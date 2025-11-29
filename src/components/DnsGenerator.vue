@@ -395,12 +395,12 @@ export default {
       }
 
       // Aggregate reports (if provided)
-      if (form.rua) {
+      if (form.rua && !errors.rua) {
         parts.push("rua=mailto:" + form.rua);
       }
 
       // Forensic reports (if provided)
-      if (form.ruf) {
+      if (form.ruf && !errors.ruf) {
         parts.push("ruf=mailto:" + form.ruf);
       }
 
