@@ -340,7 +340,7 @@ export default {
 
     function isValidDomain(domain) {
       if (!domain) return true; // Empty handled separately
-      var domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(\.[a-zA-Z]{2,})+$/;
+      var domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+$/;
       return domainRegex.test(domain);
     }
 
