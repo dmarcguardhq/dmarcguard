@@ -1144,6 +1144,10 @@ export default {
   opacity: 0.8;
 }
 
+.section-toggle:focus-visible {
+  outline: 2px solid var(--color-accent, #007bff);
+  outline-offset: 2px;
+}
 .section-toggle .toggle-icon {
   font-size: 0.9rem;
   color: var(--color-text-inverse);
