@@ -31,9 +31,11 @@
 - 📧 Auto-fetches reports from any IMAP inbox (Gmail, Outlook, etc.)
 - 📊 Beautiful dashboard with real-time statistics
 - 🔍 See exactly who's sending email as your domain
+- 🔧 Built-in DNS record generator for easy DMARC setup
 - 📦 Single binary - no databases to install, no complex setup
 - 🚀 Tiny 14MB Docker image
 - 🔒 Secure TLS support
+- 🌙 Dark mode support
 
 ## Quick Start
 
