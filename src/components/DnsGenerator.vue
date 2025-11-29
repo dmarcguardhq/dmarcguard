@@ -229,12 +229,13 @@
             class="provider-toggle"
             @click="showProviders = !showProviders"
             :aria-expanded="showProviders"
+            aria-controls="provider-list-content"
           >
             <span class="toggle-icon">{{ showProviders ? '▼' : '▶' }}</span>
             Provider-Specific Instructions
           </button>
 
-          <div v-if="showProviders" class="provider-list">
+          <div v-if="showProviders" class="provider-list" id="provider-list-content">
             <div class="provider-item">
               <h5 class="provider-name">Cloudflare</h5>
               <ol class="provider-steps">
