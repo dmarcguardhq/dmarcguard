@@ -87,7 +87,7 @@ This phase focuses on quick wins that dramatically improve user experience witho
 
 | Feature | Priority | Status |
 |---------|----------|--------|
-| [Dark Mode](#11-dark-mode) | High | Planned |
+| [Dark Mode](#11-dark-mode) | High | ✅ Complete |
 | [DNS Record Generator](#12-dns-record-generator) | High | Planned |
 | [Compliance Health Score](#13-compliance-health-score) | High | Planned |
 | [Data Export (CSV/JSON)](#14-data-export) | High | Planned |
@@ -995,6 +995,7 @@ We prioritize features based on:
 
 | Date | Change |
 |------|--------|
+| 2025-11-29 | Dark Mode feature completed |
 | 2025-11-28 | Initial roadmap created |
 
 ---
