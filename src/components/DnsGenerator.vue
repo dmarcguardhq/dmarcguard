@@ -622,6 +622,15 @@ export default {
   border-color: var(--color-accent);
 }
 
+.advanced-toggle:focus,
+.provider-toggle:focus,
+.advanced-toggle:focus-visible,
+.provider-toggle:focus-visible {
+  background: var(--color-bg-tertiary);
+  border-color: var(--color-accent);
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
 .toggle-icon {
   font-size: 0.75rem;
   color: var(--color-text-secondary);
