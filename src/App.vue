@@ -1464,7 +1464,8 @@ code {
     justify-content: flex-end;
   }
 
-  .refresh-button {
+  .refresh-button,
+  .theme-toggle {
     flex: 1;
     justify-content: center;
   }
