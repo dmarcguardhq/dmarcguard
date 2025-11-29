@@ -40,7 +40,12 @@
     <!-- Theme initialization script - prevents flash of wrong theme -->
     <script>
       (function() {
-        var theme = localStorage.getItem('parse-dmarc-theme');
+        var theme;
+        try {
+          theme = localStorage.getItem('parse-dmarc-theme');
+        } catch (e) {
+          theme = null;
+        }
         if (!theme) {
           theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
