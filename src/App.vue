@@ -15,9 +15,36 @@
               class="theme-toggle"
               @click="toggleTheme"
               :title="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
-              aria-label="Toggle theme"
+              :aria-label="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+              :aria-pressed="theme === 'dark'"
             >
-              {{ theme === 'dark' ? '☀️' : '🌙' }}
+              <span v-if="theme === 'dark'" class="theme-icon" aria-hidden="true">
+                <!-- Sun SVG icon -->
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                  <circle cx="10" cy="10" r="5" fill="currentColor"/>
+                  <g stroke="currentColor" stroke-width="2">
+                    <line x1="10" y1="1" x2="10" y2="3"/>
+                    <line x1="10" y1="17" x2="10" y2="19"/>
+                    <line x1="1" y1="10" x2="3" y2="10"/>
+                    <line x1="17" y1="10" x2="19" y2="10"/>
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+                    <line x1="14.36" y1="14.36" x2="15.78" y2="15.78"/>
+                    <line x1="4.22" y1="15.78" x2="5.64" y2="14.36"/>
+                    <line x1="14.36" y1="5.64" x2="15.78" y2="4.22"/>
+                  </g>
+                </svg>
+                <span class="visually-hidden">Light mode</span>
+              </span>
+              <span v-else class="theme-icon" aria-hidden="true">
+                <!-- Moon SVG icon -->
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                  <path
+                    d="M15.5 13.5A7 7 0 0 1 6.5 4.5a7 7 0 1 0 9 9z"
+                    fill="currentColor"
+                  />
+                </svg>
+                <span class="visually-hidden">Dark mode</span>
+              </span>
             </button>
             <button
               class="refresh-button"
