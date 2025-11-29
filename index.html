@@ -49,6 +49,9 @@
         if (!theme) {
           theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
         }
+        if (theme !== 'light' && theme !== 'dark') {
+          theme = 'light';
+        }
         document.documentElement.setAttribute('data-theme', theme);
       })();
     </script>
