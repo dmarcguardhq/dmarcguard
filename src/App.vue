@@ -134,6 +134,27 @@
           </div>
         </div>
 
+        <!-- DNS Generator Section -->
+        <div class="section">
+          <div class="section-header">
+            <h2 class="section-title">
+              <button
+                class="section-toggle"
+                @click="toggleDnsGenerator"
+                :aria-expanded="showDnsGenerator"
+                aria-controls="dns-generator-content"
+              >
+                <span class="toggle-icon">{{ showDnsGenerator ? '▼' : '▶' }}</span>
+                DMARC Record Generator
+              </button>
+            </h2>
+            <span class="section-badge" v-if="!showDnsGenerator">Click to expand</span>
+          </div>
+          <div v-if="showDnsGenerator" id="dns-generator-content">
+            <DnsGenerator />
+          </div>
+        </div>
+
         <!-- Top Sources -->
         <div class="section">
           <h2 class="section-title">Top Sending Sources</h2>
@@ -407,9 +428,13 @@
 
 <script>
 import { computed, onMounted, ref, watchEffect } from "vue";
+import DnsGenerator from "./components/DnsGenerator.vue";
 
 export default {
   name: "App",
+  components: {
+    DnsGenerator,
+  },
   setup() {
     var statistics = ref(null);
     var topSources = ref([]);
@@ -420,6 +445,7 @@ export default {
     var sortDirection = ref("asc");
     var starBannerVisible = ref(true);
     var theme = ref("light");
+    var showDnsGenerator = ref(false);
 
     function getSystemTheme() {
       if (
@@ -444,6 +470,10 @@ export default {
     function toggleTheme() {
       theme.value = theme.value === "dark" ? "light" : "dark";
       localStorage.setItem("parse-dmarc-theme", theme.value);
+    }
+
+    function toggleDnsGenerator() {
+      showDnsGenerator.value = !showDnsGenerator.value;
     }
 
     // Apply theme to document
@@ -662,6 +692,8 @@ export default {
       refreshData,
       dismissStarBanner,
       toggleTheme,
+      showDnsGenerator,
+      toggleDnsGenerator,
     };
   },
 };
@@ -1076,11 +1108,55 @@ export default {
   margin-bottom: 2rem;
 }
 
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
 .section-title {
   color: var(--color-text-inverse);
   font-size: 1.5rem;
   margin-bottom: 1rem;
   font-weight: 600;
+}
+
+.section-header .section-title {
+  margin-bottom: 0;
+}
+
+.section-toggle {
+  background: none;
+  border: none;
+  color: var(--color-text-inverse);
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0;
+  transition: opacity 0.2s;
+}
+
+.section-toggle:hover {
+  opacity: 0.8;
+}
+
+.section-toggle .toggle-icon {
+  font-size: 0.9rem;
+  color: var(--color-text-inverse);
+  opacity: 0.7;
+}
+
+.section-badge {
+  font-size: 0.8rem;
+  color: var(--color-text-inverse);
+  opacity: 0.6;
+  background: rgba(255, 255, 255, 0.1);
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
 }
 
 .card {
