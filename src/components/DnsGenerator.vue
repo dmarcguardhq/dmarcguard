@@ -85,13 +85,13 @@
           class="advanced-toggle"
           @click="showAdvanced = !showAdvanced"
           :aria-expanded="showAdvanced"
+          aria-controls="advanced-options-content"
         >
           <span class="toggle-icon">{{ showAdvanced ? '▼' : '▶' }}</span>
           Advanced Options
         </button>
 
-        <!-- Advanced Options -->
-        <div v-if="showAdvanced" class="advanced-options">
+        <div v-if="showAdvanced" class="advanced-options" id="advanced-options-content">
           <!-- Percentage -->
           <div class="form-group">
             <label for="pct" class="form-label">
