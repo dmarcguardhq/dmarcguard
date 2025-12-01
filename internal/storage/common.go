@@ -244,3 +244,152 @@ func (s *Storage) GetTopSourceIPs(limit int) ([]TopSourceIP, error) {
 func (s *Storage) Close() error {
 	return s.db.Close()
 }
+
+// DomainStats holds statistics for a single domain
+type DomainStats struct {
+	Domain            string  `json:"domain"`
+	TotalMessages     int     `json:"total_messages"`
+	CompliantMessages int     `json:"compliant_messages"`
+	ComplianceRate    float64 `json:"compliance_rate"`
+}
+
+// OrgStats holds statistics for a reporting organization
+type OrgStats struct {
+	OrgName string `json:"org_name"`
+	Reports int    `json:"reports"`
+}
+
+// DispositionStats holds statistics for a disposition type
+type DispositionStats struct {
+	Disposition string `json:"disposition"`
+	Count       int    `json:"count"`
+}
+
+// AuthResultStats holds authentication result statistics
+type AuthResultStats struct {
+	Result string `json:"result"`
+	Count  int    `json:"count"`
+}
+
+// GetDomainStats returns statistics grouped by domain
+func (s *Storage) GetDomainStats() ([]DomainStats, error) {
+	rows, err := s.db.Query(`
+		SELECT domain,
+		       COALESCE(SUM(total_messages), 0) as total_messages,
+		       COALESCE(SUM(compliant_messages), 0) as compliant_messages
+		FROM reports
+		GROUP BY domain
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var stats []DomainStats
+	for rows.Next() {
+		var ds DomainStats
+		if err := rows.Scan(&ds.Domain, &ds.TotalMessages, &ds.CompliantMessages); err != nil {
+			return nil, err
+		}
+		if ds.TotalMessages > 0 {
+			ds.ComplianceRate = float64(ds.CompliantMessages) / float64(ds.TotalMessages) * 100
+		}
+		stats = append(stats, ds)
+	}
+	return stats, nil
+}
+
+// GetOrgStats returns statistics grouped by reporting organization
+func (s *Storage) GetOrgStats() ([]OrgStats, error) {
+	rows, err := s.db.Query(`
+		SELECT org_name, COUNT(*) as reports
+		FROM reports
+		GROUP BY org_name
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var stats []OrgStats
+	for rows.Next() {
+		var os OrgStats
+		if err := rows.Scan(&os.OrgName, &os.Reports); err != nil {
+			return nil, err
+		}
+		stats = append(stats, os)
+	}
+	return stats, nil
+}
+
+// GetDispositionStats returns message counts grouped by disposition
+func (s *Storage) GetDispositionStats() ([]DispositionStats, error) {
+	rows, err := s.db.Query(`
+		SELECT COALESCE(disposition, 'unknown') as disposition,
+		       SUM(count) as total_count
+		FROM records
+		GROUP BY disposition
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var stats []DispositionStats
+	for rows.Next() {
+		var ds DispositionStats
+		if err := rows.Scan(&ds.Disposition, &ds.Count); err != nil {
+			return nil, err
+		}
+		stats = append(stats, ds)
+	}
+	return stats, nil
+}
+
+// GetSPFStats returns SPF authentication result statistics
+func (s *Storage) GetSPFStats() ([]AuthResultStats, error) {
+	rows, err := s.db.Query(`
+		SELECT COALESCE(spf_result, 'unknown') as result,
+		       SUM(count) as total_count
+		FROM records
+		GROUP BY spf_result
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var stats []AuthResultStats
+	for rows.Next() {
+		var as AuthResultStats
+		if err := rows.Scan(&as.Result, &as.Count); err != nil {
+			return nil, err
+		}
+		stats = append(stats, as)
+	}
+	return stats, nil
+}
+
+// GetDKIMStats returns DKIM authentication result statistics
+func (s *Storage) GetDKIMStats() ([]AuthResultStats, error) {
+	rows, err := s.db.Query(`
+		SELECT COALESCE(dkim_result, 'unknown') as result,
+		       SUM(count) as total_count
+		FROM records
+		GROUP BY dkim_result
+	`)
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var stats []AuthResultStats
+	for rows.Next() {
+		var as AuthResultStats
+		if err := rows.Scan(&as.Result, &as.Count); err != nil {
+			return nil, err
+		}
+		stats = append(stats, as)
+	}
+	return stats, nil
+}

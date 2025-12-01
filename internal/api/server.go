@@ -12,6 +12,7 @@ import (
 
 	"github.com/goccy/go-json"
 
+	"github.com/meysam81/parse-dmarc/internal/metrics"
 	"github.com/meysam81/parse-dmarc/internal/storage"
 )
 
@@ -21,13 +22,15 @@ var distFS embed.FS
 // Server represents the API server
 type Server struct {
 	storage *storage.Storage
+	metrics *metrics.Metrics
 	addr    string
 }
 
 // NewServer creates a new API server
-func NewServer(store *storage.Storage, host string, port int) *Server {
+func NewServer(store *storage.Storage, host string, port int, m *metrics.Metrics) *Server {
 	return &Server{
 		storage: store,
+		metrics: m,
 		addr:    fmt.Sprintf("%s:%d", host, port),
 	}
 }
@@ -41,6 +44,11 @@ func (s *Server) Start(ctx context.Context) error {
 	mux.HandleFunc("/api/reports/", s.handleReportDetail)
 	mux.HandleFunc("/api/statistics", s.handleStatistics)
 	mux.HandleFunc("/api/top-sources", s.handleTopSources)
+
+	// Prometheus metrics endpoint
+	if s.metrics != nil {
+		mux.Handle("/metrics", s.metrics.Handler())
+	}
 
 	// Serve frontend
 	// Try to serve embedded files, fallback to nothing if not embedded
@@ -63,6 +71,7 @@ func (s *Server) Start(ctx context.Context) error {
 							<li><a href="/api/statistics">Statistics</a></li>
 							<li><a href="/api/reports">Reports</a></li>
 							<li><a href="/api/top-sources">Top Sources</a></li>
+							<li><a href="/metrics">Prometheus Metrics</a></li>
 						</ul>
 					</body>
 					</html>
@@ -73,9 +82,16 @@ func (s *Server) Start(ctx context.Context) error {
 		})
 	}
 
+	// Build handler chain: CORS -> Metrics -> Routes
+	var handler http.Handler = mux
+	if s.metrics != nil {
+		handler = s.metrics.HTTPMiddleware(handler)
+	}
+	handler = s.corsMiddleware(handler)
+
 	server := &http.Server{
 		Addr:    s.addr,
-		Handler: s.corsMiddleware(mux),
+		Handler: handler,
 	}
 
 	go func() {
@@ -97,7 +113,7 @@ func (s *Server) Start(ctx context.Context) error {
 }
 
 // corsMiddleware adds CORS headers
-func (s *Server) corsMiddleware(next http.Handler) http.Handler {
+func (s *Server) corsMiddleware(next http.Handler) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
@@ -213,4 +229,84 @@ func (s *Server) writeJSON(w http.ResponseWriter, data interface{}) {
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		log.Printf("Failed to encode JSON: %v", err)
 	}
+}
+
+// RefreshMetrics updates all Prometheus metrics from current database state
+func (s *Server) RefreshMetrics() {
+	if s.metrics == nil {
+		return
+	}
+
+	// Update basic statistics
+	stats, err := s.storage.GetStatistics()
+	if err != nil {
+		log.Printf("Failed to get statistics for metrics: %v", err)
+	} else {
+		s.metrics.UpdateStatistics(
+			stats.TotalReports,
+			stats.TotalMessages,
+			stats.CompliantMessages,
+			stats.UniqueSourceIPs,
+			stats.UniqueDomains,
+			stats.ComplianceRate,
+		)
+	}
+
+	// Update per-domain metrics
+	domainStats, err := s.storage.GetDomainStats()
+	if err != nil {
+		log.Printf("Failed to get domain stats for metrics: %v", err)
+	} else {
+		for _, ds := range domainStats {
+			s.metrics.UpdateDomainMetrics(ds.Domain, ds.TotalMessages, ds.ComplianceRate)
+		}
+	}
+
+	// Update per-organization metrics
+	orgStats, err := s.storage.GetOrgStats()
+	if err != nil {
+		log.Printf("Failed to get org stats for metrics: %v", err)
+	} else {
+		for _, os := range orgStats {
+			s.metrics.UpdateOrgMetrics(os.OrgName, os.Reports)
+		}
+	}
+
+	// Update disposition metrics
+	dispStats, err := s.storage.GetDispositionStats()
+	if err != nil {
+		log.Printf("Failed to get disposition stats for metrics: %v", err)
+	} else {
+		for _, ds := range dispStats {
+			s.metrics.UpdateDispositionMetrics(ds.Disposition, ds.Count)
+		}
+	}
+
+	// Update authentication results
+	spfStats, err := s.storage.GetSPFStats()
+	if err != nil {
+		log.Printf("Failed to get SPF stats for metrics: %v", err)
+	} else {
+		spfResults := make(map[string]int)
+		for _, s := range spfStats {
+			spfResults[s.Result] = s.Count
+		}
+		s.metrics.UpdateAuthResults(spfResults, nil)
+	}
+
+	dkimStats, err := s.storage.GetDKIMStats()
+	if err != nil {
+		log.Printf("Failed to get DKIM stats for metrics: %v", err)
+	} else {
+		dkimResults := make(map[string]int)
+		for _, d := range dkimStats {
+			dkimResults[d.Result] = d.Count
+		}
+		s.metrics.UpdateAuthResults(nil, dkimResults)
+	}
+}
+
+// GetMetrics returns the metrics instance
+func (s *Server) GetMetrics() *metrics.Metrics {
+	return s.metrics
 }

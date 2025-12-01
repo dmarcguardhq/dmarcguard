@@ -12,6 +12,7 @@ import (
 	"github.com/meysam81/parse-dmarc/internal/api"
 	"github.com/meysam81/parse-dmarc/internal/config"
 	"github.com/meysam81/parse-dmarc/internal/imap"
+	"github.com/meysam81/parse-dmarc/internal/metrics"
 	"github.com/meysam81/parse-dmarc/internal/parser"
 	"github.com/meysam81/parse-dmarc/internal/storage"
 	"github.com/urfave/cli/v3"
@@ -60,6 +61,12 @@ func main() {
 				Value:   300,
 				Sources: cli.EnvVars("PARSE_DMARC_FETCH_INTERVAL"),
 			},
+			&cli.BoolFlag{
+				Name:    "metrics",
+				Usage:   "Enable Prometheus metrics endpoint at /metrics",
+				Value:   true,
+				Sources: cli.EnvVars("PARSE_DMARC_METRICS"),
+			},
 		},
 		Action: run,
 		Commands: []*cli.Command{
@@ -88,6 +95,7 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	fetchOnce := cmd.Bool("fetch-once")
 	serveOnly := cmd.Bool("serve-only")
 	fetchInterval := cmd.Int("fetch-interval")
+	metricsEnabled := cmd.Bool("metrics")
 
 	if genConfig {
 		if err := config.GenerateSample(configPath); err != nil {
@@ -108,14 +116,24 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	}
 	defer func() { _ = store.Close() }()
 
+	// Initialize metrics if enabled
+	var m *metrics.Metrics
+	if metricsEnabled {
+		m = metrics.New(version, commit, date)
+		log.Println("Prometheus metrics enabled at /metrics")
+	}
+
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
-	server := api.NewServer(store, cfg.Server.Host, cfg.Server.Port)
+	server := api.NewServer(store, cfg.Server.Host, cfg.Server.Port, m)
 	serverErrChan := make(chan error, 1)
 	go func() {
 		serverErrChan <- server.Start(ctx)
 	}()
+
+	// Refresh metrics on startup
+	server.RefreshMetrics()
 
 	if serveOnly {
 		log.Println("Running in serve-only mode")
@@ -131,18 +149,20 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if fetchOnce {
-		if err := fetchReports(cfg, store); err != nil {
+		if err := fetchReports(cfg, store, m); err != nil {
 			return fmt.Errorf("failed to fetch reports: %w", err)
 		}
+		server.RefreshMetrics()
 		log.Println("Fetch complete")
 		return nil
 	}
 
 	log.Printf("Starting continuous fetch mode (interval: %d seconds)", fetchInterval)
 
-	if err := fetchReports(cfg, store); err != nil {
+	if err := fetchReports(cfg, store, m); err != nil {
 		log.Printf("Initial fetch failed: %v", err)
 	}
+	server.RefreshMetrics()
 
 	ticker := time.NewTicker(time.Duration(fetchInterval) * time.Second)
 	defer ticker.Stop()
@@ -150,9 +170,10 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	for {
 		select {
 		case <-ticker.C:
-			if err := fetchReports(cfg, store); err != nil {
+			if err := fetchReports(cfg, store, m); err != nil {
 				log.Printf("Fetch failed: %v", err)
 			}
+			server.RefreshMetrics()
 		case <-ctx.Done():
 			log.Println("Shutting down...")
 			return nil
@@ -164,24 +185,48 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	}
 }
 
-func fetchReports(cfg *config.Config, store *storage.Storage) error {
+func fetchReports(cfg *config.Config, store *storage.Storage, m *metrics.Metrics) error {
 	log.Println("Fetching DMARC reports...")
 
+	fetchStart := time.Now()
+	if m != nil {
+		m.FetchCyclesTotal.Inc()
+	}
+
 	// Create IMAP client
+	connectStart := time.Now()
 	client := imap.NewClient(&cfg.IMAP)
 	if err := client.Connect(); err != nil {
+		if m != nil {
+			m.RecordIMAPConnection(false, time.Since(connectStart))
+			m.FetchErrors.Inc()
+		}
 		return err
+	}
+	if m != nil {
+		m.RecordIMAPConnection(true, time.Since(connectStart))
 	}
 	defer func() { _ = client.Disconnect() }()
 
 	// Fetch reports
 	reports, err := client.FetchDMARCReports()
 	if err != nil {
+		if m != nil {
+			m.FetchErrors.Inc()
+		}
 		return err
+	}
+
+	if m != nil {
+		m.ReportsFetched.Add(float64(len(reports)))
 	}
 
 	if len(reports) == 0 {
 		log.Println("No new reports found")
+		if m != nil {
+			m.RecordFetchDuration(time.Since(fetchStart))
+			m.LastFetchTimestamp.SetToCurrentTime()
+		}
 		return nil
 	}
 
@@ -191,15 +236,31 @@ func fetchReports(cfg *config.Config, store *storage.Storage) error {
 	processed := 0
 	for _, report := range reports {
 		for _, attachment := range report.Attachments {
+			if m != nil {
+				m.AttachmentsTotal.Inc()
+			}
+
 			feedback, err := parser.ParseReport(attachment.Data)
 			if err != nil {
 				log.Printf("Failed to parse %s: %v", attachment.Filename, err)
+				if m != nil {
+					m.ReportParseErrors.Inc()
+				}
 				continue
+			}
+			if m != nil {
+				m.ReportsParsed.Inc()
 			}
 
 			if err := store.SaveReport(feedback); err != nil {
 				log.Printf("Failed to save report %s: %v", feedback.ReportMetadata.ReportID, err)
+				if m != nil {
+					m.ReportStoreErrors.Inc()
+				}
 				continue
+			}
+			if m != nil {
+				m.ReportsStored.Inc()
 			}
 
 			log.Printf("Saved report: %s from %s (domain: %s, messages: %d)",
@@ -209,6 +270,11 @@ func fetchReports(cfg *config.Config, store *storage.Storage) error {
 				feedback.GetTotalMessages())
 			processed++
 		}
+	}
+
+	if m != nil {
+		m.RecordFetchDuration(time.Since(fetchStart))
+		m.LastFetchTimestamp.SetToCurrentTime()
 	}
 
 	log.Printf("Successfully processed %d reports", processed)
