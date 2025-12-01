@@ -46,9 +46,9 @@ type Metrics struct {
 	UniqueDomains     prometheus.Gauge
 
 	// Per-domain metrics
-	MessagesByDomain    *prometheus.GaugeVec
-	ComplianceByDomain  *prometheus.GaugeVec
-	ReportsByOrg        *prometheus.GaugeVec
+	MessagesByDomain      *prometheus.GaugeVec
+	ComplianceByDomain    *prometheus.GaugeVec
+	ReportsByOrg          *prometheus.GaugeVec
 	MessagesByDisposition *prometheus.GaugeVec
 
 	// Authentication results
@@ -56,8 +56,8 @@ type Metrics struct {
 	DKIMResults *prometheus.GaugeVec
 
 	// HTTP server metrics
-	HTTPRequestsTotal   *prometheus.CounterVec
-	HTTPRequestDuration *prometheus.HistogramVec
+	HTTPRequestsTotal    *prometheus.CounterVec
+	HTTPRequestDuration  *prometheus.HistogramVec
 	HTTPRequestsInFlight prometheus.Gauge
 }
 
