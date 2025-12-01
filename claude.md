@@ -24,6 +24,9 @@ parse-dmarc/
 │   ├── parser/            # DMARC XML parser
 │   └── storage/           # SQLite database layer (CGO + pure-Go)
 ├── src/                   # Vue.js 3 frontend source
+│   ├── App.vue            # Main application component (dashboard)
+│   └── components/
+│       └── DnsGenerator.vue  # DMARC DNS record generator tool
 ├── public/                # Static frontend assets
 ├── assets/                # Project assets (icons, images)
 ├── scripts/               # Utility scripts (SVG to PNG conversion)
@@ -103,6 +106,8 @@ go test -v ./internal/parser/...
 - `internal/storage/common.go` - Shared storage logic and SQL queries
 - `internal/storage/sqlite_no_cgo.go` - Pure Go SQLite implementation (modernc.org/sqlite)
 - `internal/storage/sqlite_cgo.go` - CGO SQLite implementation (mattn/go-sqlite3)
+- `src/App.vue` - Main Vue.js dashboard component
+- `src/components/DnsGenerator.vue` - DMARC DNS record generator component
 
 ## API Endpoints
 
@@ -110,6 +115,15 @@ go test -v ./internal/parser/...
 - `GET /api/reports` - List reports (paginated)
 - `GET /api/reports/:id` - Single report details
 - `GET /api/top-sources` - Top sending source IPs
+
+## Frontend Features
+
+The Vue.js dashboard includes:
+- **Dashboard Statistics** - Overview of DMARC report metrics
+- **Reports List** - Paginated view of all DMARC reports
+- **Report Details** - Detailed view of individual reports
+- **Top Sources** - Visualization of top sending source IPs
+- **DMARC DNS Generator** - Interactive tool to generate DMARC DNS TXT records with configurable policies (none/quarantine/reject), subdomain policies, reporting options (rua/ruf), and alignment modes
 
 ## Configuration
 
