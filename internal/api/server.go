@@ -283,26 +283,24 @@ func (s *Server) RefreshMetrics() {
 	}
 
 	// Update authentication results
-	spfStats, err := s.storage.GetSPFStats()
-	if err != nil {
-		log.Printf("Failed to get SPF stats for metrics: %v", err)
-	} else {
+	spfStats, errSpf := s.storage.GetSPFStats()
+	dkimStats, errDkim := s.storage.GetDKIMStats()
+	if errSpf != nil {
+		log.Printf("Failed to get SPF stats for metrics: %v", errSpf)
+	}
+	if errDkim != nil {
+		log.Printf("Failed to get DKIM stats for metrics: %v", errDkim)
+	}
+	if errSpf == nil && errDkim == nil {
 		spfResults := make(map[string]int)
 		for _, s := range spfStats {
 			spfResults[s.Result] = s.Count
 		}
-		s.metrics.UpdateAuthResults(spfResults, nil)
-	}
-
-	dkimStats, err := s.storage.GetDKIMStats()
-	if err != nil {
-		log.Printf("Failed to get DKIM stats for metrics: %v", err)
-	} else {
 		dkimResults := make(map[string]int)
 		for _, d := range dkimStats {
 			dkimResults[d.Result] = d.Count
 		}
-		s.metrics.UpdateAuthResults(nil, dkimResults)
+		s.metrics.UpdateAuthResults(spfResults, dkimResults)
 	}
 }
 
