@@ -485,7 +485,7 @@ func normalizePath(path string) string {
 		return "/metrics"
 	default:
 		// Group static assets
-		if len(path) > 7 && path[:7] == "/assets" {
+		if len(path) >= 7 && path[:7] == "/assets" {
 			return "/assets/*"
 		}
 		return "/other"
