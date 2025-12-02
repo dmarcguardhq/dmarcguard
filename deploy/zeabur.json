@@ -1,25 +1,25 @@
 {
   "$schema": "https://schema.zeabur.app/template.json",
-  "name": "parse-dmarc",
   "description": "DMARC Report Parser - Monitor who's sending email on behalf of your domain",
   "icon": "https://raw.githubusercontent.com/meysam81/parse-dmarc/main/public/android-chrome-192x192.png",
-  "tags": ["dmarc", "email", "security", "monitoring"],
+  "name": "parse-dmarc",
   "services": [
     {
-      "name": "parse-dmarc",
-      "template": "PREBUILT",
-      "source": {
-        "image": "ghcr.io/meysam81/parse-dmarc:latest"
-      },
-      "ports": [
-        {
-          "id": "web",
-          "port": 8080,
-          "type": "HTTP"
-        }
-      ],
       "env": {
+        "PARSE_DMARC_DATABASE_PATH": {
+          "default": "/data/db.sqlite",
+          "expose": true
+        },
         "PARSE_DMARC_IMAP_HOST": {
+          "default": "",
+          "expose": true,
+          "required": true
+        },
+        "PARSE_DMARC_IMAP_MAILBOX": {
+          "default": "INBOX",
+          "expose": true
+        },
+        "PARSE_DMARC_IMAP_PASSWORD": {
           "default": "",
           "expose": true,
           "required": true
@@ -33,38 +33,43 @@
           "expose": true,
           "required": true
         },
-        "PARSE_DMARC_IMAP_PASSWORD": {
-          "default": "",
-          "expose": true,
-          "required": true
-        },
-        "PARSE_DMARC_IMAP_MAILBOX": {
-          "default": "INBOX",
-          "expose": true
-        },
         "PARSE_DMARC_IMAP_USE_TLS": {
           "default": "true",
-          "expose": true
-        },
-        "PARSE_DMARC_DATABASE_PATH": {
-          "default": "/data/db.sqlite",
-          "expose": true
-        },
-        "PARSE_DMARC_SERVER_PORT": {
-          "default": "8080",
           "expose": true
         },
         "PARSE_DMARC_SERVER_HOST": {
           "default": "0.0.0.0",
           "expose": true
+        },
+        "PARSE_DMARC_SERVER_PORT": {
+          "default": "8080",
+          "expose": true
         }
       },
+      "name": "parse-dmarc",
+      "ports": [
+        {
+          "id": "web",
+          "port": 8080,
+          "type": "HTTP"
+        }
+      ],
+      "source": {
+        "image": "ghcr.io/meysam81/parse-dmarc:latest"
+      },
+      "template": "PREBUILT",
       "volumes": [
         {
-          "id": "data",
-          "dir": "/data"
+          "dir": "/data",
+          "id": "data"
         }
       ]
     }
+  ],
+  "tags": [
+    "dmarc",
+    "email",
+    "security",
+    "monitoring"
   ]
 }

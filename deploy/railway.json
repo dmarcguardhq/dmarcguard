@@ -5,10 +5,10 @@
     "dockerfilePath": "Dockerfile"
   },
   "deploy": {
-    "startCommand": "/app/parse-dmarc --config=/app/config.json",
     "healthcheckPath": "/api/statistics",
     "healthcheckTimeout": 30,
+    "restartPolicyMaxRetries": 3,
     "restartPolicyType": "ON_FAILURE",
-    "restartPolicyMaxRetries": 3
+    "startCommand": "/app/parse-dmarc --config=/app/config.json"
   }
 }

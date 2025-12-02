@@ -1,49 +1,49 @@
 {
   "apiVersion": "v1",
-  "name": "parse-dmarc",
   "description": "DMARC Report Parser - Monitor who's sending email on behalf of your domain",
+  "name": "parse-dmarc",
   "spec": {
     "kind": "Deployment",
     "spec": {
+      "billing": {
+        "deploymentPlan": "nf-compute-10"
+      },
       "deployment": {
-        "docker": {
-          "configType": "default",
-          "file": "/Dockerfile"
-        },
         "buildConfiguration": {
           "pathIgnoreRules": [
             "**/node_modules",
             "**/.git"
           ]
+        },
+        "docker": {
+          "configType": "default",
+          "file": "/Dockerfile"
         }
       },
-      "runtimeEnvironment": {},
-      "runtimeFiles": {},
-      "ports": [
-        {
-          "internalPort": 8080,
-          "public": true,
-          "protocol": "HTTP",
-          "name": "web",
-          "domains": []
-        }
-      ],
       "healthChecks": [
         {
-          "type": "HTTP",
-          "protocol": "HTTP",
-          "port": "web",
-          "path": "/api/statistics",
+          "failureThreshold": 3,
           "initialDelaySeconds": 10,
+          "path": "/api/statistics",
           "periodSeconds": 30,
-          "timeoutSeconds": 5,
+          "port": "web",
+          "protocol": "HTTP",
           "successThreshold": 1,
-          "failureThreshold": 3
+          "timeoutSeconds": 5,
+          "type": "HTTP"
         }
       ],
-      "billing": {
-        "deploymentPlan": "nf-compute-10"
-      }
+      "ports": [
+        {
+          "domains": [],
+          "internalPort": 8080,
+          "name": "web",
+          "protocol": "HTTP",
+          "public": true
+        }
+      ],
+      "runtimeEnvironment": {},
+      "runtimeFiles": {}
     }
   }
 }
