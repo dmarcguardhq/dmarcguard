@@ -339,11 +339,48 @@ spec:
 
 ### Grafana Dashboard
 
-#### Quick Start
+A production-ready Grafana dashboard is included in `grafana/dashboard.json`.
 
-1. Import the dashboard JSON from `grafana/dashboard.json` (if available) or create a new dashboard
-2. Add Prometheus as a data source pointing to your Prometheus instance
-3. Create panels using the queries below
+#### Import Manually
+
+1. In Grafana, go to **Dashboards** > **Import**
+2. Upload `grafana/dashboard.json` or paste its contents
+3. Select your Prometheus datasource
+4. Click **Import**
+
+#### Provision Automatically (Recommended for Production)
+
+```bash
+# Copy dashboard to Grafana dashboards directory
+cp grafana/dashboard.json /var/lib/grafana/dashboards/parse-dmarc/
+
+# Copy provisioning config
+cp grafana/provisioning.yaml /etc/grafana/provisioning/dashboards/parse-dmarc.yaml
+
+# Restart Grafana or wait for it to pick up changes
+systemctl restart grafana-server
+```
+
+#### Dashboard Variables
+
+| Variable | Purpose |
+|----------|---------|
+| `datasource` | Prometheus datasource to query |
+| `job` | Filter by Prometheus job label |
+| `instance` | Filter by instance(s) |
+| `domain` | Filter by monitored domain(s) |
+
+#### Dashboard Sections
+
+| Section | What It Shows |
+|---------|---------------|
+| **Overview - Golden Signals** | Compliance rate, total messages, reports count, time since last fetch |
+| **DMARC Authentication Results** | SPF/DKIM pass rates, disposition breakdown, per-domain compliance |
+| **Report Sources & Organizations** | Top reporting organizations (Google, Microsoft, etc.), messages by domain |
+| **IMAP & Fetch Operations** | Connection health, fetch cycle monitoring, latency heatmaps |
+| **Error Tracking** | Parse errors, storage errors, fetch failures |
+| **HTTP Server** | Request rates, latency percentiles, error rates |
+| **Go Runtime** | Goroutines, memory usage, GC stats, CPU usage |
 
 #### Example Grafana Panels
 

@@ -141,3 +141,24 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         name: Run goreleaser
         run: goreleaser release --release-notes CHANGELOG.md --clean
+
+  deploy-grafana:
+    needs: [release-please, build-prod]
+    if: needs.release-please.outputs.releases_created == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+      - name: Install Grizzly
+        run: |
+          curl -fSL -o grr https://github.com/grafana/grizzly/releases/latest/download/grr-linux-amd64
+          chmod +x grr
+          sudo mv grr /usr/local/bin/
+      - name: Deploy dashboard with Grizzly
+        run: |
+          grr apply grafana/
+        env:
+          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
+          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
