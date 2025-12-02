@@ -1,0 +1,44 @@
+# Koyeb Configuration
+# https://www.koyeb.com/docs/reference/koyeb-file-reference
+name: parse-dmarc
+type: web
+docker:
+  dockerfile: Dockerfile
+ports:
+  - port: 8080
+    protocol: http
+routes:
+  - path: /
+    port: 8080
+env:
+  - key: PARSE_DMARC_IMAP_HOST
+    secret: parse-dmarc-imap-host
+  - key: PARSE_DMARC_IMAP_PORT
+    value: "993"
+  - key: PARSE_DMARC_IMAP_USERNAME
+    secret: parse-dmarc-imap-username
+  - key: PARSE_DMARC_IMAP_PASSWORD
+    secret: parse-dmarc-imap-password
+  - key: PARSE_DMARC_IMAP_MAILBOX
+    value: "INBOX"
+  - key: PARSE_DMARC_IMAP_USE_TLS
+    value: "true"
+  - key: PARSE_DMARC_DATABASE_PATH
+    value: "/data/db.sqlite"
+  - key: PARSE_DMARC_SERVER_PORT
+    value: "8080"
+  - key: PARSE_DMARC_SERVER_HOST
+    value: "0.0.0.0"
+scaling:
+  min: 1
+  max: 1
+instance_types:
+  - type: nano
+health_checks:
+  - port: 8080
+    protocol: http
+    path: /api/statistics
+    interval: 30
+    timeout: 5
+    healthy_threshold: 1
+    unhealthy_threshold: 3

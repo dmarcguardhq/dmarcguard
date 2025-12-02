@@ -1,0 +1,33 @@
+# Render Blueprint
+# https://render.com/docs/blueprint-spec
+services:
+  - type: web
+    name: parse-dmarc
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    plan: starter
+    healthCheckPath: /api/statistics
+    envVars:
+      - key: PARSE_DMARC_IMAP_HOST
+        sync: false
+      - key: PARSE_DMARC_IMAP_PORT
+        value: "993"
+      - key: PARSE_DMARC_IMAP_USERNAME
+        sync: false
+      - key: PARSE_DMARC_IMAP_PASSWORD
+        sync: false
+      - key: PARSE_DMARC_IMAP_MAILBOX
+        value: "INBOX"
+      - key: PARSE_DMARC_IMAP_USE_TLS
+        value: "true"
+      - key: PARSE_DMARC_DATABASE_PATH
+        value: "/data/db.sqlite"
+      - key: PARSE_DMARC_SERVER_PORT
+        value: "8080"
+      - key: PARSE_DMARC_SERVER_HOST
+        value: "0.0.0.0"
+    disk:
+      name: parse-dmarc-data
+      mountPath: /data
+      sizeGB: 1

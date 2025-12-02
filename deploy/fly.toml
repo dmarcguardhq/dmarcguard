@@ -1,0 +1,38 @@
+# Fly.io Configuration
+# https://fly.io/docs/reference/configuration/
+app = "parse-dmarc"
+primary_region = "iad"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PARSE_DMARC_SERVER_HOST = "0.0.0.0"
+  PARSE_DMARC_SERVER_PORT = "8080"
+  PARSE_DMARC_DATABASE_PATH = "/data/db.sqlite"
+  PARSE_DMARC_IMAP_PORT = "993"
+  PARSE_DMARC_IMAP_MAILBOX = "INBOX"
+  PARSE_DMARC_IMAP_USE_TLS = "true"
+
+[http_service]
+  internal_port = 8080
+  force_https = true
+  auto_stop_machines = "stop"
+  auto_start_machines = true
+  min_machines_running = 0
+  processes = ["app"]
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  timeout = "5s"
+  path = "/api/statistics"
+
+[mounts]
+  source = "parse_dmarc_data"
+  destination = "/data"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"

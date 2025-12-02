@@ -9,6 +9,93 @@ on:
       - main
 
 jobs:
+  validate-templates:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: railway
+            file: deploy/railway.json
+            type: json
+          - name: render
+            file: deploy/render.yaml
+            type: yaml
+          - name: fly
+            file: deploy/fly.toml
+            type: toml
+          - name: heroku-app
+            file: deploy/app.json
+            type: json
+          - name: heroku-yml
+            file: deploy/heroku.yml
+            type: yaml
+          - name: digitalocean
+            file: deploy/digitalocean-app.yaml
+            type: yaml
+          - name: koyeb
+            file: deploy/koyeb.yaml
+            type: yaml
+          - name: zeabur
+            file: deploy/zeabur.json
+            type: json
+          - name: cloudbuild
+            file: deploy/cloudbuild.yaml
+            type: yaml
+          - name: northflank
+            file: deploy/northflank.json
+            type: json
+          - name: coolify
+            file: deploy/coolify.yaml
+            type: yaml
+          - name: caprover
+            file: deploy/captain-definition
+            type: json
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Validate ${{ matrix.name }} template (${{ matrix.type }})
+        run: |
+          case "${{ matrix.type }}" in
+            json)
+              echo "Validating JSON: ${{ matrix.file }}"
+              cat "${{ matrix.file }}" | jq . > /dev/null
+              ;;
+            yaml)
+              echo "Validating YAML: ${{ matrix.file }}"
+              python3 -c "import yaml; yaml.safe_load(open('${{ matrix.file }}'))"
+              ;;
+            toml)
+              echo "Validating TOML: ${{ matrix.file }}"
+              pip install toml -q
+              python3 -c "import toml; toml.load('${{ matrix.file }}')"
+              ;;
+          esac
+          echo "✓ ${{ matrix.name }} template is valid"
+
+  sync-fly-template:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [validate-templates]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Setup Fly CLI
+        if: env.FLY_API_TOKEN != ''
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        uses: superfly/flyctl-actions/setup-flyctl@master
+
+      - name: Deploy to Fly.io (if token available)
+        if: env.FLY_API_TOKEN != ''
+        env:
+          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+        run: |
+          cd deploy
+          flyctl deploy --config fly.toml --remote-only || echo "Fly.io deployment skipped (no app configured)"
+
   checks:
     permissions:
       contents: read
