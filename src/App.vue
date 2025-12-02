@@ -14,30 +14,56 @@
             <button
               class="theme-toggle"
               @click="toggleTheme"
-              :title="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
-              :aria-label="theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'"
+              :title="
+                theme === 'dark'
+                  ? 'Switch to light mode'
+                  : 'Switch to dark mode'
+              "
+              :aria-label="
+                theme === 'dark'
+                  ? 'Switch to light mode'
+                  : 'Switch to dark mode'
+              "
               :aria-pressed="theme === 'dark'"
             >
-              <span v-if="theme === 'dark'" class="theme-icon" aria-hidden="true">
+              <span
+                v-if="theme === 'dark'"
+                class="theme-icon"
+                aria-hidden="true"
+              >
                 <!-- Sun SVG icon -->
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
-                  <circle cx="10" cy="10" r="5" fill="currentColor"/>
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <circle cx="10" cy="10" r="5" fill="currentColor" />
                   <g stroke="currentColor" stroke-width="2">
-                    <line x1="10" y1="1" x2="10" y2="3"/>
-                    <line x1="10" y1="17" x2="10" y2="19"/>
-                    <line x1="1" y1="10" x2="3" y2="10"/>
-                    <line x1="17" y1="10" x2="19" y2="10"/>
-                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
-                    <line x1="14.36" y1="14.36" x2="15.78" y2="15.78"/>
-                    <line x1="4.22" y1="15.78" x2="5.64" y2="14.36"/>
-                    <line x1="14.36" y1="5.64" x2="15.78" y2="4.22"/>
+                    <line x1="10" y1="1" x2="10" y2="3" />
+                    <line x1="10" y1="17" x2="10" y2="19" />
+                    <line x1="1" y1="10" x2="3" y2="10" />
+                    <line x1="17" y1="10" x2="19" y2="10" />
+                    <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                    <line x1="14.36" y1="14.36" x2="15.78" y2="15.78" />
+                    <line x1="4.22" y1="15.78" x2="5.64" y2="14.36" />
+                    <line x1="14.36" y1="5.64" x2="15.78" y2="4.22" />
                   </g>
                 </svg>
                 <span class="visually-hidden">Light mode</span>
               </span>
               <span v-else class="theme-icon" aria-hidden="true">
                 <!-- Moon SVG icon -->
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none" aria-hidden="true" focusable="false">
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 20 20"
+                  fill="none"
+                  aria-hidden="true"
+                  focusable="false"
+                >
                   <path
                     d="M15.5 13.5A7 7 0 0 1 6.5 4.5a7 7 0 1 0 9 9z"
                     fill="currentColor"
@@ -51,7 +77,9 @@
               @click="refreshData"
               :disabled="loading"
             >
-              <span class="refresh-icon" :class="{ spinning: loading }">🔄</span>
+              <span class="refresh-icon" :class="{ spinning: loading }"
+                >🔄</span
+              >
               <span>{{ loading ? "Refreshing..." : "Refresh" }}</span>
             </button>
           </div>
@@ -144,11 +172,15 @@
                 :aria-expanded="showDnsGenerator"
                 aria-controls="dns-generator-content"
               >
-                <span class="toggle-icon">{{ showDnsGenerator ? '▼' : '▶' }}</span>
+                <span class="toggle-icon">{{
+                  showDnsGenerator ? "▼" : "▶"
+                }}</span>
                 DMARC Record Generator
               </button>
             </h2>
-            <span class="section-badge" v-if="!showDnsGenerator">Click to expand</span>
+            <span class="section-badge" v-if="!showDnsGenerator"
+              >Click to expand</span
+            >
           </div>
           <div v-if="showDnsGenerator" id="dns-generator-content">
             <DnsGenerator />
@@ -763,7 +795,9 @@ export default {
   --color-code-text: inherit;
 
   /* Transition */
-  --theme-transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+  --theme-transition:
+    background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease,
+    box-shadow 0.2s ease;
 }
 
 /* Dark Theme */
@@ -1078,7 +1112,9 @@ export default {
   align-items: center;
   gap: 1rem;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s, var(--theme-transition);
+  transition:
+    transform 0.2s,
+    var(--theme-transition);
 }
 
 .stat-card:hover {

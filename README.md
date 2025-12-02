@@ -228,63 +228,72 @@ Parse DMARC includes production-ready Prometheus metrics for monitoring and aler
 ### Available Metrics
 
 #### Build Information
-| Metric | Type | Description |
-|--------|------|-------------|
+
+| Metric                   | Type  | Description                                     |
+| ------------------------ | ----- | ----------------------------------------------- |
 | `parse_dmarc_build_info` | Gauge | Build information (version, commit, build_date) |
 
 #### Report Processing
-| Metric | Type | Description |
-|--------|------|-------------|
-| `parse_dmarc_reports_fetched_total` | Counter | Total DMARC report emails fetched from IMAP |
-| `parse_dmarc_reports_parsed_total` | Counter | Total DMARC reports successfully parsed |
-| `parse_dmarc_reports_stored_total` | Counter | Total DMARC reports stored in database |
-| `parse_dmarc_reports_parse_errors_total` | Counter | Total parse errors |
-| `parse_dmarc_reports_store_errors_total` | Counter | Total storage errors |
-| `parse_dmarc_reports_attachments_total` | Counter | Total attachments processed |
-| `parse_dmarc_reports_fetch_duration_seconds` | Histogram | Duration of fetch operations |
-| `parse_dmarc_reports_last_fetch_timestamp_seconds` | Gauge | Unix timestamp of last successful fetch |
-| `parse_dmarc_reports_fetch_cycles_total` | Counter | Total fetch cycles executed |
-| `parse_dmarc_reports_fetch_errors_total` | Counter | Total fetch cycle errors |
+
+| Metric                                             | Type      | Description                                 |
+| -------------------------------------------------- | --------- | ------------------------------------------- |
+| `parse_dmarc_reports_fetched_total`                | Counter   | Total DMARC report emails fetched from IMAP |
+| `parse_dmarc_reports_parsed_total`                 | Counter   | Total DMARC reports successfully parsed     |
+| `parse_dmarc_reports_stored_total`                 | Counter   | Total DMARC reports stored in database      |
+| `parse_dmarc_reports_parse_errors_total`           | Counter   | Total parse errors                          |
+| `parse_dmarc_reports_store_errors_total`           | Counter   | Total storage errors                        |
+| `parse_dmarc_reports_attachments_total`            | Counter   | Total attachments processed                 |
+| `parse_dmarc_reports_fetch_duration_seconds`       | Histogram | Duration of fetch operations                |
+| `parse_dmarc_reports_last_fetch_timestamp_seconds` | Gauge     | Unix timestamp of last successful fetch     |
+| `parse_dmarc_reports_fetch_cycles_total`           | Counter   | Total fetch cycles executed                 |
+| `parse_dmarc_reports_fetch_errors_total`           | Counter   | Total fetch cycle errors                    |
 
 #### IMAP Connection
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `parse_dmarc_imap_connections_total` | Counter | status | IMAP connection attempts (success/error) |
-| `parse_dmarc_imap_connection_duration_seconds` | Histogram | | IMAP connection establishment duration |
+
+| Metric                                         | Type      | Labels | Description                              |
+| ---------------------------------------------- | --------- | ------ | ---------------------------------------- |
+| `parse_dmarc_imap_connections_total`           | Counter   | status | IMAP connection attempts (success/error) |
+| `parse_dmarc_imap_connection_duration_seconds` | Histogram |        | IMAP connection establishment duration   |
 
 #### DMARC Statistics
-| Metric | Type | Description |
-|--------|------|-------------|
-| `parse_dmarc_dmarc_reports_total` | Gauge | Total reports in database |
-| `parse_dmarc_dmarc_messages_total` | Gauge | Total messages across all reports |
-| `parse_dmarc_dmarc_compliant_messages_total` | Gauge | Total DMARC-compliant messages |
-| `parse_dmarc_dmarc_compliance_rate` | Gauge | Overall compliance rate (0-100) |
-| `parse_dmarc_dmarc_unique_source_ips` | Gauge | Number of unique source IPs |
-| `parse_dmarc_dmarc_unique_domains` | Gauge | Number of unique domains |
+
+| Metric                                       | Type  | Description                       |
+| -------------------------------------------- | ----- | --------------------------------- |
+| `parse_dmarc_dmarc_reports_total`            | Gauge | Total reports in database         |
+| `parse_dmarc_dmarc_messages_total`           | Gauge | Total messages across all reports |
+| `parse_dmarc_dmarc_compliant_messages_total` | Gauge | Total DMARC-compliant messages    |
+| `parse_dmarc_dmarc_compliance_rate`          | Gauge | Overall compliance rate (0-100)   |
+| `parse_dmarc_dmarc_unique_source_ips`        | Gauge | Number of unique source IPs       |
+| `parse_dmarc_dmarc_unique_domains`           | Gauge | Number of unique domains          |
 
 #### Per-Domain/Org Metrics
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `parse_dmarc_dmarc_messages_by_domain` | Gauge | domain | Messages per domain |
-| `parse_dmarc_dmarc_compliance_rate_by_domain` | Gauge | domain | Compliance rate per domain |
-| `parse_dmarc_dmarc_reports_by_org` | Gauge | org_name | Reports per organization |
-| `parse_dmarc_dmarc_messages_by_disposition` | Gauge | disposition | Messages by disposition type |
+
+| Metric                                        | Type  | Labels      | Description                  |
+| --------------------------------------------- | ----- | ----------- | ---------------------------- |
+| `parse_dmarc_dmarc_messages_by_domain`        | Gauge | domain      | Messages per domain          |
+| `parse_dmarc_dmarc_compliance_rate_by_domain` | Gauge | domain      | Compliance rate per domain   |
+| `parse_dmarc_dmarc_reports_by_org`            | Gauge | org_name    | Reports per organization     |
+| `parse_dmarc_dmarc_messages_by_disposition`   | Gauge | disposition | Messages by disposition type |
 
 #### Authentication Results
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `parse_dmarc_dmarc_spf_results` | Gauge | result | SPF authentication result counts |
+
+| Metric                           | Type  | Labels | Description                       |
+| -------------------------------- | ----- | ------ | --------------------------------- |
+| `parse_dmarc_dmarc_spf_results`  | Gauge | result | SPF authentication result counts  |
 | `parse_dmarc_dmarc_dkim_results` | Gauge | result | DKIM authentication result counts |
 
 #### HTTP Server
-| Metric | Type | Labels | Description |
-|--------|------|--------|-------------|
-| `parse_dmarc_http_requests_total` | Counter | method, path, status | Total HTTP requests |
-| `parse_dmarc_http_request_duration_seconds` | Histogram | method, path | HTTP request duration |
-| `parse_dmarc_http_requests_in_flight` | Gauge | | Current in-flight requests |
+
+| Metric                                      | Type      | Labels               | Description                |
+| ------------------------------------------- | --------- | -------------------- | -------------------------- |
+| `parse_dmarc_http_requests_total`           | Counter   | method, path, status | Total HTTP requests        |
+| `parse_dmarc_http_request_duration_seconds` | Histogram | method, path         | HTTP request duration      |
+| `parse_dmarc_http_requests_in_flight`       | Gauge     |                      | Current in-flight requests |
 
 #### Go Runtime (Built-in)
+
 Standard Go runtime metrics are also exposed:
+
 - `go_goroutines` - Number of goroutines
 - `go_memstats_*` - Memory statistics
 - `go_gc_*` - Garbage collection metrics
@@ -311,9 +320,9 @@ Add Parse DMARC to your `prometheus.yml`:
 
 ```yaml
 scrape_configs:
-  - job_name: 'parse-dmarc'
+  - job_name: "parse-dmarc"
     static_configs:
-      - targets: ['parse-dmarc:8080']
+      - targets: ["parse-dmarc:8080"]
     scrape_interval: 30s
     metrics_path: /metrics
 ```
@@ -363,43 +372,47 @@ systemctl restart grafana-server
 
 #### Dashboard Variables
 
-| Variable | Purpose |
-|----------|---------|
+| Variable     | Purpose                        |
+| ------------ | ------------------------------ |
 | `datasource` | Prometheus datasource to query |
-| `job` | Filter by Prometheus job label |
-| `instance` | Filter by instance(s) |
-| `domain` | Filter by monitored domain(s) |
+| `job`        | Filter by Prometheus job label |
+| `instance`   | Filter by instance(s)          |
+| `domain`     | Filter by monitored domain(s)  |
 
 #### Dashboard Sections
 
-| Section | What It Shows |
-|---------|---------------|
-| **Overview - Golden Signals** | Compliance rate, total messages, reports count, time since last fetch |
-| **DMARC Authentication Results** | SPF/DKIM pass rates, disposition breakdown, per-domain compliance |
+| Section                            | What It Shows                                                             |
+| ---------------------------------- | ------------------------------------------------------------------------- |
+| **Overview - Golden Signals**      | Compliance rate, total messages, reports count, time since last fetch     |
+| **DMARC Authentication Results**   | SPF/DKIM pass rates, disposition breakdown, per-domain compliance         |
 | **Report Sources & Organizations** | Top reporting organizations (Google, Microsoft, etc.), messages by domain |
-| **IMAP & Fetch Operations** | Connection health, fetch cycle monitoring, latency heatmaps |
-| **Error Tracking** | Parse errors, storage errors, fetch failures |
-| **HTTP Server** | Request rates, latency percentiles, error rates |
-| **Go Runtime** | Goroutines, memory usage, GC stats, CPU usage |
+| **IMAP & Fetch Operations**        | Connection health, fetch cycle monitoring, latency heatmaps               |
+| **Error Tracking**                 | Parse errors, storage errors, fetch failures                              |
+| **HTTP Server**                    | Request rates, latency percentiles, error rates                           |
+| **Go Runtime**                     | Goroutines, memory usage, GC stats, CPU usage                             |
 
 #### Example Grafana Panels
 
 **Compliance Rate Gauge:**
+
 ```promql
 parse_dmarc_dmarc_compliance_rate
 ```
 
 **Messages Over Time:**
+
 ```promql
 rate(parse_dmarc_dmarc_messages_total[5m])
 ```
 
 **Compliance Rate by Domain:**
+
 ```promql
 parse_dmarc_dmarc_compliance_rate_by_domain
 ```
 
 **SPF/DKIM Pass Rate:**
+
 ```promql
 # SPF Pass Rate
 parse_dmarc_dmarc_spf_results{result="pass"} / ignoring(result) sum(parse_dmarc_dmarc_spf_results) * 100
@@ -409,22 +422,26 @@ parse_dmarc_dmarc_dkim_results{result="pass"} / ignoring(result) sum(parse_dmarc
 ```
 
 **Fetch Success Rate:**
+
 ```promql
 1 - (rate(parse_dmarc_reports_fetch_errors_total[1h]) / rate(parse_dmarc_reports_fetch_cycles_total[1h]))
 ```
 
 **IMAP Connection Health:**
+
 ```promql
 rate(parse_dmarc_imap_connections_total{status="success"}[5m]) /
 (rate(parse_dmarc_imap_connections_total{status="success"}[5m]) + rate(parse_dmarc_imap_connections_total{status="error"}[5m]))
 ```
 
 **HTTP Request Latency (p95):**
+
 ```promql
 histogram_quantile(0.95, rate(parse_dmarc_http_request_duration_seconds_bucket[5m]))
 ```
 
 **Reports by Organization:**
+
 ```promql
 topk(10, parse_dmarc_dmarc_reports_by_org)
 ```
@@ -479,7 +496,7 @@ groups:
 Complete monitoring stack:
 
 ```yaml
-version: '3.8'
+version: "3.8"
 
 services:
   parse-dmarc:
@@ -497,7 +514,7 @@ services:
     volumes:
       - ./prometheus.yml:/etc/prometheus/prometheus.yml
     command:
-      - '--config.file=/etc/prometheus/prometheus.yml'
+      - "--config.file=/etc/prometheus/prometheus.yml"
 
   grafana:
     image: grafana/grafana:latest
@@ -519,12 +536,13 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'parse-dmarc'
+  - job_name: "parse-dmarc"
     static_configs:
-      - targets: ['parse-dmarc:8080']
+      - targets: ["parse-dmarc:8080"]
 ```
 
 Access:
+
 - Parse DMARC Dashboard: http://localhost:8080
 - Prometheus: http://localhost:9090
 - Grafana: http://localhost:3000 (admin/admin)

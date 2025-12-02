@@ -26,14 +26,18 @@
             placeholder="example.com"
             @input="validateDomain"
           />
-          <span v-if="errors.domain" class="form-error">{{ errors.domain }}</span>
+          <span v-if="errors.domain" class="form-error">{{
+            errors.domain
+          }}</span>
         </div>
 
         <!-- Policy Selection -->
         <div class="form-group">
           <label for="policy" class="form-label">
             Policy (p)
-            <span class="label-hint">How receivers should handle messages that fail DMARC</span>
+            <span class="label-hint"
+              >How receivers should handle messages that fail DMARC</span
+            >
           </label>
           <select id="policy" v-model="form.policy" class="form-select">
             <option value="none">none - Monitor only, no action</option>
@@ -41,7 +45,8 @@
             <option value="reject">reject - Block entirely</option>
           </select>
           <p class="form-help">
-            <strong>Recommendation:</strong> Start with "none" to monitor, then gradually move to "quarantine" and "reject" after reviewing reports.
+            <strong>Recommendation:</strong> Start with "none" to monitor, then
+            gradually move to "quarantine" and "reject" after reviewing reports.
           </p>
         </div>
 
@@ -75,7 +80,8 @@
           />
           <span v-if="errors.rua" class="form-error">{{ errors.rua }}</span>
           <p class="form-help">
-            This is where email providers will send your DMARC reports. Use the email address that Parse DMARC monitors.
+            This is where email providers will send your DMARC reports. Use the
+            email address that Parse DMARC monitors.
           </p>
         </div>
 
@@ -87,16 +93,22 @@
           :aria-expanded="showAdvanced"
           aria-controls="advanced-options-content"
         >
-          <span class="toggle-icon">{{ showAdvanced ? '▼' : '▶' }}</span>
+          <span class="toggle-icon">{{ showAdvanced ? "▼" : "▶" }}</span>
           Advanced Options
         </button>
 
-        <div v-if="showAdvanced" class="advanced-options" id="advanced-options-content">
+        <div
+          v-if="showAdvanced"
+          class="advanced-options"
+          id="advanced-options-content"
+        >
           <!-- Percentage -->
           <div class="form-group">
             <label for="pct" class="form-label">
               Percentage (pct)
-              <span class="label-hint">Percentage of messages to apply policy to</span>
+              <span class="label-hint"
+                >Percentage of messages to apply policy to</span
+              >
             </label>
             <div class="range-input">
               <input
@@ -110,7 +122,8 @@
               <span class="range-value">{{ form.pct }}%</span>
             </div>
             <p class="form-help">
-              Use this for gradual rollout. Start at 10% when moving from "none" to "quarantine".
+              Use this for gradual rollout. Start at 10% when moving from "none"
+              to "quarantine".
             </p>
           </div>
 
@@ -142,7 +155,9 @@
           <div class="form-group">
             <label for="ruf" class="form-label">
               Forensic Report Address (ruf)
-              <span class="label-hint">Where to send failure reports (optional)</span>
+              <span class="label-hint"
+                >Where to send failure reports (optional)</span
+              >
             </label>
             <input
               id="ruf"
@@ -154,7 +169,8 @@
             />
             <span v-if="errors.ruf" class="form-error">{{ errors.ruf }}</span>
             <p class="form-help">
-              Forensic reports contain details about individual failures. Many providers don't send these due to privacy concerns.
+              Forensic reports contain details about individual failures. Many
+              providers don't send these due to privacy concerns.
             </p>
           </div>
 
@@ -209,7 +225,9 @@
           <div class="dns-record-box">
             <div class="record-row">
               <span class="record-label">Name:</span>
-              <code class="record-value">_dmarc.{{ form.domain || 'example.com' }}</code>
+              <code class="record-value"
+                >_dmarc.{{ form.domain || "example.com" }}</code
+              >
             </div>
             <div class="record-row">
               <span class="record-label">Type:</span>
@@ -231,11 +249,15 @@
             :aria-expanded="showProviders"
             aria-controls="provider-list-content"
           >
-            <span class="toggle-icon">{{ showProviders ? '▼' : '▶' }}</span>
+            <span class="toggle-icon">{{ showProviders ? "▼" : "▶" }}</span>
             Provider-Specific Instructions
           </button>
 
-          <div v-if="showProviders" class="provider-list" id="provider-list-content">
+          <div
+            v-if="showProviders"
+            class="provider-list"
+            id="provider-list-content"
+          >
             <div class="provider-item">
               <h5 class="provider-name">Cloudflare</h5>
               <ol class="provider-steps">
@@ -340,7 +362,8 @@ export default {
 
     function isValidDomain(domain) {
       if (!domain) return true; // Empty handled separately
-      var domainRegex = /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+$/;
+      var domainRegex =
+        /^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?(\.[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?)+$/;
       return domainRegex.test(domain);
     }
 
@@ -375,12 +398,7 @@ export default {
     }
 
     var isValid = computed(function () {
-      return (
-        form.domain &&
-        !errors.domain &&
-        !errors.rua &&
-        !errors.ruf
-      );
+      return form.domain && !errors.domain && !errors.rua && !errors.ruf;
     });
 
     var generatedRecord = computed(function () {
@@ -438,15 +456,18 @@ export default {
       var textToCopy = generatedRecord.value;
 
       if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(textToCopy).then(function () {
-          copySuccess.value = true;
-          setTimeout(function () {
-            copySuccess.value = false;
-          }, 2000);
-        }).catch(function (err) {
-          console.error("Failed to copy:", err);
-          fallbackCopy(textToCopy);
-        });
+        navigator.clipboard
+          .writeText(textToCopy)
+          .then(function () {
+            copySuccess.value = true;
+            setTimeout(function () {
+              copySuccess.value = false;
+            }, 2000);
+          })
+          .catch(function (err) {
+            console.error("Failed to copy:", err);
+            fallbackCopy(textToCopy);
+          });
       } else {
         fallbackCopy(textToCopy);
       }
@@ -568,7 +589,9 @@ export default {
   font-size: 0.95rem;
   background: var(--color-bg-secondary);
   color: var(--color-text-primary);
-  transition: border-color 0.2s, box-shadow 0.2s;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 }
 
 .form-input:focus,
@@ -611,7 +634,9 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: background 0.2s, border-color 0.2s;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
   width: 100%;
   text-align: left;
 }
@@ -719,7 +744,9 @@ export default {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  transition: background 0.2s, transform 0.1s;
+  transition:
+    background 0.2s,
+    transform 0.1s;
 }
 
 .copy-button:hover:not(:disabled) {

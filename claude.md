@@ -71,12 +71,14 @@ just install
 ## Building
 
 The build process:
+
 1. Frontend is built with `bun run build`
 2. Frontend dist is copied to `internal/api/dist/`
 3. Go binary embeds the frontend and serves it
 4. Output binary: `bin/parse-dmarc`
 
 Two build modes:
+
 - `just build` - Pure Go (CGO_ENABLED=0), uses modernc.org/sqlite
 - `just build-cgo` - CGO enabled, uses mattn/go-sqlite3
 
@@ -119,6 +121,7 @@ go test -v ./internal/parser/...
 ## Frontend Features
 
 The Vue.js dashboard includes:
+
 - **Dashboard Statistics** - Overview of DMARC report metrics
 - **Reports List** - Paginated view of all DMARC reports
 - **Report Details** - Detailed view of individual reports
@@ -128,6 +131,7 @@ The Vue.js dashboard includes:
 ## Configuration
 
 Config via JSON file or environment variables (using caarlos0/env):
+
 - IMAP settings (host, port, username, password, mailbox, TLS)
 - Database path
 - Server host/port
@@ -144,6 +148,7 @@ Example: `config.example.json`
 ## Roadmap
 
 See `ROADMAP.md` for the comprehensive product roadmap including:
+
 - Phase 1: Delightful Defaults (dark mode, DNS generator, health score, exports)
 - Phase 2: Proactive Intelligence (alerting, trends, GeoIP maps, DNS validator)
 - Phase 3: Enterprise Ready (auth, multi-org, RBAC, Prometheus metrics)
@@ -152,6 +157,7 @@ See `ROADMAP.md` for the comprehensive product roadmap including:
 ## Contributing
 
 See `CONTRIBUTING.md` for development setup and contribution guidelines. Key areas for contribution:
+
 - Forensic Reports (RUF support)
 - OAuth2 for IMAP authentication
 - CSV/JSON export functionality

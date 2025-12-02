@@ -109,7 +109,6 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -174,7 +173,6 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -239,7 +237,6 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -312,7 +309,6 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -408,7 +404,6 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -515,7 +510,6 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -682,7 +676,6 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -799,7 +792,6 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -916,7 +908,6 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -994,7 +985,6 @@
         "showThresholdMarkers": true,
         "sizing": "auto"
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1098,7 +1088,6 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1189,7 +1178,6 @@
         "xTickLabelRotation": 0,
         "xTickLabelSpacing": 0
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1328,7 +1316,6 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1408,7 +1395,6 @@
           "unit": "s"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1535,7 +1521,6 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1626,7 +1611,6 @@
           "unit": "s"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1766,7 +1750,6 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1850,7 +1833,6 @@
         "textMode": "auto",
         "wideLayout": true
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -1992,7 +1974,6 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -2134,7 +2115,6 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -2251,7 +2231,6 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -2348,7 +2327,6 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -2458,7 +2436,6 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -2555,7 +2532,6 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -2673,7 +2649,6 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -2769,7 +2744,6 @@
           "sort": "none"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -2866,7 +2840,6 @@
           "sort": "desc"
         }
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -2954,7 +2927,6 @@
         "textMode": "value",
         "wideLayout": true
       },
-      "pluginVersion": "11.0.0",
       "targets": [
         {
           "datasource": {
@@ -2993,7 +2965,7 @@
       "type": "stat"
     }
   ],
-  "refresh": "30s",
+  "refresh": "auto",
   "schemaVersion": 39,
   "tags": [
     "parse-dmarc",

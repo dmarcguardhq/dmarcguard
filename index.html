@@ -39,20 +39,24 @@
     <meta name="twitter:image" content="/og-image.png" />
     <!-- Theme initialization script - prevents flash of wrong theme -->
     <script>
-      (function() {
+      (function () {
         var theme;
         try {
-          theme = localStorage.getItem('parse-dmarc-theme');
+          theme = localStorage.getItem("parse-dmarc-theme");
         } catch (e) {
           theme = null;
         }
         if (!theme) {
-          theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+          theme =
+            window.matchMedia &&
+            window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light";
         }
-        if (theme !== 'light' && theme !== 'dark') {
-          theme = 'light';
+        if (theme !== "light" && theme !== "dark") {
+          theme = "light";
         }
-        document.documentElement.setAttribute('data-theme', theme);
+        document.documentElement.setAttribute("data-theme", theme);
       })();
     </script>
     <style>

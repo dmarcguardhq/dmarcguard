@@ -26,30 +26,35 @@ This roadmap outlines our strategic direction for Parse DMARC. It's designed to 
 Understanding who we're building for shapes every decision. Parse DMARC serves several distinct personas:
 
 ### The Solo Developer
+
 - **Context**: Runs multiple side projects, each with its own domain
 - **Pain Point**: No time to learn email authentication intricacies; just wants things to work
 - **Need**: Set-and-forget solution with instant visibility when something goes wrong
 - **Success Metric**: Protected in under 5 minutes, never thinks about DMARC again until needed
 
 ### The Startup Engineer
+
 - **Context**: Building a SaaS product, sending transactional and marketing emails
 - **Pain Point**: Email deliverability issues affecting customer experience; no budget for enterprise tools
 - **Need**: Comprehensive monitoring without the Elasticsearch/Kibana complexity
 - **Success Metric**: Full visibility into email authentication, catches issues before customers complain
 
 ### The Security Engineer
+
 - **Context**: Protecting organization's domain from spoofing and phishing attacks
 - **Pain Point**: Aggregate reports are unreadable; can't detect attacks in real-time
 - **Need**: Threat intelligence, alerting, forensic analysis capabilities
 - **Success Metric**: Detects and responds to spoofing attempts within minutes
 
 ### The MSP/Agency
+
 - **Context**: Managing email security for dozens or hundreds of client domains
 - **Pain Point**: No unified view across clients; manual report checking doesn't scale
 - **Need**: Multi-tenant dashboard, white-labeling, automated reporting
 - **Success Metric**: Manages 100+ domains from a single pane of glass
 
 ### The Enterprise IT Team
+
 - **Context**: Large organization with complex email infrastructure
 - **Pain Point**: Compliance requirements, audit trails, integration with existing security stack
 - **Need**: SSO, RBAC, SIEM integration, comprehensive audit logging
@@ -62,18 +67,23 @@ Understanding who we're building for shapes every decision. Parse DMARC serves s
 Every feature we build adheres to these principles:
 
 ### 1. Zero-to-Protected in Minutes
+
 The time from "I heard about DMARC" to "my domain is monitored" should be measured in minutes, not hours. Every friction point is a failure.
 
 ### 2. Actionable, Not Just Informational
+
 Data without context is noise. Every metric, alert, and visualization should answer "so what?" and ideally "what should I do about it?"
 
 ### 3. Complexity is Optional
+
 Simple use cases should feel simple. Advanced features should be discoverable but never in the way. A solo developer and an enterprise security team should both feel at home.
 
 ### 4. Works Where You Work
+
 Parse DMARC should integrate into existing workflows—Slack, Prometheus, CI/CD pipelines—rather than demanding users change how they work.
 
 ### 5. Trust Through Transparency
+
 As a security tool, we must be transparent about what we do, how we handle data, and what our limitations are. Open source isn't just our license; it's our philosophy.
 
 ---
@@ -81,70 +91,74 @@ As a security tool, we must be transparent about what we do, how we handle data,
 ## Roadmap Phases
 
 ### Phase 1: Delightful Defaults
+
 **Theme**: Polish the foundation, make first impressions unforgettable
 
 This phase focuses on quick wins that dramatically improve user experience without major architectural changes. Every feature here should make users think "why doesn't every tool do this?"
 
-| Feature | Priority | Status |
-|---------|----------|--------|
-| [Dark Mode](#11-dark-mode) | High | ✅ Complete |
-| [DNS Record Generator](#12-dns-record-generator) | High | ✅ Complete |
-| [Compliance Health Score](#13-compliance-health-score) | High | Planned |
-| [Data Export (CSV/JSON)](#14-data-export) | High | Planned |
-| [Keyboard Shortcuts](#15-keyboard-shortcuts) | Medium | Planned |
-| [ASN/Organization Enrichment](#16-asnorganization-enrichment) | Medium | Planned |
-| [Compliance Badge](#17-compliance-badge) | Medium | Planned |
-| [Manual Report Upload](#18-manual-report-upload) | Medium | Planned |
+| Feature                                                       | Priority | Status      |
+| ------------------------------------------------------------- | -------- | ----------- |
+| [Dark Mode](#11-dark-mode)                                    | High     | ✅ Complete |
+| [DNS Record Generator](#12-dns-record-generator)              | High     | ✅ Complete |
+| [Compliance Health Score](#13-compliance-health-score)        | High     | Planned     |
+| [Data Export (CSV/JSON)](#14-data-export)                     | High     | Planned     |
+| [Keyboard Shortcuts](#15-keyboard-shortcuts)                  | Medium   | Planned     |
+| [ASN/Organization Enrichment](#16-asnorganization-enrichment) | Medium   | Planned     |
+| [Compliance Badge](#17-compliance-badge)                      | Medium   | Planned     |
+| [Manual Report Upload](#18-manual-report-upload)              | Medium   | Planned     |
 
 ---
 
 ### Phase 2: Proactive Intelligence
+
 **Theme**: Transform from passive monitoring to active protection
 
 This phase adds the intelligence layer that turns Parse DMARC from a report viewer into a security tool. Users should feel protected, not just informed.
 
-| Feature | Priority | Status |
-|---------|----------|--------|
-| [Smart Alerting System](#21-smart-alerting-system) | High | Planned |
-| [Historical Trend Charts](#22-historical-trend-charts) | High | Planned |
-| [Interactive GeoIP Map](#23-interactive-geoip-map) | High | Planned |
-| [DNS Record Validator](#24-dns-record-validator) | High | Planned |
-| [Remediation Guide](#25-remediation-guide) | High | Planned |
-| [IP Reputation Integration](#26-ip-reputation-integration) | Medium | Planned |
-| [Onboarding Wizard](#27-onboarding-wizard) | Medium | Planned |
-| [Webhook Support](#28-webhook-support) | Medium | Planned |
+| Feature                                                    | Priority | Status  |
+| ---------------------------------------------------------- | -------- | ------- |
+| [Smart Alerting System](#21-smart-alerting-system)         | High     | Planned |
+| [Historical Trend Charts](#22-historical-trend-charts)     | High     | Planned |
+| [Interactive GeoIP Map](#23-interactive-geoip-map)         | High     | Planned |
+| [DNS Record Validator](#24-dns-record-validator)           | High     | Planned |
+| [Remediation Guide](#25-remediation-guide)                 | High     | Planned |
+| [IP Reputation Integration](#26-ip-reputation-integration) | Medium   | Planned |
+| [Onboarding Wizard](#27-onboarding-wizard)                 | Medium   | Planned |
+| [Webhook Support](#28-webhook-support)                     | Medium   | Planned |
 
 ---
 
 ### Phase 3: Enterprise Ready
+
 **Theme**: Scale to teams, organizations, and enterprises
 
 This phase introduces the collaboration and governance features needed for professional deployments. Parse DMARC becomes viable for organizations with compliance requirements and multiple stakeholders.
 
-| Feature | Priority | Status |
-|---------|----------|--------|
-| [Authentication System](#31-authentication-system) | High | Planned |
-| [Multi-Organization Support](#32-multi-organization-support) | High | Planned |
-| [Role-Based Access Control](#33-role-based-access-control) | Medium | Planned |
-| [Prometheus Metrics](#34-prometheus-metrics) | Medium | Planned |
-| [Scheduled Reports](#35-scheduled-reports) | Medium | Planned |
-| [Audit Logging](#36-audit-logging) | Medium | Planned |
-| [API Keys](#37-api-keys) | Medium | Planned |
+| Feature                                                      | Priority | Status  |
+| ------------------------------------------------------------ | -------- | ------- |
+| [Authentication System](#31-authentication-system)           | High     | Planned |
+| [Multi-Organization Support](#32-multi-organization-support) | High     | Planned |
+| [Role-Based Access Control](#33-role-based-access-control)   | Medium   | Planned |
+| [Prometheus Metrics](#34-prometheus-metrics)                 | Medium   | Planned |
+| [Scheduled Reports](#35-scheduled-reports)                   | Medium   | Planned |
+| [Audit Logging](#36-audit-logging)                           | Medium   | Planned |
+| [API Keys](#37-api-keys)                                     | Medium   | Planned |
 
 ---
 
 ### Phase 4: AI-Powered Security
+
 **Theme**: Intelligence that actually helps
 
 This phase leverages AI/ML to provide insights humans might miss and explanations that make complex concepts accessible. This is where Parse DMARC becomes truly differentiated.
 
-| Feature | Priority | Status |
-|---------|----------|--------|
-| [AI Assistant](#41-ai-assistant) | Medium | Planned |
-| [Anomaly Detection](#42-anomaly-detection) | Medium | Planned |
-| [Forensic Reports (RUF)](#43-forensic-reports) | Medium | Planned |
-| [Natural Language Queries](#44-natural-language-queries) | Low | Planned |
-| [Predictive Analytics](#45-predictive-analytics) | Low | Planned |
+| Feature                                                  | Priority | Status  |
+| -------------------------------------------------------- | -------- | ------- |
+| [AI Assistant](#41-ai-assistant)                         | Medium   | Planned |
+| [Anomaly Detection](#42-anomaly-detection)               | Medium   | Planned |
+| [Forensic Reports (RUF)](#43-forensic-reports)           | Medium   | Planned |
+| [Natural Language Queries](#44-natural-language-queries) | Low      | Planned |
+| [Predictive Analytics](#45-predictive-analytics)         | Low      | Planned |
 
 ---
 
@@ -159,6 +173,7 @@ This phase leverages AI/ML to provide insights humans might miss and explanation
 **User Story**: As a user working late investigating an email issue, I want a dark interface option so that I can work comfortably without straining my eyes.
 
 **Scope**:
+
 - System preference detection (prefers-color-scheme)
 - Manual toggle with persistence (localStorage)
 - Smooth transition animations
@@ -166,6 +181,7 @@ This phase leverages AI/ML to provide insights humans might miss and explanation
 - Proper contrast ratios for accessibility (WCAG AA)
 
 **Technical Notes**:
+
 - CSS custom properties for theming
 - Single source of truth for color tokens
 - Consider both light-on-dark and dark-on-light contrast needs
@@ -179,6 +195,7 @@ This phase leverages AI/ML to provide insights humans might miss and explanation
 **User Story**: As a new user, I want Parse DMARC to generate the exact DNS record I need so that I can copy-paste it into my DNS provider without learning DMARC syntax.
 
 **Scope**:
+
 - Interactive form for DMARC policy options:
   - Policy level (none/quarantine/reject)
   - Subdomain policy
@@ -193,11 +210,13 @@ This phase leverages AI/ML to provide insights humans might miss and explanation
 - Explanation of each option in plain English
 
 **Example Output**:
+
 ```
 _dmarc.yourdomain.com TXT "v=DMARC1; p=reject; rua=mailto:dmarc@yourdomain.com; pct=100; adkim=r; aspf=r"
 ```
 
 **Technical Notes**:
+
 - Client-side generation (no server needed)
 - Consider generating SPF records too as a bonus
 
@@ -210,6 +229,7 @@ _dmarc.yourdomain.com TXT "v=DMARC1; p=reject; rua=mailto:dmarc@yourdomain.com; 
 **User Story**: As a domain owner, I want a single score representing my email authentication health so that I can quickly understand my status and track improvement over time.
 
 **Scope**:
+
 - Score calculation algorithm considering:
   - DMARC pass rate (primary factor)
   - SPF alignment rate
@@ -223,6 +243,7 @@ _dmarc.yourdomain.com TXT "v=DMARC1; p=reject; rua=mailto:dmarc@yourdomain.com; 
 - Historical score tracking
 
 **Scoring Framework**:
+
 ```
 Base Score = (DMARC Pass Rate × 0.5) + (SPF Pass Rate × 0.25) + (DKIM Pass Rate × 0.25)
 Policy Multiplier = { reject: 1.0, quarantine: 0.9, none: 0.7 }
@@ -238,6 +259,7 @@ Final Score = Base Score × Policy Multiplier × 100
 **User Story**: As a security engineer, I want to export DMARC data in standard formats so that I can include it in reports, analyze in spreadsheets, or archive for compliance.
 
 **Scope**:
+
 - Export formats:
   - CSV (for spreadsheets)
   - JSON (for programmatic use)
@@ -252,6 +274,7 @@ Final Score = Base Score × Policy Multiplier × 100
 - Immediate download (no email required)
 
 **Technical Notes**:
+
 - Client-side generation for CSV/JSON (faster, no server load)
 - Consider streaming for large exports
 - Include metadata (export date, filters applied)
@@ -265,6 +288,7 @@ Final Score = Base Score × Policy Multiplier × 100
 **User Story**: As a power user, I want keyboard shortcuts for common actions so that I can navigate and operate the dashboard without reaching for my mouse.
 
 **Scope**:
+
 - Global shortcuts:
   - `r` - Refresh data
   - `/` or `Cmd+K` - Focus search/filter
@@ -279,6 +303,7 @@ Final Score = Base Score × Policy Multiplier × 100
 - Visible hints in UI (tooltips showing shortcuts)
 
 **Technical Notes**:
+
 - Use a lightweight library or native event handling
 - Ensure shortcuts don't fire when typing in inputs
 - Consider customization in future
@@ -292,6 +317,7 @@ Final Score = Base Score × Policy Multiplier × 100
 **User Story**: As a user reviewing sending sources, I want to see organization names instead of just IP addresses so that I can quickly identify legitimate senders vs. suspicious ones.
 
 **Scope**:
+
 - Resolve IP → ASN → Organization name
 - Display in:
   - Top sending sources table
@@ -304,6 +330,7 @@ Final Score = Base Score × Policy Multiplier × 100
   - Or ipinfo.io API (freemium)
 
 **Example Display**:
+
 ```
 172.217.164.110
 Google LLC (AS15169)
@@ -319,6 +346,7 @@ Mountain View, US
 **User Story**: As a developer, I want a dynamic badge showing my domain's DMARC compliance so that I can display it in my README and demonstrate my commitment to email security.
 
 **Scope**:
+
 - Dynamic SVG badge endpoint: `/badge/{domain}.svg`
 - Badge styles:
   - shields.io compatible format
@@ -330,6 +358,7 @@ Mountain View, US
 - Optional: require API key for private data
 
 **Example**:
+
 ```markdown
 ![DMARC Compliance](https://your-instance.com/badge/example.com.svg)
 ```
@@ -345,6 +374,7 @@ Mountain View, US
 **User Story**: As a user without IMAP access, I want to upload DMARC XML files directly so that I can use Parse DMARC without configuring email integration.
 
 **Scope**:
+
 - Drag-and-drop upload zone
 - Support formats:
   - Raw XML files
@@ -357,6 +387,7 @@ Mountain View, US
 - Success confirmation with link to view report
 
 **Technical Notes**:
+
 - Reuse existing parser code
 - Consider file size limits
 - Add rate limiting for public instances
@@ -372,6 +403,7 @@ Mountain View, US
 **User Story**: As a domain owner, I want to receive alerts when something important happens with my email authentication so that I can respond quickly to issues without constantly checking the dashboard.
 
 **Scope**:
+
 - Alert channels:
   - Email (via SMTP configuration)
   - Slack (webhook integration)
@@ -392,6 +424,7 @@ Mountain View, US
 - Alert history and acknowledgment
 
 **Example Alert**:
+
 ```
 🚨 DMARC Alert: example.com
 
@@ -412,6 +445,7 @@ View details: https://your-instance.com/reports?domain=example.com
 **User Story**: As a security engineer, I want to see how my email authentication metrics have changed over time so that I can track improvement, detect gradual degradation, and report on progress.
 
 **Scope**:
+
 - Time-series charts for:
   - Compliance rate over time
   - Email volume trends
@@ -428,6 +462,7 @@ View details: https://your-instance.com/reports?domain=example.com
 - Responsive design for all screen sizes
 
 **Technical Notes**:
+
 - Use a lightweight charting library (Chart.js, Apache ECharts)
 - Aggregate data in database for performance
 - Consider data retention implications
@@ -441,6 +476,7 @@ View details: https://your-instance.com/reports?domain=example.com
 **User Story**: As a security analyst, I want to see a geographic visualization of email sources so that I can quickly identify suspicious activity from unexpected locations.
 
 **Scope**:
+
 - Interactive world map (Leaflet + OpenStreetMap)
 - Features:
   - Markers/bubbles sized by volume
@@ -455,6 +491,7 @@ View details: https://your-instance.com/reports?domain=example.com
 - List view toggle for accessibility
 
 **Technical Notes**:
+
 - MaxMind GeoLite2 City database for IP geolocation
 - Cluster markers at low zoom levels
 - Consider WebGL for large datasets
@@ -468,10 +505,11 @@ View details: https://your-instance.com/reports?domain=example.com
 **User Story**: As a domain administrator, I want Parse DMARC to validate my DNS records and alert me to misconfigurations so that I can fix issues before they affect deliverability.
 
 **Scope**:
+
 - Validate records for:
-  - DMARC (_dmarc.domain.com)
+  - DMARC (\_dmarc.domain.com)
   - SPF (domain.com TXT)
-  - DKIM (selector._domainkey.domain.com)
+  - DKIM (selector.\_domainkey.domain.com)
 - Validation checks:
   - Syntax correctness
   - Policy consistency
@@ -485,6 +523,7 @@ View details: https://your-instance.com/reports?domain=example.com
 - Manual on-demand validation
 
 **Example Output**:
+
 ```
 ✅ DMARC: Valid
    Policy: reject | Alignment: relaxed
@@ -507,6 +546,7 @@ View details: https://your-instance.com/reports?domain=example.com
 **User Story**: As a user viewing a failed authentication, I want specific guidance on how to fix the issue so that I don't have to research DMARC troubleshooting separately.
 
 **Scope**:
+
 - "Fix This" button on failed records
 - Context-aware recommendations based on:
   - Failure type (SPF, DKIM, alignment)
@@ -522,6 +562,7 @@ View details: https://your-instance.com/reports?domain=example.com
 - Provider-specific guides (Google Workspace, Microsoft 365, SendGrid, etc.)
 
 **Example**:
+
 ```
 📧 Failure Analysis
 
@@ -552,6 +593,7 @@ Fix Steps:
 **User Story**: As a security analyst, I want to see reputation information for sending IPs so that I can quickly distinguish between legitimate senders and potential threats.
 
 **Scope**:
+
 - Reputation data sources:
   - AbuseIPDB (abuse reports)
   - VirusTotal (malware/phishing associations)
@@ -580,6 +622,7 @@ Fix Steps:
 **User Story**: As a new user, I want a guided setup experience so that I can get Parse DMARC working correctly without reading extensive documentation.
 
 **Scope**:
+
 - Step-by-step wizard:
   1. Welcome & overview
   2. DNS record setup (with generator)
@@ -595,6 +638,7 @@ Fix Steps:
 - Option to revisit wizard
 
 **Technical Notes**:
+
 - Store completion state to not show repeatedly
 - Consider video/animation elements
 - Mobile-friendly design
@@ -608,6 +652,7 @@ Fix Steps:
 **User Story**: As a DevOps engineer, I want to receive webhook notifications for DMARC events so that I can integrate with my existing automation and monitoring systems.
 
 **Scope**:
+
 - Webhook events:
   - `report.received` - New report processed
   - `compliance.changed` - Compliance threshold crossed
@@ -625,6 +670,7 @@ Fix Steps:
   - Payload preview
 
 **Payload Example**:
+
 ```json
 {
   "event": "compliance.changed",
@@ -650,6 +696,7 @@ Fix Steps:
 **User Story**: As an administrator, I want to secure access to Parse DMARC so that only authorized users can view and manage email authentication data.
 
 **Scope**:
+
 - Authentication methods:
   - Local username/password
   - OIDC/OAuth2 (Google, GitHub, etc.)
@@ -666,6 +713,7 @@ Fix Steps:
   - Password policies
 
 **Technical Notes**:
+
 - Consider using an auth library (ZITADEL, Authelia, or built-in)
 - JWT or session-based authentication
 - Secure cookie handling
@@ -679,6 +727,7 @@ Fix Steps:
 **User Story**: As an MSP, I want to manage multiple clients' DMARC data in a single Parse DMARC instance so that I don't need separate deployments for each client.
 
 **Scope**:
+
 - Organization model:
   - Create/edit/delete organizations
   - Assign domains to organizations
@@ -695,6 +744,7 @@ Fix Steps:
 - Global admin view across all orgs
 
 **Database Considerations**:
+
 - Add organization_id to reports/records tables
 - Index optimization for multi-tenant queries
 - Consider row-level security
@@ -708,6 +758,7 @@ Fix Steps:
 **User Story**: As an organization admin, I want to assign different permission levels to users so that I can control who can view, edit, or manage Parse DMARC.
 
 **Scope**:
+
 - Built-in roles:
   - **Owner**: Full access, can delete org
   - **Admin**: Manage users, settings, full data access
@@ -733,6 +784,7 @@ Fix Steps:
 **User Story**: As a DevOps engineer, I want Parse DMARC to expose Prometheus metrics so that I can monitor it alongside my other infrastructure in Grafana.
 
 **Scope**:
+
 - Metrics endpoint: `/metrics`
 - Metrics exposed:
   - `parse_dmarc_reports_total` (counter)
@@ -755,6 +807,7 @@ Fix Steps:
 **User Story**: As a security manager, I want to receive scheduled summary reports so that I can keep stakeholders informed without them needing dashboard access.
 
 **Scope**:
+
 - Report types:
   - Daily summary
   - Weekly digest
@@ -783,6 +836,7 @@ Fix Steps:
 **User Story**: As a compliance officer, I want a complete audit trail of all actions in Parse DMARC so that I can demonstrate control effectiveness during audits.
 
 **Scope**:
+
 - Logged events:
   - User authentication (login, logout, failed attempts)
   - Configuration changes
@@ -811,6 +865,7 @@ Fix Steps:
 **User Story**: As a developer, I want to generate API keys so that I can integrate Parse DMARC with my automation scripts and CI/CD pipelines.
 
 **Scope**:
+
 - API key management:
   - Create with name/description
   - Set expiration (optional)
@@ -823,7 +878,7 @@ Fix Steps:
   - IP allowlisting (optional)
 - Usage:
   - Bearer token authentication
-  - Key prefix for identification (pd_live_...)
+  - Key prefix for identification (pd*live*...)
 - Per-organization keys in multi-tenant mode
 
 ---
@@ -837,6 +892,7 @@ Fix Steps:
 **User Story**: As a non-expert user, I want to ask questions about my DMARC data in plain English so that I can understand issues without becoming a DMARC expert.
 
 **Scope**:
+
 - Chat interface in dashboard
 - Capabilities:
   - Explain what a specific failure means
@@ -853,6 +909,7 @@ Fix Steps:
 - Privacy: Option to disable, clear data handling
 
 **Technical Notes**:
+
 - Integration with LLM API (OpenAI, Anthropic, local models)
 - Careful prompt engineering for accuracy
 - Rate limiting to control costs
@@ -866,6 +923,7 @@ Fix Steps:
 **User Story**: As a security engineer, I want Parse DMARC to automatically detect unusual patterns so that I can catch sophisticated attacks that wouldn't trigger simple threshold alerts.
 
 **Scope**:
+
 - Anomaly types:
   - Unusual volume (spike or drop)
   - New geographic source
@@ -891,6 +949,7 @@ Fix Steps:
 **User Story**: As a security analyst investigating an incident, I want access to forensic reports so that I can see individual message details for failed authentications.
 
 **Scope**:
+
 - RUF report parsing
 - Display:
   - Individual message headers
@@ -915,6 +974,7 @@ Fix Steps:
 **User Story**: As a user, I want to query my DMARC data using natural language so that I don't need to learn filter syntax.
 
 **Scope**:
+
 - Query examples:
   - "Show me failures from last week"
   - "Which IPs sent the most email in November?"
@@ -934,6 +994,7 @@ Fix Steps:
 **User Story**: As a security manager, I want to see predictions of future compliance trends so that I can proactively address potential issues.
 
 **Scope**:
+
 - Predictions:
   - Compliance trajectory
   - Volume forecasting
@@ -950,21 +1011,25 @@ Fix Steps:
 These ideas are on our radar but not yet committed to the roadmap:
 
 ### Extended Protocol Support
+
 - **MTA-STS monitoring**: Monitor Mail Transfer Agent Strict Transport Security policies
 - **TLS-RPT parsing**: Parse TLS reporting alongside DMARC
 - **BIMI validation**: Monitor Brand Indicators for Message Identification
 
 ### Advanced Integrations
+
 - **Terraform provider**: Infrastructure-as-code for Parse DMARC configuration
 - **Kubernetes operator**: CRD-based deployment and auto-scaling
 - **SIEM connectors**: Native integration with Splunk, Elastic, Sentinel
 
 ### Community Features
+
 - **Public threat intelligence feed**: Opt-in sharing of anonymized threat data
 - **Community benchmarks**: Compare your metrics to anonymized industry averages
 - **Plugin architecture**: Enable community-built extensions
 
 ### Innovative Concepts
+
 - **Browser extension**: Check any domain's DMARC status with right-click
 - **Slack bot**: Conversational interface for DMARC queries
 - **Email deliverability score**: Holistic scoring beyond just DMARC
@@ -984,6 +1049,7 @@ This roadmap is a living document. We welcome community input on prioritization 
 ### Prioritization Factors
 
 We prioritize features based on:
+
 - **Impact**: How many users benefit? How significant is the improvement?
 - **Effort**: Engineering time and complexity
 - **Strategic fit**: Alignment with project vision
@@ -993,12 +1059,12 @@ We prioritize features based on:
 
 ## Changelog
 
-| Date | Change |
-|------|--------|
+| Date       | Change                                 |
+| ---------- | -------------------------------------- |
 | 2025-11-29 | DNS Record Generator feature completed |
-| 2025-11-29 | Dark Mode feature completed |
-| 2025-11-28 | Initial roadmap created |
+| 2025-11-29 | Dark Mode feature completed            |
+| 2025-11-28 | Initial roadmap created                |
 
 ---
 
-*This roadmap represents our current thinking and is subject to change based on community feedback, resource availability, and evolving priorities.*
+_This roadmap represents our current thinking and is subject to change based on community feedback, resource availability, and evolving priorities._

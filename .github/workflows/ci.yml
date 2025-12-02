@@ -151,14 +151,16 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: ${{ needs.release-please.outputs.tag_name }}
-      - name: Install Grizzly
+      - name: Validate dashboard JSON
         run: |
-          curl -fSL -o grr https://github.com/grafana/grizzly/releases/latest/download/grr-linux-amd64
-          chmod +x grr
-          sudo mv grr /usr/local/bin/
-      - name: Deploy dashboard with Grizzly
-        run: |
-          grr apply grafana/
+          python3 -c "import json; json.load(open('grafana/dashboard.json'))"
+          echo "Dashboard JSON is valid"
+      - name: Upload dashboard to Grafana.com
         env:
-          GRAFANA_URL: ${{ secrets.GRAFANA_URL }}
-          GRAFANA_TOKEN: ${{ secrets.GRAFANA_TOKEN }}
+          GRAFANA_API_KEY: ${{ secrets.GRAFANA_API_KEY }}
+        run: |
+          curl -X POST \
+            -H "Authorization: Bearer $GRAFANA_API_KEY" \
+            -H "Content-Type: application/json" \
+            -d @grafana/dashboard.json \
+            "https://grafana.com/api/dashboards"
