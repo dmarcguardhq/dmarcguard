@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.2.2](https://github.com/meysam81/parse-dmarc/compare/v1.2.1...v1.2.2) (2025-12-05)
+
+
+### Bug Fixes
+
+* **CI:** add the brew token ([4081621](https://github.com/meysam81/parse-dmarc/commit/4081621ae9d1771185712512a912aa350a2e0305))
+
 ## [1.2.1](https://github.com/meysam81/parse-dmarc/compare/v1.2.0...v1.2.1) (2025-12-05)
 
 
