@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.2.1](https://github.com/meysam81/parse-dmarc/compare/v1.2.0...v1.2.1) (2025-12-05)
+
+
+### Bug Fixes
+
+* **CI:** move bundled dist to server directory ([59dabf1](https://github.com/meysam81/parse-dmarc/commit/59dabf1becfc22fddda4bfdab6dd22188396b4c3))
+* **docs:** pin to full version for now ([2060e45](https://github.com/meysam81/parse-dmarc/commit/2060e451a3b7322d933ad4b8f389f28474f85fb1))
+* **docs:** update quickstart command with volume ([617c258](https://github.com/meysam81/parse-dmarc/commit/617c2584402cb309e1a652630f5f75de92df0b2e))
+
 ## [1.2.0](https://github.com/meysam81/parse-dmarc/compare/v1.1.0...v1.2.0) (2025-12-05)
 
 
