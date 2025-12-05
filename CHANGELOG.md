@@ -1,5 +1,31 @@
 # Changelog
 
+## [1.2.0](https://github.com/meysam81/parse-dmarc/compare/v1.1.0...v1.2.0) (2025-12-05)
+
+
+### Features
+
+* add production-ready Grafana dashboard ([6f857fe](https://github.com/meysam81/parse-dmarc/commit/6f857fe660144093b8766f529c15b17a21edc3b2))
+* add production-ready Prometheus metrics ([#39](https://github.com/meysam81/parse-dmarc/issues/39)) ([17f6968](https://github.com/meysam81/parse-dmarc/commit/17f69681b23eee92ff1bc908fde7da2de11b8a52))
+* **frontend:** add DMARC DNS record generator ([34491ba](https://github.com/meysam81/parse-dmarc/commit/34491ba244f9af48a25e3a0d6b09979661678c0d))
+* **frontend:** implement dark mode with theme toggle ([#35](https://github.com/meysam81/parse-dmarc/issues/35)) ([569fd36](https://github.com/meysam81/parse-dmarc/commit/569fd3649931f94fa4f39845d0f141afacd6fbc0))
+
+
+### Bug Fixes
+
+* **CI:** build on major version as well ([fdff51d](https://github.com/meysam81/parse-dmarc/commit/fdff51d2c77d55e890e5b6d9c12ce316ddec2542))
+* **CI:** only pin main with latest ([f120b2e](https://github.com/meysam81/parse-dmarc/commit/f120b2e7b7985adbaa815b6104f8aaee44e8e9ce))
+* **CI:** reverse the conditional for build-dev job ([ce8b417](https://github.com/meysam81/parse-dmarc/commit/ce8b417c65c62563886787df3871200679c8de66))
+* **CI:** update dockerignore after main.go change ([1241b2f](https://github.com/meysam81/parse-dmarc/commit/1241b2f22b8138348b7bf087ba00659e0b1f6fe8))
+* **CI:** update version of the binary ([0a8f023](https://github.com/meysam81/parse-dmarc/commit/0a8f0230b30229349db270aa065e3332da63990a))
+* **CI:** use go version file when setting up go ([40fbcb1](https://github.com/meysam81/parse-dmarc/commit/40fbcb1dfbe962c7d48ef2c821ee32d997e7c78c))
+* **dev:** remove extra compose file ([eb71b09](https://github.com/meysam81/parse-dmarc/commit/eb71b097005bb9d024454ee6d84c2ce5fbb59d7b))
+* **dev:** remove user from compose ([e9fbf73](https://github.com/meysam81/parse-dmarc/commit/e9fbf73b72a2a9958d62ed6f6ffea4bad2f2771f))
+* make github star non-intrusive ([831047b](https://github.com/meysam81/parse-dmarc/commit/831047b88394cd468ff57bc08c53907880e0feee))
+* move main.go to the root ([0dd5787](https://github.com/meysam81/parse-dmarc/commit/0dd57878ec5f7d6707faca0189834a6d91c266e5))
+* publish to grafana community dashboards instead ([86f40b0](https://github.com/meysam81/parse-dmarc/commit/86f40b052607861de3d1a843f9e9c9e08ba57481))
+* remove broken dns generator ([df39352](https://github.com/meysam81/parse-dmarc/commit/df393527710b487bc0bdbe7d67d9a3f909623b92))
+
 ## [1.1.0](https://github.com/meysam81/parse-dmarc/compare/v1.0.2...v1.1.0) (2025-11-08)
 
 
