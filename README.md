@@ -37,6 +37,31 @@
 - 🔒 Secure TLS support
 - 🌙 Dark mode support
 
+## Installation
+
+### Homebrew (macOS/Linux)
+
+```bash
+brew install meysam81/tap/parse-dmarc
+```
+
+Or tap first, then install:
+
+```bash
+brew tap meysam81/tap
+brew install parse-dmarc
+```
+
+### Docker
+
+```bash
+docker pull ghcr.io/meysam81/parse-dmarc:latest
+```
+
+### Binary Downloads
+
+Download pre-built binaries from the [Releases page](https://github.com/meysam81/parse-dmarc/releases).
+
 ## Quick Start
 
 ### Step 1: Set Up DNS to Receive DMARC Reports
