@@ -80,12 +80,12 @@ type AuthResultStatsOutput struct {
 
 // ParsedReportOutput wraps a parsed DMARC report response.
 type ParsedReportOutput struct {
-	Report          *parser.Feedback `json:"report"`
-	TotalMessages   int              `json:"total_messages"`
-	CompliantCount  int              `json:"compliant_count"`
-	ComplianceRate  float64          `json:"compliance_rate"`
-	DateBegin       string           `json:"date_begin"`
-	DateEnd         string           `json:"date_end"`
+	Report         *parser.Feedback `json:"report"`
+	TotalMessages  int              `json:"total_messages"`
+	CompliantCount int              `json:"compliant_count"`
+	ComplianceRate float64          `json:"compliance_rate"`
+	DateBegin      string           `json:"date_begin"`
+	DateEnd        string           `json:"date_end"`
 }
 
 // Tool handlers
