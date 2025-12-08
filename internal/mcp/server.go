@@ -139,8 +139,12 @@ func (s *Server) RunHTTP(ctx context.Context, addr string) error {
 	}
 
 	server := &http.Server{
-		Addr:    addr,
-		Handler: handler,
+		Addr:           addr,
+		Handler:        handler,
+		ReadTimeout:    15 * time.Second,
+		WriteTimeout:   15 * time.Second,
+		IdleTimeout:    60 * time.Second,
+		MaxHeaderBytes: 1 << 20, // 1 MiB
 	}
 
 	// Handle graceful shutdown
