@@ -240,6 +240,10 @@ func (s *Server) parseDMARCReport(ctx context.Context, req *mcp.CallToolRequest,
 		return nil, ParsedReportOutput{}, fmt.Errorf("failed to decode base64 data: %w", err)
 	}
 
+	const maxReportSize = 10 * 1024 * 1024 // 10MB
+	if len(data) > maxReportSize {
+		return nil, ParsedReportOutput{}, fmt.Errorf("report data exceeds maximum size of %d bytes", maxReportSize)
+	}
 	// Parse the report
 	report, err := parser.ParseReport(data)
 	if err != nil {
