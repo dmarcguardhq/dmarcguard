@@ -3,7 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,10 +11,12 @@ import (
 	"github.com/meysam81/parse-dmarc/internal/api"
 	"github.com/meysam81/parse-dmarc/internal/config"
 	"github.com/meysam81/parse-dmarc/internal/imap"
+	"github.com/meysam81/parse-dmarc/internal/logger"
 	mcpserver "github.com/meysam81/parse-dmarc/internal/mcp"
 	"github.com/meysam81/parse-dmarc/internal/metrics"
 	"github.com/meysam81/parse-dmarc/internal/parser"
 	"github.com/meysam81/parse-dmarc/internal/storage"
+	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
 )
 
@@ -24,6 +25,10 @@ var (
 	commit  = "none"
 	date    = "unknown"
 	builtBy = "unknown"
+
+	log         *zerolog.Logger
+	logLevel    = "info"
+	coloredLogs = false
 )
 
 func main() {
@@ -33,6 +38,10 @@ func main() {
 		Version:               version,
 		EnableShellCompletion: true,
 		Suggest:               true,
+		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
+			log = logger.NewLogger(logLevel, !coloredLogs)
+			return ctx, nil
+		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "config",
@@ -96,7 +105,7 @@ func main() {
 	}
 
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed to run")
 	}
 }
 
@@ -306,6 +315,7 @@ func runMCPServer(ctx context.Context, store *storage.Storage, httpAddr string) 
 	mcpCfg := &mcpserver.Config{
 		Version:  version,
 		HTTPAddr: httpAddr,
+		Logger:   log,
 	}
 
 	server := mcpserver.NewServer(store, mcpCfg)

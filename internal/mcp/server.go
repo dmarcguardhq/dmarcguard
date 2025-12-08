@@ -5,17 +5,19 @@ package mcp
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/http"
+	"time"
 
 	"github.com/meysam81/parse-dmarc/internal/storage"
 	"github.com/modelcontextprotocol/go-sdk/mcp"
+	"github.com/rs/zerolog"
 )
 
 // Server wraps the MCP server with storage access.
 type Server struct {
 	mcpServer *mcp.Server
 	store     *storage.Storage
+	logger    *zerolog.Logger
 }
 
 // Config holds MCP server configuration.
@@ -24,6 +26,8 @@ type Config struct {
 	HTTPAddr string
 	// Version info for the server implementation.
 	Version string
+	// Logger for the server
+	Logger *zerolog.Logger
 }
 
 // NewServer creates a new MCP server with all DMARC tools registered.
@@ -59,6 +63,11 @@ Available tools:
 	s := &Server{
 		mcpServer: mcpServer,
 		store:     store,
+		logger:    cfg.Logger,
+	}
+
+	if s.logger != nil {
+		mcpServer.AddReceivingMiddleware(s.loggingMiddleware())
 	}
 
 	// Register all tools
@@ -67,9 +76,55 @@ Available tools:
 	return s
 }
 
+func (s *Server) loggingMiddleware() mcp.Middleware {
+	return func(next mcp.MethodHandler) mcp.MethodHandler {
+		return func(ctx context.Context, method string, req mcp.Request) (mcp.Result, error) {
+			logger := s.logger.With().
+				Str("method", method).
+				Str("session_id", req.GetSession().ID()).
+				Logger()
+
+			logger.Debug().
+				Bool("has_params", req.GetParams() != nil).
+				Msg("MCP request started")
+
+			if ctr, ok := req.(*mcp.CallToolRequest); ok {
+				logger.Info().
+					Str("tool", ctr.Params.Name).
+					Msg("calling tool")
+			}
+
+			start := time.Now()
+			result, err := next(ctx, method, req)
+			duration := time.Since(start)
+
+			if err != nil {
+				logger.Error().
+					Err(err).
+					Dur("duration", duration).
+					Msg("MCP request failed")
+			} else {
+				logEvent := logger.Debug().
+					Dur("duration", duration).
+					Bool("has_result", result != nil)
+
+				if ctr, ok := result.(*mcp.CallToolResult); ok {
+					logEvent = logEvent.Bool("is_error", ctr.IsError)
+				}
+
+				logEvent.Msg("MCP request completed")
+			}
+
+			return result, err
+		}
+	}
+}
+
 // RunStdio runs the MCP server over stdio transport.
 func (s *Server) RunStdio(ctx context.Context) error {
-	log.Println("Starting MCP server over stdio...")
+	if s.logger != nil {
+		s.logger.Info().Msg("starting MCP server over stdio")
+	}
 	return s.mcpServer.Run(ctx, &mcp.StdioTransport{})
 }
 
@@ -79,7 +134,9 @@ func (s *Server) RunHTTP(ctx context.Context, addr string) error {
 		return s.mcpServer
 	}, nil)
 
-	log.Printf("Starting MCP server over HTTP at %s", addr)
+	if s.logger != nil {
+		s.logger.Info().Str("addr", addr).Msg("starting MCP server over HTTP")
+	}
 
 	server := &http.Server{
 		Addr:    addr,
@@ -89,7 +146,9 @@ func (s *Server) RunHTTP(ctx context.Context, addr string) error {
 	// Handle graceful shutdown
 	go func() {
 		<-ctx.Done()
-		log.Println("Shutting down MCP HTTP server...")
+		if s.logger != nil {
+			s.logger.Info().Msg("shutting down MCP HTTP server")
+		}
 		_ = server.Shutdown(context.Background())
 	}()
 
