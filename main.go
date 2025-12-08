@@ -323,7 +323,7 @@ func runMCPServer(ctx context.Context, store *storage.Storage, httpAddr string) 
 	// If HTTP address is specified, run HTTP server
 	// Otherwise, run over stdio
 	if httpAddr != "" {
-		return server.RunHTTP(ctx, httpAddr)
+		return server.RunHTTP(ctx, mcpCfg.HTTPAddr)
 	}
 
 	return server.RunStdio(ctx)
