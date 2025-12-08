@@ -17,23 +17,23 @@ type EmptyInput struct{}
 
 // PaginationInput is used for tools that support pagination.
 type PaginationInput struct {
-	Limit  int `json:"limit,omitempty" jsonschema:"description=Maximum number of results to return (default: 50)"`
-	Offset int `json:"offset,omitempty" jsonschema:"description=Number of results to skip for pagination (default: 0)"`
+	Limit  int `json:"limit,omitempty"`
+	Offset int `json:"offset,omitempty"`
 }
 
 // ReportIDInput is used for tools that require a report ID.
 type ReportIDInput struct {
-	ID int64 `json:"id" jsonschema:"description=The database ID of the report to retrieve,required"`
+	ID int64 `json:"id"`
 }
 
 // LimitInput is used for tools that only need a limit parameter.
 type LimitInput struct {
-	Limit int `json:"limit,omitempty" jsonschema:"description=Maximum number of results to return (default: 10)"`
+	Limit int `json:"limit,omitempty"`
 }
 
 // ParseReportInput is used for parsing raw DMARC reports.
 type ParseReportInput struct {
-	ReportData string `json:"report_data" jsonschema:"description=Base64 encoded DMARC report data (gzip/zip/XML),required"`
+	ReportData string `json:"report_data"`
 }
 
 // Tool output types
