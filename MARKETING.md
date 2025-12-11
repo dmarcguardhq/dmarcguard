@@ -93,7 +93,7 @@ Getting featured in newsletters = high-quality traffic. Reach out to editors.
 | **DevOps Weekly** | DevOps tools | [devopsweekly.com](https://www.devopsweekly.com) | Email Gareth Rushgrove |
 | **Console.dev** | Dev tools | [console.dev](https://console.dev) | Submit via "Beta" section |
 | **Changelog Nightly** | Trending repos | [changelog.com](https://changelog.com) | Automatic (tracks GitHub trending) |
-| **SRE Weekly** | Site reliability | Subscribe & engage | Email editor with tool announcement |
+| **SRE Weekly** | Site reliability | [sreweekly.com](https://sreweekly.com) | Email editor with tool announcement |
 | **selfh.st** | Self-hosted | [selfh.st](https://selfh.st) | Contact for "This Week in Self-Hosted" |
 | **tl;dr sec** | Security | [tldrsec.com](https://tldrsec.com) | Email Clint Gibler |
 | **TLDR InfoSec** | Security news | [tldr.tech/infosec](https://tldr.tech/infosec) | Submit via TLDR |
