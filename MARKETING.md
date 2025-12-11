@@ -331,7 +331,7 @@ Submit PRs to relevant curated lists.
 ## Resources
 
 ### Directory Aggregators
-- [awesome-saas-directories](https://github.com/mahseema/awesome-saas-directories) - 100+ directories
+- [awesome-saas-directories](https://github.com/mahseema/awesome-saas-directories) - 100+ SaaS directories (some may accept open source/self-hosted tools; review for applicability)
 - [Launchpedia](https://launchpedia.co) - Product Hunt alternatives list
 - [Directory list by LinkDR](https://linkdr.com/blog/directories) - 99+ directories
 
