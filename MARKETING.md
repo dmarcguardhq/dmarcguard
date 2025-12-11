@@ -97,7 +97,7 @@ Getting featured in newsletters = high-quality traffic. Reach out to editors.
 | **selfh.st** | Self-hosted | [selfh.st](https://selfh.st) | Contact for "This Week in Self-Hosted" |
 | **tl;dr sec** | Security | [tldrsec.com](https://tldrsec.com) | Email Clint Gibler |
 | **TLDR InfoSec** | Security news | [tldr.tech/infosec](https://tldr.tech/infosec) | Submit via TLDR |
-| **This Week in Security** | Cybersecurity | [this.weekinsecurity.com](https://this.weekinsecurity.com) | Email Zack Whittaker |
+| **This Week in Security** | Cybersecurity | [thisweekin.security](https://thisweekin.security) | Email Zack Whittaker |
 
 ### Newsletter Pitch Template
 ```
