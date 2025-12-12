@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.3.0](https://github.com/meysam81/parse-dmarc/compare/v1.2.2...v1.3.0) (2025-12-12)
+
+
+### Features
+
+* add MCP server integration to project ([#46](https://github.com/meysam81/parse-dmarc/issues/46)) ([807b8d6](https://github.com/meysam81/parse-dmarc/commit/807b8d677c81aef6ac39605bffb7125680841d4a))
+* **CI:** add man page and shell completion to brew ([0e45ed2](https://github.com/meysam81/parse-dmarc/commit/0e45ed2a10d26a06fadc6a2fdfe3b81ad5a01197))
+* **CI:** add prettier job ([39af52d](https://github.com/meysam81/parse-dmarc/commit/39af52d186fcf75dba2f8ac05ef313808f1e01b4))
+* **CI:** install pandoc and use official goreleaser action ([0d0a307](https://github.com/meysam81/parse-dmarc/commit/0d0a3077395a9879a9d036166b4afbab43ee164e))
+* **mcp:** add OAuth2 authentication for MCP HTTP server ([361f078](https://github.com/meysam81/parse-dmarc/commit/361f0782e2f20b7160873a085e600adc68988432))
+
 ## [1.2.2](https://github.com/meysam81/parse-dmarc/compare/v1.2.1...v1.2.2) (2025-12-05)
 
 
