@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.8](https://github.com/meysam81/parse-dmarc/compare/v1.3.7...v1.3.8) (2025-12-13)
+
+
+### Bug Fixes
+
+* **CI:** set up buildx action for multi platform build ([a36e41c](https://github.com/meysam81/parse-dmarc/commit/a36e41c02e6af54297275042e269c66b85545a78))
+
 ## [1.3.7](https://github.com/meysam81/parse-dmarc/compare/v1.3.6...v1.3.7) (2025-12-13)
 
 
