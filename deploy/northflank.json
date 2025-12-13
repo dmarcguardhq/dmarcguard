@@ -10,10 +10,7 @@
       },
       "deployment": {
         "buildConfiguration": {
-          "pathIgnoreRules": [
-            "**/node_modules",
-            "**/.git"
-          ]
+          "pathIgnoreRules": ["**/node_modules", "**/.git"]
         },
         "docker": {
           "configType": "default",

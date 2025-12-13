@@ -2,7 +2,7 @@
 # https://coolify.io/docs
 # Deploy using Docker Compose or Dockerfile
 
-version: '3.8'
+version: "3.8"
 
 services:
   parse-dmarc:
@@ -25,7 +25,14 @@ services:
       - parse-dmarc-data:/data
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/statistics"]
+      test:
+        [
+          "CMD",
+          "wget",
+          "-q",
+          "--spider",
+          "http://localhost:8080/api/statistics",
+        ]
       interval: 30s
       timeout: 5s
       retries: 3

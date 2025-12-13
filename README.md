@@ -19,31 +19,31 @@ Deploy Parse DMARC to your favorite cloud provider with one click:
 
 ### Platform as a Service (PaaS)
 
-| Provider | Deploy | Notes |
-|----------|--------|-------|
-| **Railway** | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/parse-dmarc?referralCode=meysam81) | Recommended for beginners |
-| **Render** | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/meysam81/parse-dmarc) | Free tier available |
-| **Heroku** | [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/meysam81/parse-dmarc) | Classic PaaS |
-| **DigitalOcean** | [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/meysam81/parse-dmarc/tree/main) | App Platform |
-| **Koyeb** | [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?name=parse-dmarc&type=docker&image=ghcr.io/meysam81/parse-dmarc:latest&ports=8080;http;/) | Global edge deployment |
-| **Zeabur** | [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/parse-dmarc) | Asia-Pacific optimized |
-| **Northflank** | [![Deploy to Northflank](https://northflank.com/button.svg)](https://app.northflank.com/s/account/templates/new?externalTemplateId=parse-dmarc) | Developer-focused |
-| **Fly.io** | [![Deploy to Fly.io](https://img.shields.io/badge/Deploy-Fly.io-7B3FE4?style=for-the-badge&logo=fly.io)](https://fly.io/launch?image=ghcr.io/meysam81/parse-dmarc:latest) | Edge computing |
+| Provider         | Deploy                                                                                                                                                                                             | Notes                     |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
+| **Railway**      | [![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/parse-dmarc?referralCode=meysam81)                                                                             | Recommended for beginners |
+| **Render**       | [![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/meysam81/parse-dmarc)                                               | Free tier available       |
+| **Heroku**       | [![Deploy to Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/meysam81/parse-dmarc)                                                     | Classic PaaS              |
+| **DigitalOcean** | [![Deploy to DO](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/meysam81/parse-dmarc/tree/main)                                      | App Platform              |
+| **Koyeb**        | [![Deploy to Koyeb](https://www.koyeb.com/static/images/deploy/button.svg)](https://app.koyeb.com/deploy?name=parse-dmarc&type=docker&image=ghcr.io/meysam81/parse-dmarc:latest&ports=8080;http;/) | Global edge deployment    |
+| **Zeabur**       | [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/parse-dmarc)                                                                                                     | Asia-Pacific optimized    |
+| **Northflank**   | [![Deploy to Northflank](https://northflank.com/button.svg)](https://app.northflank.com/s/account/templates/new?externalTemplateId=parse-dmarc)                                                    | Developer-focused         |
+| **Fly.io**       | [![Deploy to Fly.io](https://img.shields.io/badge/Deploy-Fly.io-7B3FE4?style=for-the-badge&logo=fly.io)](https://fly.io/launch?image=ghcr.io/meysam81/parse-dmarc:latest)                          | Edge computing            |
 
 ### Enterprise Cloud
 
-| Provider | Deploy | Notes |
-|----------|--------|-------|
-| **Google Cloud Run** | [![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run?git_repo=https://github.com/meysam81/parse-dmarc) | Serverless containers |
-| **Azure Container Apps** | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmeysam81%2Fparse-dmarc%2Fmain%2Fdeploy%2Fazure-container-apps.bicep) | Microsoft Azure |
+| Provider                 | Deploy                                                                                                                                                                                                                          | Notes                 |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------- |
+| **Google Cloud Run**     | [![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run?git_repo=https://github.com/meysam81/parse-dmarc)                                                                                        | Serverless containers |
+| **Azure Container Apps** | [![Deploy to Azure](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmeysam81%2Fparse-dmarc%2Fmain%2Fdeploy%2Fazure-container-apps.bicep) | Microsoft Azure       |
 
 ### Self-Hosted
 
-| Provider | Deploy | Notes |
-|----------|--------|-------|
-| **CapRover** | [![Deploy to CapRover](https://img.shields.io/badge/Deploy-CapRover-0072CE?style=for-the-badge&logo=docker)](https://github.com/meysam81/parse-dmarc) | Self-hosted PaaS |
-| **Coolify** | [![Deploy to Coolify](https://img.shields.io/badge/Deploy-Coolify-6B46C1?style=for-the-badge&logo=docker)](https://github.com/meysam81/parse-dmarc) | Open-source Heroku alternative |
-| **Docker** | [![Docker](https://img.shields.io/badge/Docker-Pull%20Image-2496ED?style=for-the-badge&logo=docker)](https://github.com/meysam81/parse-dmarc/pkgs/container/parse-dmarc) | Run anywhere |
+| Provider     | Deploy                                                                                                                                                                   | Notes                          |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------ |
+| **CapRover** | [![Deploy to CapRover](https://img.shields.io/badge/Deploy-CapRover-0072CE?style=for-the-badge&logo=docker)](https://github.com/meysam81/parse-dmarc)                    | Self-hosted PaaS               |
+| **Coolify**  | [![Deploy to Coolify](https://img.shields.io/badge/Deploy-Coolify-6B46C1?style=for-the-badge&logo=docker)](https://github.com/meysam81/parse-dmarc)                      | Open-source Heroku alternative |
+| **Docker**   | [![Docker](https://img.shields.io/badge/Docker-Pull%20Image-2496ED?style=for-the-badge&logo=docker)](https://github.com/meysam81/parse-dmarc/pkgs/container/parse-dmarc) | Run anywhere                   |
 
 > **Note**: All deployments require IMAP credentials. See [Configuration](#configuration-options) for details on setting up Gmail, Outlook, or other email providers.
 

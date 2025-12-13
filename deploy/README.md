@@ -8,20 +8,20 @@ Use the deploy buttons in the main [README.md](../README.md) for one-click deplo
 
 ## Templates
 
-| Provider | Template | Documentation |
-|----------|----------|---------------|
-| Railway | [railway.json](./railway.json) | [Railway Docs](https://docs.railway.app/) |
-| Render | [render.yaml](./render.yaml) | [Render Docs](https://render.com/docs) |
-| Fly.io | [fly.toml](./fly.toml) | [Fly.io Docs](https://fly.io/docs/) |
-| Heroku | [app.json](./app.json), [heroku.yml](./heroku.yml) | [Heroku Docs](https://devcenter.heroku.com/) |
-| DigitalOcean | [digitalocean-app.yaml](./digitalocean-app.yaml) | [DO App Platform Docs](https://docs.digitalocean.com/products/app-platform/) |
-| Koyeb | [koyeb.yaml](./koyeb.yaml) | [Koyeb Docs](https://www.koyeb.com/docs) |
-| Zeabur | [zeabur.json](./zeabur.json) | [Zeabur Docs](https://zeabur.com/docs) |
-| Google Cloud Run | [cloudbuild.yaml](./cloudbuild.yaml) | [Cloud Run Docs](https://cloud.google.com/run/docs) |
-| Azure Container Apps | [azure-container-apps.bicep](./azure-container-apps.bicep) | [Azure Docs](https://learn.microsoft.com/en-us/azure/container-apps/) |
-| Northflank | [northflank.json](./northflank.json) | [Northflank Docs](https://northflank.com/docs) |
-| CapRover | [captain-definition](./captain-definition) | [CapRover Docs](https://caprover.com/docs/) |
-| Coolify | [coolify.yaml](./coolify.yaml) | [Coolify Docs](https://coolify.io/docs) |
+| Provider             | Template                                                   | Documentation                                                                |
+| -------------------- | ---------------------------------------------------------- | ---------------------------------------------------------------------------- |
+| Railway              | [railway.json](./railway.json)                             | [Railway Docs](https://docs.railway.app/)                                    |
+| Render               | [render.yaml](./render.yaml)                               | [Render Docs](https://render.com/docs)                                       |
+| Fly.io               | [fly.toml](./fly.toml)                                     | [Fly.io Docs](https://fly.io/docs/)                                          |
+| Heroku               | [app.json](./app.json), [heroku.yml](./heroku.yml)         | [Heroku Docs](https://devcenter.heroku.com/)                                 |
+| DigitalOcean         | [digitalocean-app.yaml](./digitalocean-app.yaml)           | [DO App Platform Docs](https://docs.digitalocean.com/products/app-platform/) |
+| Koyeb                | [koyeb.yaml](./koyeb.yaml)                                 | [Koyeb Docs](https://www.koyeb.com/docs)                                     |
+| Zeabur               | [zeabur.json](./zeabur.json)                               | [Zeabur Docs](https://zeabur.com/docs)                                       |
+| Google Cloud Run     | [cloudbuild.yaml](./cloudbuild.yaml)                       | [Cloud Run Docs](https://cloud.google.com/run/docs)                          |
+| Azure Container Apps | [azure-container-apps.bicep](./azure-container-apps.bicep) | [Azure Docs](https://learn.microsoft.com/en-us/azure/container-apps/)        |
+| Northflank           | [northflank.json](./northflank.json)                       | [Northflank Docs](https://northflank.com/docs)                               |
+| CapRover             | [captain-definition](./captain-definition)                 | [CapRover Docs](https://caprover.com/docs/)                                  |
+| Coolify              | [coolify.yaml](./coolify.yaml)                             | [Coolify Docs](https://coolify.io/docs)                                      |
 
 ## Environment Variables
 
@@ -29,22 +29,22 @@ All deployments require the following environment variables:
 
 ### Required
 
-| Variable | Description | Example |
-|----------|-------------|---------|
-| `PARSE_DMARC_IMAP_HOST` | IMAP server hostname | `imap.gmail.com` |
-| `PARSE_DMARC_IMAP_USERNAME` | IMAP username/email | `dmarc@yourdomain.com` |
-| `PARSE_DMARC_IMAP_PASSWORD` | IMAP password or app password | `your-app-password` |
+| Variable                    | Description                   | Example                |
+| --------------------------- | ----------------------------- | ---------------------- |
+| `PARSE_DMARC_IMAP_HOST`     | IMAP server hostname          | `imap.gmail.com`       |
+| `PARSE_DMARC_IMAP_USERNAME` | IMAP username/email           | `dmarc@yourdomain.com` |
+| `PARSE_DMARC_IMAP_PASSWORD` | IMAP password or app password | `your-app-password`    |
 
 ### Optional (with defaults)
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `PARSE_DMARC_IMAP_PORT` | IMAP server port | `993` |
-| `PARSE_DMARC_IMAP_MAILBOX` | IMAP mailbox | `INBOX` |
-| `PARSE_DMARC_IMAP_USE_TLS` | Use TLS for IMAP | `true` |
+| Variable                    | Description          | Default           |
+| --------------------------- | -------------------- | ----------------- |
+| `PARSE_DMARC_IMAP_PORT`     | IMAP server port     | `993`             |
+| `PARSE_DMARC_IMAP_MAILBOX`  | IMAP mailbox         | `INBOX`           |
+| `PARSE_DMARC_IMAP_USE_TLS`  | Use TLS for IMAP     | `true`            |
 | `PARSE_DMARC_DATABASE_PATH` | SQLite database path | `/data/db.sqlite` |
-| `PARSE_DMARC_SERVER_PORT` | HTTP server port | `8080` |
-| `PARSE_DMARC_SERVER_HOST` | HTTP server host | `0.0.0.0` |
+| `PARSE_DMARC_SERVER_PORT`   | HTTP server port     | `8080`            |
+| `PARSE_DMARC_SERVER_HOST`   | HTTP server host     | `0.0.0.0`         |
 
 ## Manual Deployment
 
