@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.7](https://github.com/meysam81/parse-dmarc/compare/v1.3.6...v1.3.7) (2025-12-13)
+
+
+### Bug Fixes
+
+* **CI:** remove annotations from docker build ([b5d0cd6](https://github.com/meysam81/parse-dmarc/commit/b5d0cd650ba0dd780ea95ec35c82940620aad6bb))
+
 ## [1.3.6](https://github.com/meysam81/parse-dmarc/compare/v1.3.5...v1.3.6) (2025-12-13)
 
 
