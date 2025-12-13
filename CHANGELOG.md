@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.5](https://github.com/meysam81/parse-dmarc/compare/v1.3.4...v1.3.5) (2025-12-13)
+
+
+### Bug Fixes
+
+* **CI:** disable attestation digest for docker build ([95d6665](https://github.com/meysam81/parse-dmarc/commit/95d666543f59b3a890ea8921275f840eebb32f8e))
+
 ## [1.3.4](https://github.com/meysam81/parse-dmarc/compare/v1.3.3...v1.3.4) (2025-12-13)
 
 
