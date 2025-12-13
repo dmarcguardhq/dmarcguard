@@ -1,5 +1,5 @@
+# $schema: https://render.com/schema/render.yaml.json
 ---
-$schema: https://render.com/schema/render.yaml.json
 services:
   - disk:
       mountPath: /data
