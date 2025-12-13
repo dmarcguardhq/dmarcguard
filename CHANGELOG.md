@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.3.9](https://github.com/meysam81/parse-dmarc/compare/v1.3.8...v1.3.9) (2025-12-13)
+
+
+### Bug Fixes
+
+* **CI:** perform keyless docker sign ([1f322d3](https://github.com/meysam81/parse-dmarc/commit/1f322d33999d3586880d82c5ce3570b60157cd21))
+* **CI:** update the digest name for attestation ([eb692a8](https://github.com/meysam81/parse-dmarc/commit/eb692a81fb08205990e639ab6c54c8998c705cd0))
+
 ## [1.3.8](https://github.com/meysam81/parse-dmarc/compare/v1.3.7...v1.3.8) (2025-12-13)
 
 
