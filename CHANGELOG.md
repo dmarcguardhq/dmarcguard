@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.3](https://github.com/meysam81/parse-dmarc/compare/v1.3.2...v1.3.3) (2025-12-13)
+
+
+### Bug Fixes
+
+* **CI:** add current dir to docker build context ([254cc6a](https://github.com/meysam81/parse-dmarc/commit/254cc6a6b0b88afc67af8a1cdc4a41d1b71ff1a6))
+
 ## [1.3.2](https://github.com/meysam81/parse-dmarc/compare/v1.3.1...v1.3.2) (2025-12-13)
 
 
