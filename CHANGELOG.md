@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.10](https://github.com/meysam81/parse-dmarc/compare/v1.3.9...v1.3.10) (2025-12-13)
+
+
+### Bug Fixes
+
+* **CI:** reverse the digest conditional for provenance ([9c0e165](https://github.com/meysam81/parse-dmarc/commit/9c0e165ec1cfeb58c7c535ec02bd0c81e60ba501))
+
 ## [1.3.9](https://github.com/meysam81/parse-dmarc/compare/v1.3.8...v1.3.9) (2025-12-13)
 
 
