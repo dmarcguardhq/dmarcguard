@@ -1,0 +1,54 @@
+---
+# DigitalOcean App Platform Specification
+# https://docs.digitalocean.com/products/app-platform/reference/app-spec/
+spec:
+  name: parse-dmarc
+  region: nyc
+  services:
+    - dockerfile_path: Dockerfile
+      envs:
+        - key: IMAP_HOST
+          scope: RUN_TIME
+          type: SECRET
+        - key: IMAP_PORT
+          scope: RUN_TIME
+          value: "993"
+        - key: IMAP_USERNAME
+          scope: RUN_TIME
+          type: SECRET
+        - key: IMAP_PASSWORD
+          scope: RUN_TIME
+          type: SECRET
+        - key: IMAP_MAILBOX
+          scope: RUN_TIME
+          value: INBOX
+        - key: IMAP_USE_TLS
+          scope: RUN_TIME
+          value: "true"
+        - key: DATABASE_PATH
+          scope: RUN_TIME
+          value: /data/db.sqlite
+        - key: SERVER_PORT
+          scope: RUN_TIME
+          value: "8080"
+        - key: SERVER_HOST
+          scope: RUN_TIME
+          value: 0.0.0.0
+      health_check:
+        failure_threshold: 3
+        http_path: /api/statistics
+        initial_delay_seconds: 10
+        period_seconds: 30
+        success_threshold: 1
+        timeout_seconds: 5
+      http_port: 8080
+      image:
+        deploy_on_push:
+          enabled: false
+        registry: docker.io
+        registry_type: DOCKER_HUB
+        repository: meysam81/parse-dmarc
+        tag: latest
+      instance_count: 1
+      instance_size_slug: apps-s-1vcpu-0.5gb
+      name: web
