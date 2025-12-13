@@ -30,15 +30,9 @@ services:
       - key: FETCH_INTERVAL
         value: 300
     healthCheckPath: /api/statistics
-    maxShutdownDelaySeconds: 60
     name: parse-dmarc
     plan: starter
     preDeployCommand: echo "Deploying Parse DMARC..."
     region: oregon
     runtime: docker
-    scaling:
-      maxInstances: 1
-      minInstances: 1
-      targetCPUPercent: 75
-      targetMemoryPercent: 70
     type: web
