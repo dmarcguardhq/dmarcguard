@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.2](https://github.com/meysam81/parse-dmarc/compare/v1.3.1...v1.3.2) (2025-12-13)
+
+
+### Features
+
+* **CI:** build docker via goreleaser ([8555265](https://github.com/meysam81/parse-dmarc/commit/855526505aa48c9ab1cdc946f10370a875ee47d8))
+
 ## [1.3.1](https://github.com/meysam81/parse-dmarc/compare/v1.3.0...v1.3.1) (2025-12-13)
 
 
