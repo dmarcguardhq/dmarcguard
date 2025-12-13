@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.6](https://github.com/meysam81/parse-dmarc/compare/v1.3.5...v1.3.6) (2025-12-13)
+
+
+### Bug Fixes
+
+* **CI:** disable sbom via config ([6b0f3be](https://github.com/meysam81/parse-dmarc/commit/6b0f3be7d79cafe1eeb0930d2f30bf02f53c56af))
+
 ## [1.3.5](https://github.com/meysam81/parse-dmarc/compare/v1.3.4...v1.3.5) (2025-12-13)
 
 
