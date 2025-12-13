@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.4](https://github.com/meysam81/parse-dmarc/compare/v1.3.3...v1.3.4) (2025-12-13)
+
+
+### Bug Fixes
+
+* **CI:** disable sbom on docker ([36e5cc4](https://github.com/meysam81/parse-dmarc/commit/36e5cc4d829efa633fc75879e0a132d076866318))
+
 ## [1.3.3](https://github.com/meysam81/parse-dmarc/compare/v1.3.2...v1.3.3) (2025-12-13)
 
 
