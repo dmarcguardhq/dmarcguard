@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.1](https://github.com/meysam81/parse-dmarc/compare/v1.3.0...v1.3.1) (2025-12-13)
+
+
+### Bug Fixes
+
+* **CI:** publish to casks for a change ([0e8346b](https://github.com/meysam81/parse-dmarc/commit/0e8346b3e1c3dcc557445370f59ea7c93588c1fd))
+
 ## [1.3.0](https://github.com/meysam81/parse-dmarc/compare/v1.2.2...v1.3.0) (2025-12-12)
 
 
