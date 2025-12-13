@@ -1,0 +1,44 @@
+---
+$schema: https://render.com/schema/render.yaml.json
+services:
+  - disk:
+      mountPath: /data
+      name: parse-dmarc-data
+      sizeGB: 1
+    dockerfilePath: ./Dockerfile
+    envVars:
+      - key: PARSE_DMARC_CONFIG
+        value: /app/config.json
+      - key: PARSE_DMARC_METRICS
+        value: "true"
+      - key: IMAP_HOST
+        sync: false
+      - key: IMAP_PORT
+        value: 993
+      - key: IMAP_USERNAME
+        sync: false
+      - key: IMAP_PASSWORD
+        sync: false
+      - key: IMAP_MAILBOX
+        value: INBOX
+      - key: IMAP_USE_TLS
+        value: "true"
+      - key: SERVER_HOST
+        value: 0.0.0.0
+      - key: SERVER_PORT
+        value: 8080
+      - key: FETCH_INTERVAL
+        value: 300
+    healthCheckPath: /api/statistics
+    maxShutdownDelaySeconds: 60
+    name: parse-dmarc
+    plan: starter
+    preDeployCommand: echo "Deploying Parse DMARC..."
+    region: oregon
+    runtime: docker
+    scaling:
+      maxInstances: 1
+      minInstances: 1
+      targetCPUPercent: 75
+      targetMemoryPercent: 70
+    type: web
