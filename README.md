@@ -7,7 +7,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/meysam81/parse-dmarc?style=flat-square)](https://goreportcard.com/report/github.com/meysam81/parse-dmarc)
 [![Made with Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg?style=flat-square&logo=go)](https://go.dev)
 [![Made with Vue.js](https://img.shields.io/badge/Made%20with-Vue.js-4FC08D.svg?style=flat-square&logo=vue.js)](https://vuejs.org)
-[![GHCR](https://img.shields.io/badge/GHCR-ghcr.io%2Fmeysam81%2Fparse--dmarc-blue?style=flat-square&logo=github)](https://github.com/meysam81/parse-dmarc/pkgs/container/parse-dmarc)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-meysam81%2Fparse--dmarc-blue?style=flat-square&logo=docker)](https://hub.docker.com/r/meysam81/parse-dmarc)
+[![Docker Pulls](https://img.shields.io/docker/pulls/meysam81/parse-dmarc?style=flat-square&logo=docker)](https://hub.docker.com/r/meysam81/parse-dmarc)
+[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/meysam81/parse-dmarc/v1)](https://hub.docker.com/r/meysam81/parse-dmarc)
 
 **Monitor who's sending email on behalf of your domain. Catch spoofing. Stop phishing.**
 
@@ -91,7 +93,7 @@ brew install parse-dmarc
 ### Docker
 
 ```bash
-docker pull ghcr.io/meysam81/parse-dmarc:latest
+docker pull meysam81/parse-dmarc:v1
 ```
 
 ### Binary Downloads
@@ -164,7 +166,7 @@ docker run -d \
   -p 8080:8080 \
   -v $(pwd)/config.json:/app/config.json \
   -v parse-dmarc-data:/data \
-  ghcr.io/meysam81/parse-dmarc:v1.2.0
+  meysam81/parse-dmarc:v1
 ```
 
 **Access the dashboard:** Open `http://localhost:8080` in your browser.
@@ -372,7 +374,7 @@ To disable the metrics endpoint:
 export PARSE_DMARC_METRICS=false
 
 # Docker
-docker run -e PARSE_DMARC_METRICS=false ghcr.io/meysam81/parse-dmarc:latest
+docker run -e PARSE_DMARC_METRICS=false meysam81/parse-dmarc:v1
 ```
 
 ### Prometheus Configuration
@@ -561,7 +563,7 @@ version: "3.8"
 
 services:
   parse-dmarc:
-    image: ghcr.io/meysam81/parse-dmarc:latest
+    image: meysam81/parse-dmarc:v1
     ports:
       - "8080:8080"
     volumes:
