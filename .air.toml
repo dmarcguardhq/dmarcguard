@@ -3,9 +3,9 @@ testdata_dir = "testdata"
 tmp_dir = "tmp"
 
 [build]
-  args_bin = []
-  bin = "./tmp/main"
-  cmd = "go run ./cmd/parse-dmarc -config=config.json"
+  args_bin = [
+    "-config=config.json",
+  ]
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "frontend", ".git*", "bin"]
   exclude_file = []

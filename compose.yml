@@ -2,13 +2,14 @@
 services:
   parse-dmarc:
     build: .
-    image: ghcr.io/meysam81/parse-dmarc:latest
+    image: ${IMAGE_NAME:-ghcr.io/meysam81/parse-dmarc}
+    environment:
+      DATABASE_PATH: /data/parse-dmarc.db
     ports:
       - "8080:8080"
-    user: "1000:1000"
     volumes:
       - ./config.json:/app/config.json
-      - parse-dmarc-data:/data
+      - parse-dmarc:/data
 
 volumes:
-  parse-dmarc-data:
+  parse-dmarc:

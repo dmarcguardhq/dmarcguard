@@ -1,0 +1,214 @@
+# yaml-language-server: $schema=https://goreleaser.com/static/schema.json
+# vim: set ts=2 sw=2 tw=0 fo=cnqoj
+
+version: 2
+
+env:
+  - GITHUB_TOKEN
+  - HOMEBREW_TAP_GITHUB_TOKEN
+  - COSIGN_EXPERIMENTAL=true
+
+before:
+  hooks:
+    - go mod download
+    - go mod verify
+    - bun install --frozen-lockfile
+    - bun run build
+    - rm -rf internal/api/dist
+    - mv dist internal/api/
+
+builds:
+  - binary: parse-dmarc
+    env:
+      - CGO_ENABLED=0
+    flags:
+      - "-trimpath"
+    goarch:
+      - amd64
+      - arm64
+      - arm
+    goarm:
+      - "6"
+      - "7"
+    goos:
+      - linux
+      - windows
+      - darwin
+    ignore:
+      - goarch: arm
+        goos: windows
+      - goarch: arm64
+        goos: windows
+    ldflags:
+      - "-s"
+      - "-w"
+      - "-extldflags '-static'"
+      - "-X main.version={{.Version}}"
+      - "-X main.commit={{.Commit}}"
+      - "-X main.date={{.Date}}"
+      - "-X main.builtBy=goreleaser"
+    main: .
+
+archives:
+  - format_overrides:
+      - formats:
+          - zip
+        goos: windows
+    formats:
+      - tar.gz
+    id: default
+    name_template: >-
+      {{ .ProjectName }}_
+      {{- tolower .Os }}_
+      {{- if eq .Arch "386" }}i386
+      {{- else }}{{ .Arch }}{{ end }}
+      {{- if .Arm }}v{{ .Arm }}{{ end }}
+
+changelog:
+  filters:
+    exclude:
+      - "^docs:"
+      - "^test:"
+      - "^ci:"
+      - "^chore:"
+      - merge conflict
+      - Merge pull request
+      - Merge remote-tracking branch
+      - Merge branch
+  groups:
+    - order: 0
+      regexp: ^.*?feat(\([[:word:]]+\))??!?:.+$
+      title: Features
+    - order: 1
+      regexp: ^.*?fix(\([[:word:]]+\))??!?:.+$
+      title: Bug fixes
+    - order: 2
+      regexp: ^.*?perf(\([[:word:]]+\))??!?:.+$
+      title: Performance improvements
+    - order: 999
+      title: Others
+  sort: asc
+  use: github
+
+dist: .goreleaser-dist
+
+release:
+  draft: false
+  prerelease: auto
+  header: |
+    ## What's Changed
+
+    This release includes the following changes:
+  footer: |
+    ## Docker Images
+
+    ```bash
+    docker pull ghcr.io/meysam81/{{ .ProjectName }}:{{ .Version }}
+    ```
+
+    **Full Changelog**: https://github.com/meysam81/{{ .ProjectName }}/compare/{{ .PreviousTag }}...{{ .Tag }}
+
+binary_signs:
+  - args:
+      - sign-blob
+      - "--output-signature=${signature}"
+      - "--output-certificate=${certificate}"
+      - ${artifact}
+      - "--yes"
+    certificate: ${artifact}_{{- tolower .Os }}_{{- if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}{{- if .Arm }}v{{ .Arm }}{{ end }}.pem
+    cmd: cosign
+    output: true
+    signature: ${artifact}_{{- tolower .Os }}_{{- if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}{{- if .Arm }}v{{ .Arm }}{{ end }}.sig
+
+dockers_v2:
+  - images:
+      - meysam81/{{ .ProjectName }}
+      - ghcr.io/meysam81/{{ .ProjectName }}
+    tags:
+      - "v{{ .Version }}"
+      - "v{{ .Major }}"
+      - "v{{ .Major }}.{{ .Minor }}"
+      - "v{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "{{ if .IsNightly }}latest{{ end }}"
+    extra_files:
+      - ./
+    labels:
+      "org.opencontainers.image.created": "{{.Date}}"
+      "org.opencontainers.image.description": "🛡️ A lightweight, self-hosted DMARC report parser with a beautiful Vue.js dashboard. Single-binary deployment with IMAP integration, SQLite storage, and RFC 7489 compliance. Built with Go and Vue 3 - no external dependencies required."
+      "org.opencontainers.image.name": "{{.ProjectName}}"
+      "org.opencontainers.image.revision": "{{.FullCommit}}"
+      "org.opencontainers.image.source": "{{.GitURL}}"
+      "org.opencontainers.image.version": "{{.Version}}"
+    platforms:
+      - linux/amd64
+      - linux/arm64
+    disable: "{{ .IsSnapshot }}"
+    sbom: "{{ not .Env.DISABLE_SBOM }}"
+    build_args:
+      VERSION: "{{.Version}}"
+      COMMIT: "{{.FullCommit}}"
+      DATE: "{{.Date}}"
+      BUILT_BY: goreleaser
+
+docker_signs:
+  - id: default
+    args:
+      - "sign"
+      - "--yes"
+      - "${artifact}"
+    cmd: cosign
+    output: true
+
+docker_digest:
+  name_template: "digest.txt"
+  disable: "{{ .Env.NO_DIGEST }}"
+
+report_sizes: true
+
+sboms:
+  - artifacts: archive
+    documents:
+      - ${artifact}_{{- tolower .Os }}_{{- if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}{{- if .Arm }}v{{ .Arm }}{{ end }}_sbom.spdx.json
+    id: archive
+  - artifacts: source
+    documents:
+      - ${artifact}_{{- tolower .Os }}_{{- if eq .Arch "386" }}i386{{- else }}{{ .Arch }}{{ end }}{{- if .Arm }}v{{ .Arm }}{{ end }}_src_sbom.spdx.json
+    id: source
+
+milestones:
+  - close: true
+    fail_on_error: false
+    name_template: "{{ .Tag }}"
+
+announce:
+  skip: "{{gt .Patch 0}}"
+
+checksum:
+  algorithm: sha256
+  name_template: checksums.txt
+
+homebrew_casks:
+  - commit_msg_template: Brew formula update for {{ .ProjectName }} version {{ .Tag }}
+    description: Single-binary, zero-dependency DMARC parser with a modern web dashboard.
+    homepage: https://github.com/meysam81/parse-dmarc
+    license: Apache-2.0
+    name: parse-dmarc
+    repository:
+      name: homebrew-tap
+      owner: meysam81
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    hooks:
+      post:
+        install: |
+          if OS.mac?
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/parse-dmarc"]
+          end
+          puts "✨ parse-dmarc installed successfully!"
+          puts ""
+          puts "📝 Tip: You can enable shell completion by running:"
+          puts "   parse-dmarc completion bash  # for bash"
+          puts "   parse-dmarc completion zsh   # for zsh"
+          puts "   parse-dmarc completion fish  # for fish"
+          puts ""
+          puts "📚 For more information and usage instructions, visit:"
+          puts "   https://github.com/meysam81/parse-dmarc"

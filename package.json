@@ -31,9 +31,9 @@
   },
   "scripts": {
     "build": "vite build",
-    "dev": "vite",
     "prebuild": "./scripts/convert-svg-to-png.js",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "start": "vite"
   },
   "type": "module",
   "version": "1.0.1"

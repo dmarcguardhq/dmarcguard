@@ -3,18 +3,22 @@ package main
 import (
 	"context"
 	"fmt"
-	"log"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
 	"github.com/meysam81/parse-dmarc/internal/api"
 	"github.com/meysam81/parse-dmarc/internal/config"
 	"github.com/meysam81/parse-dmarc/internal/imap"
+	"github.com/meysam81/parse-dmarc/internal/logger"
+	mcpserver "github.com/meysam81/parse-dmarc/internal/mcp"
+	"github.com/meysam81/parse-dmarc/internal/mcp/oauth"
 	"github.com/meysam81/parse-dmarc/internal/metrics"
 	"github.com/meysam81/parse-dmarc/internal/parser"
 	"github.com/meysam81/parse-dmarc/internal/storage"
+	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
 )
 
@@ -23,6 +27,10 @@ var (
 	commit  = "none"
 	date    = "unknown"
 	builtBy = "unknown"
+
+	log         *zerolog.Logger
+	logLevel    = "info"
+	coloredLogs = false
 )
 
 func main() {
@@ -32,6 +40,10 @@ func main() {
 		Version:               version,
 		EnableShellCompletion: true,
 		Suggest:               true,
+		Before: func(ctx context.Context, c *cli.Command) (context.Context, error) {
+			log = logger.NewLogger(logLevel, !coloredLogs)
+			return ctx, nil
+		},
 		Flags: []cli.Flag{
 			&cli.StringFlag{
 				Name:    "config",
@@ -67,6 +79,64 @@ func main() {
 				Value:   true,
 				Sources: cli.EnvVars("PARSE_DMARC_METRICS"),
 			},
+			&cli.BoolFlag{
+				Name:    "mcp",
+				Usage:   "Run as MCP (Model Context Protocol) server over stdio",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP"),
+			},
+			&cli.StringFlag{
+				Name:    "mcp-http",
+				Usage:   "Run MCP server over HTTP/SSE at the specified address (e.g., :8081)",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP_HTTP"),
+			},
+			// OAuth2 flags for MCP HTTP server
+			&cli.BoolFlag{
+				Name:    "mcp-oauth",
+				Usage:   "Enable OAuth2 authentication for MCP HTTP server",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH"),
+			},
+			&cli.StringFlag{
+				Name:    "mcp-oauth-issuer",
+				Usage:   "OAuth2/OIDC issuer URL (e.g., https://auth.example.com/realms/master)",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH_ISSUER"),
+			},
+			&cli.StringFlag{
+				Name:    "mcp-oauth-audience",
+				Usage:   "Expected audience claim in tokens (usually the MCP server URL)",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH_AUDIENCE"),
+			},
+			&cli.StringFlag{
+				Name:    "mcp-oauth-client-id",
+				Usage:   "OAuth2 client ID for token introspection",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH_CLIENT_ID"),
+			},
+			&cli.StringFlag{
+				Name:    "mcp-oauth-client-secret",
+				Usage:   "OAuth2 client secret for token introspection",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH_CLIENT_SECRET"),
+			},
+			&cli.StringFlag{
+				Name:    "mcp-oauth-scopes",
+				Usage:   "Required scopes (comma-separated, e.g., mcp:tools)",
+				Value:   "mcp:tools",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH_SCOPES"),
+			},
+			&cli.StringFlag{
+				Name:    "mcp-oauth-introspection-endpoint",
+				Usage:   "Token introspection endpoint URL (if set, uses introspection instead of JWT validation)",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH_INTROSPECTION_ENDPOINT"),
+			},
+			&cli.StringFlag{
+				Name:    "mcp-oauth-resource-name",
+				Usage:   "Human-readable name for the MCP server (for metadata)",
+				Value:   "Parse-DMARC MCP Server",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH_RESOURCE_NAME"),
+			},
+			&cli.BoolFlag{
+				Name:    "mcp-oauth-insecure",
+				Usage:   "Skip TLS certificate verification (development only)",
+				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH_INSECURE"),
+			},
 		},
 		Action: run,
 		Commands: []*cli.Command{
@@ -85,7 +155,7 @@ func main() {
 	}
 
 	if err := cmd.Run(context.Background(), os.Args); err != nil {
-		log.Fatal(err)
+		log.Fatal().Err(err).Msg("failed to run")
 	}
 }
 
@@ -96,6 +166,19 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	serveOnly := cmd.Bool("serve-only")
 	fetchInterval := cmd.Int("fetch-interval")
 	metricsEnabled := cmd.Bool("metrics")
+	mcpMode := cmd.Bool("mcp")
+	mcpHTTPAddr := cmd.String("mcp-http")
+
+	// OAuth configuration for MCP HTTP server
+	mcpOAuthEnabled := cmd.Bool("mcp-oauth")
+	mcpOAuthIssuer := cmd.String("mcp-oauth-issuer")
+	mcpOAuthAudience := cmd.String("mcp-oauth-audience")
+	mcpOAuthClientID := cmd.String("mcp-oauth-client-id")
+	mcpOAuthClientSecret := cmd.String("mcp-oauth-client-secret")
+	mcpOAuthScopes := cmd.String("mcp-oauth-scopes")
+	mcpOAuthIntrospection := cmd.String("mcp-oauth-introspection-endpoint")
+	mcpOAuthResourceName := cmd.String("mcp-oauth-resource-name")
+	mcpOAuthInsecure := cmd.Bool("mcp-oauth-insecure")
 
 	if genConfig {
 		if err := config.GenerateSample(configPath); err != nil {
@@ -115,6 +198,46 @@ func run(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed to initialize storage: %w", err)
 	}
 	defer func() { _ = store.Close() }()
+
+	// Handle MCP mode
+	if mcpMode || mcpHTTPAddr != "" {
+		// Build OAuth config if enabled
+		var oauthCfg *oauth.Config
+		if mcpOAuthEnabled {
+			// Parse scopes
+			var scopes []string
+			if mcpOAuthScopes != "" {
+				for _, s := range strings.Split(mcpOAuthScopes, ",") {
+					scopes = append(scopes, strings.TrimSpace(s))
+				}
+			}
+
+			// Determine resource server URL and audience from HTTP address
+			var resourceServerURL, audience string
+			if mcpOAuthAudience != "" {
+				resourceServerURL = mcpOAuthAudience
+				audience = mcpOAuthAudience
+			} else if mcpHTTPAddr != "" {
+				// Use localhost with the port if no audience specified
+				resourceServerURL = "http://localhost" + mcpHTTPAddr
+				audience = resourceServerURL
+			}
+
+			oauthCfg = &oauth.Config{
+				Enabled:               true,
+				Issuer:                mcpOAuthIssuer,
+				Audience:              audience,
+				ClientID:              mcpOAuthClientID,
+				ClientSecret:          mcpOAuthClientSecret,
+				RequiredScopes:        scopes,
+				IntrospectionEndpoint: mcpOAuthIntrospection,
+				ResourceServerURL:     resourceServerURL,
+				ResourceName:          mcpOAuthResourceName,
+				InsecureSkipVerify:    mcpOAuthInsecure,
+			}
+		}
+		return runMCPServer(ctx, store, mcpHTTPAddr, oauthCfg)
+	}
 
 	// Initialize metrics if enabled
 	var m *metrics.Metrics
@@ -279,4 +402,26 @@ func fetchReports(cfg *config.Config, store *storage.Storage, m *metrics.Metrics
 
 	log.Printf("Successfully processed %d reports", processed)
 	return nil
+}
+
+func runMCPServer(ctx context.Context, store *storage.Storage, httpAddr string, oauthCfg *oauth.Config) error {
+	ctx, stop := signal.NotifyContext(ctx, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
+	defer stop()
+
+	mcpCfg := &mcpserver.Config{
+		Version:  version,
+		HTTPAddr: httpAddr,
+		Logger:   log,
+		OAuth:    oauthCfg,
+	}
+
+	server := mcpserver.NewServer(store, mcpCfg)
+
+	// If HTTP address is specified, run HTTP server
+	// Otherwise, run over stdio
+	if httpAddr != "" {
+		return server.RunHTTP(ctx, mcpCfg.HTTPAddr, oauthCfg)
+	}
+
+	return server.RunStdio(ctx)
 }

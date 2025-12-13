@@ -96,6 +96,32 @@ jobs:
           cd deploy
           flyctl deploy --config fly.toml --remote-only || echo "Fly.io deployment skipped (no app configured)"
 
+  prettier:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+      - name: Setup bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+      - name: Run prettier
+        run: bunx prettier@v3 -w .
+      - name: Commit if changed
+        if: github.event_name == 'pull_request'
+        run: |
+          if [[ -n "$(git status --porcelain)" ]]; then
+            git config user.name "github-actions[bot]"
+            git config user.email "${{ github.actor_id }}+${{ github.actor }}@users.noreply.github.com"
+            git add .
+            git commit -m "chore: format code with prettier" -m 'skip ci'
+            git push origin "$(git branch --show-current)"
+          else
+            echo "No changes to commit"
+          fi
+
   checks:
     permissions:
       contents: read
@@ -107,7 +133,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v6
         with:
-          go-version: 1.25
+          go-version-file: ./go.mod
       - name: Create dist
         run: |
           mkdir -p internal/api/dist
@@ -115,38 +141,53 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
 
+  build-pr:
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+    steps:
+      - name: Build docker
+        uses: meysam81/build-docker@main
+        with:
+          build-args: |
+            VERSION=pr-${{ github.event.pull_request.number }}-${{ github.sha }}
+            COMMIT=${{ github.sha }}
+            DATE=${{ github.event.head_commit.timestamp }}
+            BUILT_BY=github-actions
+          cosign: true
+          image-name: ghcr.io/${{ github.repository }}
+          image-extra-tags: |
+            ghcr.io/${{ github.repository }}:${{ github.sha }}
+            ghcr.io/${{ github.repository }}:pr-${{ github.event.pull_request.number }}
+          kubescape: true
+
   build-dev:
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
     permissions:
       contents: write
       packages: write
       id-token: write
     steps:
-      - name: Checkout
-        uses: actions/checkout@v5
-      - name: Cache docker
-        uses: actions/cache@v4
-        id: cache
-        with:
-          path: |
-            /tmp/dockercache
-          key: docker-cache-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}
-          restore-keys: |
-            docker-cache-${{ runner.os }}-
       - name: Build docker
         uses: meysam81/build-docker@main
         with:
           build-args: |
-            VERSION=dev-${{ github.sha }}
+            VERSION=head-${{ github.sha }}
             COMMIT=${{ github.sha }}
             DATE=${{ github.event.head_commit.timestamp }}
             BUILT_BY=github-actions
-          cache-from: type=local,src=/tmp/dockercache
-          cache-to: type=local,dest=/tmp/dockercache
-          checkout: false
           cosign: true
+          dockerhub-username: ${{ vars.DOCKERHUB_USERNAME }}
+          dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
           image-name: ghcr.io/${{ github.repository }}
           image-extra-tags: |
+            ${{ github.repository }}:latest
+            ${{ github.repository }}:${{ github.run_id }}
+            ${{ github.repository }}:${{ github.sha }}
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.run_id }}
             ghcr.io/${{ github.repository }}:${{ github.sha }}
@@ -174,26 +215,18 @@ jobs:
     if: needs.release-please.outputs.releases_created == 'true'
     runs-on: ubuntu-latest
     permissions:
+      attestations: write
       contents: write
-      packages: write
-      issues: write
-      pull-requests: write
       id-token: write
+      issues: write
+      packages: write
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v5
         with:
           fetch-depth: 0
           ref: ${{ needs.release-please.outputs.tag_name }}
-      - name: Cache docker
-        uses: actions/cache@v4
-        id: cache
-        with:
-          path: |
-            /tmp/dockercache
-          key: docker-cache-${{ runner.os }}-${{ hashFiles('**/Dockerfile') }}
-          restore-keys: |
-            docker-cache-${{ runner.os }}-
       - name: Install syft
         uses: anchore/sbom-action/download-syft@v0
       - name: Setup Cosign CLI
@@ -202,29 +235,60 @@ jobs:
         uses: oven-sh/setup-bun@v2
         with:
           bun-version: latest
-      - name: Install goreleaser
-        run: |
-          echo 'deb [trusted=yes] https://repo.goreleaser.com/apt/ /' | sudo tee /etc/apt/sources.list.d/goreleaser.list
-          sudo apt update
-          sudo apt install -y goreleaser
-          goreleaser --version
-      - name: Build docker
-        uses: meysam81/build-docker@main
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          build-args: |
-            VERSION=${{ needs.release-please.outputs.tag_name }}
-            COMMIT=${{ github.sha }}
-            DATE=${{ github.event.head_commit.timestamp }}
-            BUILT_BY=github-actions
-          cache-from: type=local,src=/tmp/dockercache
-          cache-to: type=local,dest=/tmp/dockercache
-          checkout: false
-          cosign: true
-          image-name: ghcr.io/${{ github.repository }}
-          image-extra-tags: |
-            ghcr.io/${{ github.repository }}:${{ needs.release-please.outputs.tag_name }}
-          kubescape: true
-      - env:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ github.token }}
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Run GoReleaser
+        uses: goreleaser/goreleaser-action@v6
+        with:
+          distribution: goreleaser
+          version: "~> v2"
+          args: release --clean --release-notes CHANGELOG.md
+        env:
+          BUILDKIT_MULTI_PLATFORM: "${{ vars.BUILDKIT_MULTI_PLATFORM }}"
+          DISABLE_SBOM: "${{ vars.DISABLE_SBOM }}"
           GITHUB_TOKEN: ${{ github.token }}
-        name: Run goreleaser
-        run: goreleaser release --release-notes CHANGELOG.md --clean
+          HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
+          NO_DIGEST: ${{ vars.NO_DIGEST }}
+      - uses: actions/attest-build-provenance@v3
+        with:
+          subject-checksums: ./.goreleaser-dist/checksums.txt
+      - uses: actions/attest-build-provenance@v3
+        if: env.NO_DIGEST != 'false'
+        with:
+          subject-checksums: ./.goreleaser-dist/digest.txt
+
+  # deploy-grafana:
+  #   needs: [release-please, build-prod]
+  #   if: needs.release-please.outputs.releases_created == 'true'
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v5
+  #       with:
+  #         ref: ${{ needs.release-please.outputs.tag_name }}
+  #     - name: Validate dashboard JSON
+  #       run: |
+  #         python3 -c "import json; json.load(open('grafana/dashboard.json'))"
+  #         echo "Dashboard JSON is valid"
+  #     - name: Upload dashboard to Grafana.com
+  #       env:
+  #         GRAFANA_API_KEY: ${{ secrets.GRAFANA_API_KEY }}
+  #       run: |
+  #         curl -X POST \
+  #           -H "Authorization: Bearer $GRAFANA_API_KEY" \
+  #           -H "Content-Type: application/json" \
+  #           -d @grafana/dashboard.json \
+  #           "https://grafana.com/api/dashboards"

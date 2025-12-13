@@ -37,32 +37,7 @@
       content="Monitor who's sending email on behalf of your domain. Catch spoofing. Stop phishing."
     />
     <meta name="twitter:image" content="/og-image.png" />
-    <!-- Theme initialization script - prevents flash of wrong theme -->
-    <script>
-      (function() {
-        var theme;
-        try {
-          theme = localStorage.getItem('parse-dmarc-theme');
-        } catch (e) {
-          theme = null;
-        }
-        if (!theme) {
-          theme = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-        }
-        if (theme !== 'light' && theme !== 'dark') {
-          theme = 'light';
-        }
-        document.documentElement.setAttribute('data-theme', theme);
-      })();
-    </script>
     <style>
-      :root {
-        --body-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      }
-      [data-theme="dark"] {
-        --body-gradient: linear-gradient(135deg, #1e1e2e 0%, #2d1f3d 100%);
-      }
-
       * {
         margin: 0;
         padding: 0;
@@ -73,9 +48,8 @@
         font-family:
           -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
           "Helvetica Neue", Arial, sans-serif;
-        background: var(--body-gradient);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         min-height: 100vh;
-        transition: background 0.2s ease;
       }
     </style>
   </head>

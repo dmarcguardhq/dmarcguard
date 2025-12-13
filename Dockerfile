@@ -1,4 +1,4 @@
-# Build stage
+# syntax=docker/dockerfile:1
 FROM oven/bun:1 AS frontend-builder
 
 WORKDIR /build/frontend
@@ -8,9 +8,7 @@ RUN --mount=type=bind,source=package.json,target=package.json \
     --mount=type=cache,target=/root/.bun/install/cache \
     bun install --frozen-lockfile
 
-COPY bun.lock index.html package*.json vite.config.js ./
-COPY ./src ./src
-COPY ./scripts ./scripts
+COPY . .
 RUN bun run build
 
 FROM golang:1.25 AS mod
@@ -37,7 +35,7 @@ COPY . .
 COPY --from=frontend-builder /build/frontend/dist ./internal/api/dist
 
 RUN --mount=type=cache,target=/go/pkg/mod \
-    go build -ldflags="-s -w -extldflags '-static' -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE} -X main.builtBy=${BUILT_BY}" -trimpath -o parse-dmarc ./cmd/parse-dmarc
+    go build -ldflags="-s -w -extldflags '-static' -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE} -X main.builtBy=${BUILT_BY}" -trimpath -o parse-dmarc .
 
 FROM scratch AS final
 

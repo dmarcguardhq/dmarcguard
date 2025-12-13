@@ -16,11 +16,11 @@ frontend:
 
 backend: frontend
     @echo "Building Go binary (pure Go, no CGO)..."
-    CGO_ENABLED=0 go build -o bin/parse-dmarc ./cmd/parse-dmarc
+    CGO_ENABLED=0 go build -o bin/parse-dmarc .
 
 backend-cgo: frontend
     @echo "Building Go binary (with CGO)..."
-    CGO_ENABLED=1 go build -tags cgo -o bin/parse-dmarc ./cmd/parse-dmarc
+    CGO_ENABLED=1 go build -tags cgo -o bin/parse-dmarc .
 
 build: frontend backend
     @echo "Build complete! Binary available at ./bin/parse-dmarc"
@@ -33,7 +33,7 @@ dev:
     air
 
 config:
-    go run ./cmd/parse-dmarc -gen-config
+    go run . -gen-config
 
 clean:
     @echo "Cleaning build artifacts..."
