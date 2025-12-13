@@ -5,8 +5,7 @@ spec:
   name: parse-dmarc
   region: nyc
   services:
-    - dockerfile_path: Dockerfile
-      envs:
+    - envs:
         - key: IMAP_HOST
           scope: RUN_TIME
           type: SECRET
