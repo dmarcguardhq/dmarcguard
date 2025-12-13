@@ -45,7 +45,14 @@
       "size": "basic"
     }
   },
-  "keywords": ["dmarc", "email", "security", "spf", "dkim", "monitoring"],
+  "keywords": [
+    "dmarc",
+    "email",
+    "security",
+    "spf",
+    "dkim",
+    "monitoring"
+  ],
   "logo": "https://raw.githubusercontent.com/meysam81/parse-dmarc/main/public/android-chrome-192x192.png",
   "name": "parse-dmarc",
   "repository": "https://github.com/meysam81/parse-dmarc",

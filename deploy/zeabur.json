@@ -66,5 +66,10 @@
       ]
     }
   ],
-  "tags": ["dmarc", "email", "security", "monitoring"]
+  "tags": [
+    "dmarc",
+    "email",
+    "security",
+    "monitoring"
+  ]
 }
