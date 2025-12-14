@@ -193,6 +193,14 @@ func run(ctx context.Context, cmd *cli.Command) error {
 		return fmt.Errorf("failed to load config: %w", err)
 	}
 
+	// Validate required IMAP configuration when fetching is enabled
+	// (not serve-only and not MCP mode)
+	if !serveOnly && !mcpMode && mcpHTTPAddr == "" {
+		if err := cfg.Validate(); err != nil {
+			return fmt.Errorf("configuration error: %w", err)
+		}
+	}
+
 	store, err := storage.NewStorage(cfg.Database.Path)
 	if err != nil {
 		return fmt.Errorf("failed to initialize storage: %w", err)

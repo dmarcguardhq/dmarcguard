@@ -1,11 +1,21 @@
 package config
 
 import (
+	"errors"
 	"os"
 	"path/filepath"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/goccy/go-json"
+)
+
+var (
+	// ErrMissingIMAPHost is returned when IMAP host is not configured
+	ErrMissingIMAPHost = errors.New("IMAP_HOST is required: set via environment variable or config file")
+	// ErrMissingIMAPUsername is returned when IMAP username is not configured
+	ErrMissingIMAPUsername = errors.New("IMAP_USERNAME is required: set via environment variable or config file")
+	// ErrMissingIMAPPassword is returned when IMAP password is not configured
+	ErrMissingIMAPPassword = errors.New("IMAP_PASSWORD is required: set via environment variable or config file")
 )
 
 // Config holds the application configuration
@@ -97,6 +107,22 @@ func Load(path string) (*Config, error) {
 	}
 
 	return &cfg, nil
+}
+
+// Validate checks that all required configuration values are set.
+// Required fields: IMAP host, username, and password.
+// Returns nil if valid, or an error describing the missing configuration.
+func (c *Config) Validate() error {
+	if c.IMAP.Host == "" {
+		return ErrMissingIMAPHost
+	}
+	if c.IMAP.Username == "" {
+		return ErrMissingIMAPUsername
+	}
+	if c.IMAP.Password == "" {
+		return ErrMissingIMAPPassword
+	}
+	return nil
 }
 
 // GenerateSample creates a sample configuration file
