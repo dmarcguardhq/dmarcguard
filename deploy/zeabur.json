@@ -6,42 +6,42 @@
   "services": [
     {
       "env": {
-        "PARSE_DMARC_DATABASE_PATH": {
+        "DATABASE_PATH": {
           "default": "/data/db.sqlite",
           "expose": true
         },
-        "PARSE_DMARC_IMAP_HOST": {
+        "IMAP_HOST": {
           "default": "",
           "expose": true,
           "required": true
         },
-        "PARSE_DMARC_IMAP_MAILBOX": {
+        "IMAP_MAILBOX": {
           "default": "INBOX",
           "expose": true
         },
-        "PARSE_DMARC_IMAP_PASSWORD": {
+        "IMAP_PASSWORD": {
           "default": "",
           "expose": true,
           "required": true
         },
-        "PARSE_DMARC_IMAP_PORT": {
+        "IMAP_PORT": {
           "default": "993",
           "expose": true
         },
-        "PARSE_DMARC_IMAP_USERNAME": {
+        "IMAP_USERNAME": {
           "default": "",
           "expose": true,
           "required": true
         },
-        "PARSE_DMARC_IMAP_USE_TLS": {
+        "IMAP_USE_TLS": {
           "default": "true",
           "expose": true
         },
-        "PARSE_DMARC_SERVER_HOST": {
+        "SERVER_HOST": {
           "default": "0.0.0.0",
           "expose": true
         },
-        "PARSE_DMARC_SERVER_PORT": {
+        "SERVER_PORT": {
           "default": "8080",
           "expose": true
         }

@@ -11,23 +11,23 @@ routes:
   - path: /
     port: 8080
 env:
-  - key: PARSE_DMARC_IMAP_HOST
+  - key: IMAP_HOST
     secret: parse-dmarc-imap-host
-  - key: PARSE_DMARC_IMAP_PORT
+  - key: IMAP_PORT
     value: "993"
-  - key: PARSE_DMARC_IMAP_USERNAME
+  - key: IMAP_USERNAME
     secret: parse-dmarc-imap-username
-  - key: PARSE_DMARC_IMAP_PASSWORD
+  - key: IMAP_PASSWORD
     secret: parse-dmarc-imap-password
-  - key: PARSE_DMARC_IMAP_MAILBOX
+  - key: IMAP_MAILBOX
     value: "INBOX"
-  - key: PARSE_DMARC_IMAP_USE_TLS
+  - key: IMAP_USE_TLS
     value: "true"
-  - key: PARSE_DMARC_DATABASE_PATH
+  - key: DATABASE_PATH
     value: "/data/db.sqlite"
-  - key: PARSE_DMARC_SERVER_PORT
+  - key: SERVER_PORT
     value: "8080"
-  - key: PARSE_DMARC_SERVER_HOST
+  - key: SERVER_HOST
     value: "0.0.0.0"
 scaling:
   min: 1

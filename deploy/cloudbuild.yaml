@@ -47,7 +47,7 @@ steps:
       - "--max-instances"
       - "1"
       - "--set-env-vars"
-      - "PARSE_DMARC_SERVER_HOST=0.0.0.0,PARSE_DMARC_SERVER_PORT=8080,PARSE_DMARC_DATABASE_PATH=/data/db.sqlite"
+      - "SERVER_HOST=0.0.0.0,SERVER_PORT=8080,DATABASE_PATH=/data/db.sqlite"
 
 substitutions:
   _REGION: us-central1

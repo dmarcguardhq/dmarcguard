@@ -2,39 +2,39 @@
   "addons": [],
   "description": "DMARC Report Parser - Monitor who's sending email on behalf of your domain",
   "env": {
-    "PARSE_DMARC_DATABASE_PATH": {
+    "DATABASE_PATH": {
       "description": "Path to SQLite database",
       "value": "/data/db.sqlite"
     },
-    "PARSE_DMARC_IMAP_HOST": {
+    "IMAP_HOST": {
       "description": "IMAP server hostname (e.g., imap.gmail.com)",
       "required": true
     },
-    "PARSE_DMARC_IMAP_MAILBOX": {
+    "IMAP_MAILBOX": {
       "description": "IMAP mailbox to fetch from",
       "value": "INBOX"
     },
-    "PARSE_DMARC_IMAP_PASSWORD": {
+    "IMAP_PASSWORD": {
       "description": "IMAP password or app password",
       "required": true
     },
-    "PARSE_DMARC_IMAP_PORT": {
+    "IMAP_PORT": {
       "description": "IMAP server port",
       "value": "993"
     },
-    "PARSE_DMARC_IMAP_USERNAME": {
+    "IMAP_USERNAME": {
       "description": "IMAP username/email",
       "required": true
     },
-    "PARSE_DMARC_IMAP_USE_TLS": {
+    "IMAP_USE_TLS": {
       "description": "Use TLS for IMAP connection",
       "value": "true"
     },
-    "PARSE_DMARC_SERVER_HOST": {
+    "SERVER_HOST": {
       "description": "HTTP server host",
       "value": "0.0.0.0"
     },
-    "PARSE_DMARC_SERVER_PORT": {
+    "SERVER_PORT": {
       "description": "HTTP server port",
       "value": "8080"
     }

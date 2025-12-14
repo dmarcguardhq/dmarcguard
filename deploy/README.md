@@ -31,20 +31,20 @@ All deployments require the following environment variables:
 
 | Variable                    | Description                   | Example                |
 | --------------------------- | ----------------------------- | ---------------------- |
-| `PARSE_DMARC_IMAP_HOST`     | IMAP server hostname          | `imap.gmail.com`       |
-| `PARSE_DMARC_IMAP_USERNAME` | IMAP username/email           | `dmarc@yourdomain.com` |
-| `PARSE_DMARC_IMAP_PASSWORD` | IMAP password or app password | `your-app-password`    |
+| `IMAP_HOST`     | IMAP server hostname          | `imap.gmail.com`       |
+| `IMAP_USERNAME` | IMAP username/email           | `dmarc@yourdomain.com` |
+| `IMAP_PASSWORD` | IMAP password or app password | `your-app-password`    |
 
 ### Optional (with defaults)
 
 | Variable                    | Description          | Default           |
 | --------------------------- | -------------------- | ----------------- |
-| `PARSE_DMARC_IMAP_PORT`     | IMAP server port     | `993`             |
-| `PARSE_DMARC_IMAP_MAILBOX`  | IMAP mailbox         | `INBOX`           |
-| `PARSE_DMARC_IMAP_USE_TLS`  | Use TLS for IMAP     | `true`            |
-| `PARSE_DMARC_DATABASE_PATH` | SQLite database path | `/data/db.sqlite` |
-| `PARSE_DMARC_SERVER_PORT`   | HTTP server port     | `8080`            |
-| `PARSE_DMARC_SERVER_HOST`   | HTTP server host     | `0.0.0.0`         |
+| `IMAP_PORT`     | IMAP server port     | `993`             |
+| `IMAP_MAILBOX`  | IMAP mailbox         | `INBOX`           |
+| `IMAP_USE_TLS`  | Use TLS for IMAP     | `true`            |
+| `DATABASE_PATH` | SQLite database path | `/data/db.sqlite` |
+| `SERVER_PORT`   | HTTP server port     | `8080`            |
+| `SERVER_HOST`   | HTTP server host     | `0.0.0.0`         |
 
 ## Manual Deployment
 
@@ -54,9 +54,9 @@ All deployments require the following environment variables:
 docker run -d \
   --name parse-dmarc \
   -p 8080:8080 \
-  -e PARSE_DMARC_IMAP_HOST=imap.gmail.com \
-  -e PARSE_DMARC_IMAP_USERNAME=your-email@gmail.com \
-  -e PARSE_DMARC_IMAP_PASSWORD=your-app-password \
+  -e IMAP_HOST=imap.gmail.com \
+  -e IMAP_USERNAME=your-email@gmail.com \
+  -e IMAP_PASSWORD=your-app-password \
   -v parse-dmarc-data:/data \
   ghcr.io/meysam81/parse-dmarc:latest
 ```
@@ -66,9 +66,9 @@ docker run -d \
 ```bash
 cd deploy
 fly launch --copy-config
-fly secrets set PARSE_DMARC_IMAP_HOST=imap.gmail.com
-fly secrets set PARSE_DMARC_IMAP_USERNAME=your-email@gmail.com
-fly secrets set PARSE_DMARC_IMAP_PASSWORD=your-app-password
+fly secrets set IMAP_HOST=imap.gmail.com
+fly secrets set IMAP_USERNAME=your-email@gmail.com
+fly secrets set IMAP_PASSWORD=your-app-password
 fly deploy
 ```
 
@@ -77,9 +77,9 @@ fly deploy
 ```bash
 railway init
 railway up
-railway variables set PARSE_DMARC_IMAP_HOST=imap.gmail.com
-railway variables set PARSE_DMARC_IMAP_USERNAME=your-email@gmail.com
-railway variables set PARSE_DMARC_IMAP_PASSWORD=your-app-password
+railway variables set IMAP_HOST=imap.gmail.com
+railway variables set IMAP_USERNAME=your-email@gmail.com
+railway variables set IMAP_PASSWORD=your-app-password
 ```
 
 ### Using Google Cloud Run
@@ -94,8 +94,8 @@ gcloud run deploy parse-dmarc \
   --platform managed \
   --region us-central1 \
   --allow-unauthenticated \
-  --set-env-vars "PARSE_DMARC_IMAP_HOST=imap.gmail.com,PARSE_DMARC_IMAP_USERNAME=your-email@gmail.com" \
-  --set-secrets "PARSE_DMARC_IMAP_PASSWORD=parse-dmarc-imap-password:latest"
+  --set-env-vars "IMAP_HOST=imap.gmail.com,IMAP_USERNAME=your-email@gmail.com" \
+  --set-secrets "IMAP_PASSWORD=parse-dmarc-imap-password:latest"
 ```
 
 ### Using Azure Container Apps

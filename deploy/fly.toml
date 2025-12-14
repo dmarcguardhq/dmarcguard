@@ -7,12 +7,12 @@ primary_region = "iad"
   dockerfile = "Dockerfile"
 
 [env]
-  PARSE_DMARC_SERVER_HOST = "0.0.0.0"
-  PARSE_DMARC_SERVER_PORT = "8080"
-  PARSE_DMARC_DATABASE_PATH = "/data/db.sqlite"
-  PARSE_DMARC_IMAP_PORT = "993"
-  PARSE_DMARC_IMAP_MAILBOX = "INBOX"
-  PARSE_DMARC_IMAP_USE_TLS = "true"
+  SERVER_HOST = "0.0.0.0"
+  SERVER_PORT = "8080"
+  DATABASE_PATH = "/data/db.sqlite"
+  IMAP_PORT = "993"
+  IMAP_MAILBOX = "INBOX"
+  IMAP_USE_TLS = "true"
 
 [http_service]
   internal_port = 8080
@@ -30,7 +30,7 @@ primary_region = "iad"
   path = "/api/statistics"
 
 [mounts]
-  source = "parse_dmarc_data"
+  source = "data"
   destination = "/data"
 
 [[vm]]

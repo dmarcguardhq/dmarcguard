@@ -68,39 +68,39 @@ resource containerApp 'Microsoft.App/containerApps@2023-05-01' = {
           }
           env: [
             {
-              name: 'PARSE_DMARC_IMAP_HOST'
+              name: 'IMAP_HOST'
               secretRef: 'imap-host'
             }
             {
-              name: 'PARSE_DMARC_IMAP_PORT'
+              name: 'IMAP_PORT'
               value: '993'
             }
             {
-              name: 'PARSE_DMARC_IMAP_USERNAME'
+              name: 'IMAP_USERNAME'
               secretRef: 'imap-username'
             }
             {
-              name: 'PARSE_DMARC_IMAP_PASSWORD'
+              name: 'IMAP_PASSWORD'
               secretRef: 'imap-password'
             }
             {
-              name: 'PARSE_DMARC_IMAP_MAILBOX'
+              name: 'IMAP_MAILBOX'
               value: 'INBOX'
             }
             {
-              name: 'PARSE_DMARC_IMAP_USE_TLS'
+              name: 'IMAP_USE_TLS'
               value: 'true'
             }
             {
-              name: 'PARSE_DMARC_DATABASE_PATH'
+              name: 'DATABASE_PATH'
               value: '/data/db.sqlite'
             }
             {
-              name: 'PARSE_DMARC_SERVER_PORT'
+              name: 'SERVER_PORT'
               value: '8080'
             }
             {
-              name: 'PARSE_DMARC_SERVER_HOST'
+              name: 'SERVER_HOST'
               value: '0.0.0.0'
             }
           ]
