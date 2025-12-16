@@ -13,6 +13,7 @@ const config = reactive({
 })
 
 const copied = ref(false)
+const copiedValue = ref(false)
 
 // Generate the TXT record string
 const recordValue = computed(() => {
@@ -60,14 +61,26 @@ const fullRecord = computed(() => {
   return `_dmarc.${config.domain} IN TXT "${recordValue.value}"`
 })
 
-const copyToClipboard = async () => {
-  try {
-    await navigator.clipboard.writeText(fullRecord.value)
-    copied.value = true
-    setTimeout(() => copied.value = false, 2000)
-  } catch (err) {
-    console.error('Failed to copy:', err)
-  }
+function copyToClipboard() {
+  navigator.clipboard.writeText(fullRecord.value)
+    .then(function() {
+      copied.value = true
+      setTimeout(function() { copied.value = false }, 2000)
+    })
+    .catch(function(err) {
+      console.error('Failed to copy:', err)
+    })
+}
+
+function copyValueOnly() {
+  navigator.clipboard.writeText(recordValue.value)
+    .then(function() {
+      copiedValue.value = true
+      setTimeout(function() { copiedValue.value = false }, 2000)
+    })
+    .catch(function(err) {
+      console.error('Failed to copy:', err)
+    })
 }
 </script>
 
@@ -247,6 +260,10 @@ const copyToClipboard = async () => {
           <div class="line break-word">
             <span class="key">Value:</span>
             <span class="string">"{{ recordValue }}"</span>
+            <button class="btn-copy-inline" @click="copyValueOnly" :class="{ copied: copiedValue }" title="Copy value only">
+              <svg v-if="!copiedValue" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+              <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            </button>
           </div>
         </div>
 
@@ -516,6 +533,7 @@ const copyToClipboard = async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  align-items: center;
 }
 
 .key {
@@ -556,6 +574,32 @@ const copyToClipboard = async () => {
 
 .btn-copy.copied {
   background: var(--c-success);
+  color: white;
+}
+
+.btn-copy-inline {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  color: #94a3b8;
+  margin-left: 8px;
+}
+
+.btn-copy-inline:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+  color: #e2e8f0;
+}
+
+.btn-copy-inline.copied {
+  background: var(--c-success);
+  border-color: var(--c-success);
   color: white;
 }
 
