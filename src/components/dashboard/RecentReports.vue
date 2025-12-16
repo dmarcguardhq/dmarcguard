@@ -71,6 +71,7 @@ const getPolicyClass = (policy) => {
           v-model="searchQuery"
           placeholder="Filter domain or org..."
           class="search-input"
+          aria-label="Filter domain or organization"
         >
       </div>
     </div>

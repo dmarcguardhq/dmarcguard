@@ -2,7 +2,7 @@
 import { computed } from 'vue'
 
 const props = defineProps({
-  complianceScore: { type: Number, required: true, default: 0 },
+  complianceScore: { type: Number, required: true },
   volume: { type: Number, default: 0 },
   sourceCount: { type: Number, default: 0 },
   dateRange: { type: String, default: 'Last 30 Days' },
