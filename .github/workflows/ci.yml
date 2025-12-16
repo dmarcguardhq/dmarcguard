@@ -12,7 +12,8 @@ jobs:
   prettier:
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout
         uses: actions/checkout@v6
