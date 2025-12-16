@@ -1,0 +1,123 @@
+:root {
+  /* Brand & Semantics */
+  --c-primary: #4F46E5;
+  --c-success: #10B981;
+  --c-success-soft: #D1FAE5;
+  --c-warning: #F59E0B;
+  --c-warning-soft: #FEF3C7;
+  --c-danger: #EF4444;
+  --c-danger-soft: #FEE2E2;
+
+  /* Neutrals (Light Mode) */
+  --bg-app: #F8FAFC;
+  --bg-card: #FFFFFF;
+  --border-subtle: #E2E8F0;
+  --text-main: #0F172A;
+  --text-muted: #64748B;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+
+  /* Spacing */
+  --radius-card: 8px;
+  --radius-sm: 4px;
+  --radius-lg: 12px;
+}
+
+/* Dark Mode Overrides */
+[data-theme='dark'] {
+  --bg-app: #0F172A;
+  --bg-card: #1E293B;
+  --border-subtle: #334155;
+  --text-main: #F1F5F9;
+  --text-muted: #94A3B8;
+  --c-success-soft: #064E3B;
+  --c-danger-soft: #7F1D1D;
+  --c-warning-soft: #78350F;
+}
+
+/* Base Reset & Defaults */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  transition: background-color 0.3s, color 0.3s;
+}
+
+/* Utility Classes */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-success {
+  color: var(--c-success);
+}
+
+.text-warning {
+  color: var(--c-warning);
+}
+
+.text-danger {
+  color: var(--c-danger);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Selection */
+::selection {
+  background: var(--c-primary);
+  color: white;
+}
+
+/* Focus Styles */
+:focus-visible {
+  outline: 2px solid var(--c-primary);
+  outline-offset: 2px;
+}
+
+/* Links */
+a {
+  color: var(--c-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
