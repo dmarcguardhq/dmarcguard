@@ -1,269 +1,373 @@
+<script setup>
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import DashboardHero from "./components/dashboard/DashboardHero.vue";
+import RecentReports from "./components/dashboard/RecentReports.vue";
+import ReportDrawer from "./components/dashboard/ReportDrawer.vue";
+import DnsGenerator from "./components/tools/DnsGenerator.vue";
+import "./assets/base.css";
+
+// State
+const statistics = ref(null);
+const topSources = ref([]);
+const reports = ref([]);
+const selectedReport = ref(null);
+const loading = ref(true);
+const loadingDetail = ref(false);
+const isDrawerOpen = ref(false);
+const currentView = ref("dashboard"); // 'dashboard' | 'generator'
+const theme = ref("light");
+
+// Auto-refresh interval
+let refreshInterval = null;
+
+// Theme management
+const initTheme = () => {
+  const savedTheme = localStorage.getItem("theme");
+  const systemPrefersDark = window.matchMedia(
+    "(prefers-color-scheme: dark)",
+  ).matches;
+  theme.value = savedTheme || (systemPrefersDark ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme.value);
+};
+
+const toggleTheme = () => {
+  theme.value = theme.value === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", theme.value);
+  localStorage.setItem("theme", theme.value);
+};
+
+// Data fetching
+const fetchStatistics = async () => {
+  try {
+    const response = await fetch("/api/statistics");
+    statistics.value = await response.json();
+  } catch (error) {
+    console.error("Failed to fetch statistics:", error);
+  }
+};
+
+const fetchTopSources = async () => {
+  try {
+    const response = await fetch("/api/top-sources?limit=10");
+    topSources.value = await response.json();
+  } catch (error) {
+    console.error("Failed to fetch top sources:", error);
+  }
+};
+
+const fetchReports = async () => {
+  try {
+    const response = await fetch("/api/reports?limit=20");
+    reports.value = await response.json();
+  } catch (error) {
+    console.error("Failed to fetch reports:", error);
+  }
+};
+
+const loadData = async () => {
+  loading.value = true;
+  await Promise.all([fetchStatistics(), fetchTopSources(), fetchReports()]);
+  loading.value = false;
+};
+
+const refreshData = () => {
+  loadData();
+};
+
+// Report detail handling
+const openReportDetails = async (report) => {
+  isDrawerOpen.value = true;
+  loadingDetail.value = true;
+  try {
+    const response = await fetch(`/api/reports/${report.id}`);
+    selectedReport.value = await response.json();
+  } catch (error) {
+    console.error("Failed to fetch report details:", error);
+    selectedReport.value = null;
+  } finally {
+    loadingDetail.value = false;
+  }
+};
+
+const closeDrawer = () => {
+  isDrawerOpen.value = false;
+  setTimeout(() => {
+    selectedReport.value = null;
+  }, 300);
+};
+
+// Computed values for hero component
+const complianceScore = computed(() => {
+  return statistics.value?.compliance_rate ?? 0;
+});
+
+const totalVolume = computed(() => {
+  return statistics.value?.total_messages ?? 0;
+});
+
+const sourceCount = computed(() => {
+  return statistics.value?.unique_source_ips ?? 0;
+});
+
+// Helpers
+const getPassPercentage = (source) => {
+  const total = source.count;
+  return total > 0 ? (source.pass / total) * 100 : 0;
+};
+
+const getFailPercentage = (source) => {
+  const total = source.count;
+  return total > 0 ? (source.fail / total) * 100 : 0;
+};
+
+const formatNumber = (num) => {
+  return new Intl.NumberFormat().format(num);
+};
+
+// Lifecycle
+onMounted(() => {
+  initTheme();
+  loadData();
+  // Auto-refresh every 5 minutes
+  refreshInterval = setInterval(loadData, 5 * 60 * 1000);
+});
+
+onUnmounted(() => {
+  if (refreshInterval) {
+    clearInterval(refreshInterval);
+  }
+});
+</script>
+
 <template>
   <div class="app">
-    <header class="header">
-      <div class="container">
-        <div class="header-top">
-          <div>
-            <h1 class="title">
-              <span class="icon">🛡️</span>
-              DMARC Report Dashboard
-            </h1>
-            <p class="subtitle">Email Authentication & Compliance Monitoring</p>
-          </div>
-          <button
-            class="refresh-button"
-            @click="refreshData"
-            :disabled="loading"
+    <!-- Navigation -->
+    <nav class="nav">
+      <div class="nav-container">
+        <div class="nav-brand">
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
           >
-            <span class="refresh-icon" :class="{ spinning: loading }">🔄</span>
-            <span>{{ loading ? "Refreshing..." : "Refresh" }}</span>
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+          <span class="nav-title">Parse DMARC</span>
+        </div>
+
+        <div class="nav-links">
+          <button
+            class="nav-link"
+            :class="{ active: currentView === 'dashboard' }"
+            @click="currentView = 'dashboard'"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="7" height="9" />
+              <rect x="14" y="3" width="7" height="5" />
+              <rect x="14" y="12" width="7" height="9" />
+              <rect x="3" y="16" width="7" height="5" />
+            </svg>
+            Dashboard
+          </button>
+          <button
+            class="nav-link"
+            :class="{ active: currentView === 'generator' }"
+            @click="currentView = 'generator'"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <line x1="9" y1="21" x2="9" y2="9" />
+            </svg>
+            DNS Generator
           </button>
         </div>
-      </div>
-    </header>
 
+        <div class="nav-actions">
+          <button class="btn-theme" @click="toggleTheme" title="Toggle theme">
+            <svg
+              v-if="theme === 'light'"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2" />
+              <path d="M12 20v2" />
+              <path d="m4.93 4.93 1.41 1.41" />
+              <path d="m17.66 17.66 1.41 1.41" />
+              <path d="M2 12h2" />
+              <path d="M20 12h2" />
+              <path d="m6.34 17.66-1.41 1.41" />
+              <path d="m19.07 4.93-1.41 1.41" />
+            </svg>
+            <svg
+              v-else
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+          <a
+            href="https://github.com/meysam81/parse-dmarc"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="nav-github"
+            title="Star on GitHub"
+          >
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+              />
+            </svg>
+          </a>
+        </div>
+      </div>
+    </nav>
+
+    <!-- Main Content -->
     <main class="main">
       <div class="container">
-        <!-- Statistics Cards -->
-        <div class="stats-grid" v-if="statistics">
-          <div class="stat-card">
-            <div class="stat-icon">📊</div>
-            <div class="stat-content">
-              <div class="stat-value">{{ statistics.total_reports }}</div>
-              <div class="stat-label">Total Reports</div>
-            </div>
-          </div>
+        <!-- Dashboard View -->
+        <template v-if="currentView === 'dashboard'">
+          <DashboardHero
+            :compliance-score="complianceScore"
+            :volume="totalVolume"
+            :source-count="sourceCount"
+            :loading="loading"
+            @refresh="refreshData"
+          />
 
-          <div class="stat-card">
-            <div class="stat-icon">📧</div>
-            <div class="stat-content">
-              <div class="stat-value">
-                {{ formatNumber(statistics.total_messages) }}
-              </div>
-              <div class="stat-label">Total Messages</div>
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon">✅</div>
-            <div class="stat-content">
-              <div class="stat-value">
-                {{ statistics.compliance_rate.toFixed(1) }}%
-              </div>
-              <div class="stat-label">Compliance Rate</div>
-            </div>
-          </div>
-
-          <div class="stat-card">
-            <div class="stat-icon">🌐</div>
-            <div class="stat-content">
-              <div class="stat-value">{{ statistics.unique_source_ips }}</div>
-              <div class="stat-label">Unique Sources</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Top Sources -->
-        <div class="section">
-          <h2 class="section-title">Top Sending Sources</h2>
-          <div class="card">
-            <div class="source-list" v-if="topSources?.length > 0">
-              <div
-                v-for="source in topSources"
-                :key="source.source_ip"
-                class="source-item"
-              >
-                <div class="source-ip">{{ source.source_ip }}</div>
-                <div class="source-stats">
-                  <div class="source-count">
-                    {{ formatNumber(source.count) }} messages
-                  </div>
-                  <div class="source-bar">
-                    <div
-                      class="source-bar-pass"
-                      :style="{ width: getPassPercentage(source) + '%' }"
-                    ></div>
-                    <div
-                      class="source-bar-fail"
-                      :style="{ width: getFailPercentage(source) + '%' }"
-                    ></div>
-                  </div>
-                  <div class="source-legend">
-                    <span class="legend-pass">{{ source.pass }} pass</span>
-                    <span class="legend-fail">{{ source.fail }} fail</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div v-else class="empty-state">
-              No data available yet. Reports will appear here once fetched.
-            </div>
-          </div>
-        </div>
-
-        <!-- Recent Reports -->
-        <div class="section">
-          <h2 class="section-title">Recent Reports</h2>
-          <div class="card">
-            <div class="table-container" v-if="reports?.length > 0">
-              <table class="report-table">
-                <thead>
-                  <tr>
-                    <th @click="sortBy('org_name')" class="sortable">
-                      Organization
-                      <span class="sort-indicator">{{
-                        getSortIndicator("org_name")
-                      }}</span>
-                    </th>
-                    <th @click="sortBy('domain')" class="sortable">
-                      Domain
-                      <span class="sort-indicator">{{
-                        getSortIndicator("domain")
-                      }}</span>
-                    </th>
-                    <th @click="sortBy('date_begin')" class="sortable">
-                      Date Range
-                      <span class="sort-indicator">{{
-                        getSortIndicator("date_begin")
-                      }}</span>
-                    </th>
-                    <th @click="sortBy('total_messages')" class="sortable">
-                      Messages
-                      <span class="sort-indicator">{{
-                        getSortIndicator("total_messages")
-                      }}</span>
-                    </th>
-                    <th @click="sortBy('compliance_rate')" class="sortable">
-                      Compliance
-                      <span class="sort-indicator">{{
-                        getSortIndicator("compliance_rate")
-                      }}</span>
-                    </th>
-                    <th @click="sortBy('policy_p')" class="sortable">
-                      Policy
-                      <span class="sort-indicator">{{
-                        getSortIndicator("policy_p")
-                      }}</span>
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr
-                    v-for="report in sortedReports"
-                    :key="report.id"
-                    class="report-row"
-                    @click="viewReport(report)"
-                  >
-                    <td>{{ report.org_name }}</td>
-                    <td>
-                      <code>{{ report.domain }}</code>
-                    </td>
-                    <td class="date-cell">
-                      {{ formatDate(report.date_begin) }}
-                    </td>
-                    <td>{{ formatNumber(report.total_messages) }}</td>
-                    <td>
-                      <span
-                        class="compliance-badge"
-                        :class="getComplianceClass(report.compliance_rate)"
-                      >
-                        {{ report.compliance_rate.toFixed(1) }}%
-                      </span>
-                    </td>
-                    <td>
-                      <span class="policy-badge">{{ report.policy_p }}</span>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div v-else class="empty-state">
-              No reports available yet. Check your IMAP configuration and run
-              the fetch process.
-            </div>
-          </div>
-        </div>
-
-        <!-- Report Detail Modal -->
-        <div v-if="selectedReport" class="modal" @click="closeModal">
-          <div class="modal-content" @click.stop>
-            <div class="modal-header">
-              <h3>Report Details</h3>
-              <button class="modal-close" @click="closeModal">×</button>
-            </div>
-            <div class="modal-body">
-              <div class="detail-grid">
-                <div class="detail-item">
-                  <strong>Organization:</strong>
-                  {{ selectedReport.ReportMetadata?.OrgName || "N/A" }}
-                </div>
-                <div class="detail-item">
-                  <strong>Domain:</strong>
-                  {{ selectedReport.PolicyPublished?.Domain || "N/A" }}
-                </div>
-                <div class="detail-item">
-                  <strong>Report ID:</strong>
-                  {{ selectedReport.ReportMetadata?.ReportID || "N/A" }}
-                </div>
-                <div class="detail-item">
-                  <strong>Policy:</strong>
-                  {{ selectedReport.PolicyPublished?.P || "N/A" }}
-                </div>
-              </div>
-
-              <h4 class="detail-subtitle">
-                Records ({{ selectedReport?.Records?.length || 0 }})
-              </h4>
-              <div class="records-list">
-                <div
-                  v-for="(record, idx) in selectedReport.Records || []"
-                  :key="idx"
-                  class="record-item"
+          <!-- Top Sending Sources -->
+          <section class="section">
+            <div class="card sources-card">
+              <h2 class="section-title">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
                 >
-                  <div class="record-header">
-                    <span class="record-ip">{{
-                      record.Row?.SourceIP || "N/A"
-                    }}</span>
-                    <span class="record-count"
-                      >{{ record.Row?.Count || 0 }} messages</span
-                    >
-                  </div>
-                  <div class="record-details">
-                    <span
-                      :class="
-                        'result-badge ' +
-                        (record.Row?.PolicyEvaluated?.DKIM === 'pass'
-                          ? 'pass'
-                          : 'fail')
-                      "
-                    >
-                      DKIM: {{ record.Row?.PolicyEvaluated?.DKIM || "unknown" }}
-                    </span>
-                    <span
-                      :class="
-                        'result-badge ' +
-                        (record.Row?.PolicyEvaluated?.SPF === 'pass'
-                          ? 'pass'
-                          : 'fail')
-                      "
-                    >
-                      SPF: {{ record.Row?.PolicyEvaluated?.SPF || "unknown" }}
-                    </span>
-                    <span class="result-badge">
-                      Disposition:
-                      {{
-                        record.Row?.PolicyEvaluated?.Disposition || "unknown"
-                      }}
-                    </span>
+                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                  <line x1="6" y1="6" x2="6.01" y2="6" />
+                  <line x1="6" y1="18" x2="6.01" y2="18" />
+                </svg>
+                Top Sending Sources
+              </h2>
+
+              <div class="source-list" v-if="topSources?.length > 0">
+                <div
+                  v-for="source in topSources"
+                  :key="source.source_ip"
+                  class="source-item"
+                >
+                  <div class="source-ip font-mono">{{ source.source_ip }}</div>
+                  <div class="source-stats">
+                    <div class="source-count">
+                      {{ formatNumber(source.count) }} messages
+                    </div>
+                    <div class="source-bar">
+                      <div
+                        class="source-bar-pass"
+                        :style="{ width: getPassPercentage(source) + '%' }"
+                      ></div>
+                      <div
+                        class="source-bar-fail"
+                        :style="{ width: getFailPercentage(source) + '%' }"
+                      ></div>
+                    </div>
+                    <div class="source-legend">
+                      <span class="legend-pass">{{ source.pass }} pass</span>
+                      <span class="legend-fail">{{ source.fail }} fail</span>
+                    </div>
                   </div>
                 </div>
               </div>
+              <div v-else class="empty-state">
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <p>
+                  No data available yet. Reports will appear here once fetched.
+                </p>
+              </div>
             </div>
+          </section>
+
+          <!-- Recent Reports Table -->
+          <section class="section">
+            <RecentReports
+              :reports="reports"
+              @view-details="openReportDetails"
+            />
+          </section>
+        </template>
+
+        <!-- DNS Generator View -->
+        <template v-else-if="currentView === 'generator'">
+          <div class="page-header">
+            <h1 class="page-title">DMARC DNS Generator</h1>
+            <p class="page-subtitle">
+              Generate your DMARC TXT record for DNS configuration
+            </p>
           </div>
-        </div>
+          <DnsGenerator />
+        </template>
       </div>
     </main>
 
+    <!-- Report Details Drawer -->
+    <ReportDrawer
+      :is-open="isDrawerOpen"
+      :report="selectedReport"
+      :loading="loadingDetail"
+      @close="closeDrawer"
+    />
+
+    <!-- Footer -->
     <footer class="footer">
       <div class="container">
         <div class="footer-content">
@@ -276,7 +380,16 @@
               rel="noopener noreferrer"
               class="github-star-link"
             >
-              <span class="github-star-icon">⭐</span>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                />
+              </svg>
               <span>Star on GitHub</span>
             </a>
           </div>
@@ -333,608 +446,217 @@
             +
             <a href="https://golang.org/" target="_blank" rel="noopener">Go</a>
           </p>
-          <p class="opensource-message">
-            Free and Open Source Software • Contributions Welcome • Made with ❤️
-            for the Community
-          </p>
+          <p class="opensource-message">Free and Open Source Software</p>
         </div>
       </div>
     </footer>
   </div>
 </template>
 
-<script>
-import { computed, onMounted, ref, watchEffect } from "vue";
-
-export default {
-  name: "App",
-  components: {},
-  setup() {
-    var statistics = ref(null);
-    var topSources = ref([]);
-    var reports = ref([]);
-    var selectedReport = ref(null);
-    var loading = ref(true);
-    var sortColumn = ref(null);
-    var sortDirection = ref("asc");
-    var starBannerVisible = ref(true);
-    var theme = ref("light");
-
-    function fetchStatistics() {
-      return fetch("/api/statistics")
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (data) {
-          statistics.value = data;
-        })
-        .catch(function (error) {
-          console.error("Failed to fetch statistics:", error);
-        });
-    }
-
-    function fetchTopSources() {
-      return fetch("/api/top-sources?limit=10")
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (data) {
-          topSources.value = data;
-        })
-        .catch(function (error) {
-          console.error("Failed to fetch top sources:", error);
-        });
-    }
-
-    function fetchReports() {
-      return fetch("/api/reports?limit=20")
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (data) {
-          reports.value = data;
-        })
-        .catch(function (error) {
-          console.error("Failed to fetch reports:", error);
-        });
-    }
-
-    function viewReport(report) {
-      fetch(`/api/reports/${report.id}`)
-        .then(function (response) {
-          return response.json();
-        })
-        .then(function (data) {
-          selectedReport.value = data;
-        })
-        .catch(function (error) {
-          console.error("Failed to fetch report details:", error);
-          selectedReport.value = null;
-        });
-    }
-
-    function closeModal() {
-      selectedReport.value = null;
-    }
-
-    function formatNumber(num) {
-      return new Intl.NumberFormat().format(num);
-    }
-
-    function formatDate(timestamp) {
-      return new Date(timestamp * 1000).toLocaleDateString();
-    }
-
-    function getPassPercentage(source) {
-      var total = source.count;
-      return total > 0 ? (source.pass / total) * 100 : 0;
-    }
-
-    function getFailPercentage(source) {
-      var total = source.count;
-      return total > 0 ? (source.fail / total) * 100 : 0;
-    }
-
-    function getComplianceClass(rate) {
-      if (rate >= 95) return "high";
-      if (rate >= 70) return "medium";
-      return "low";
-    }
-
-    function loadData() {
-      loading.value = true;
-      return Promise.all([
-        fetchStatistics(),
-        fetchTopSources(),
-        fetchReports(),
-      ]).then(function () {
-        loading.value = false;
-      });
-    }
-
-    function refreshData() {
-      loadData();
-    }
-
-    function sortBy(column) {
-      if (sortColumn.value === column) {
-        if (sortDirection.value === "asc") {
-          sortDirection.value = "desc";
-        } else {
-          sortColumn.value = null;
-          sortDirection.value = "asc";
-        }
-      } else {
-        sortColumn.value = column;
-        sortDirection.value = "asc";
-      }
-    }
-
-    function getSortIndicator(column) {
-      if (sortColumn.value !== column) {
-        return "";
-      }
-      return sortDirection.value === "asc" ? "↑" : "↓";
-    }
-
-    var sortedReports = computed(function () {
-      if (!sortColumn.value || !reports.value) {
-        return reports.value;
-      }
-
-      var sorted = [...reports.value].sort(function (a, b) {
-        var aVal = a[sortColumn.value];
-        var bVal = b[sortColumn.value];
-
-        if (typeof aVal === "string") {
-          aVal = aVal.toLowerCase();
-          bVal = bVal.toLowerCase();
-        }
-
-        if (aVal < bVal) {
-          return sortDirection.value === "asc" ? -1 : 1;
-        }
-        if (aVal > bVal) {
-          return sortDirection.value === "asc" ? 1 : -1;
-        }
-        return 0;
-      });
-
-      return sorted;
-    });
-
-    function dismissStarBanner() {
-      starBannerVisible.value = false;
-      var dismissalData = {
-        dismissed: true,
-        timestamp: Date.now(),
-      };
-      localStorage.setItem(
-        "starBannerDismissed",
-        JSON.stringify(dismissalData),
-      );
-    }
-
-    function checkStarBannerDismissal() {
-      var dismissalData = localStorage.getItem("starBannerDismissed");
-      if (dismissalData) {
-        try {
-          var data = JSON.parse(dismissalData);
-          var thirtyDaysInMs = 30 * 24 * 60 * 60 * 1000;
-          if (
-            data &&
-            typeof data.timestamp === "number" &&
-            !isNaN(data.timestamp)
-          ) {
-            var timeSinceDismissal = Date.now() - data.timestamp;
-            if (timeSinceDismissal < thirtyDaysInMs) {
-              starBannerVisible.value = false;
-            }
-          } else {
-            // Clear old dismissal data after 30 days and show the banner again
-            localStorage.removeItem("starBannerDismissed");
-            starBannerVisible.value = true;
-          }
-        } catch (e) {
-          console.error("Failed to parse star banner dismissal data:", e);
-        }
-      }
-    }
-
-    onMounted(function () {
-      checkStarBannerDismissal();
-      loadData();
-      setInterval(loadData, 5 * 60 * 1000);
-    });
-
-    return {
-      statistics,
-      topSources,
-      reports,
-      selectedReport,
-      loading,
-      sortColumn,
-      sortDirection,
-      sortedReports,
-      starBannerVisible,
-      viewReport,
-      closeModal,
-      formatNumber,
-      formatDate,
-      getPassPercentage,
-      getFailPercentage,
-      getComplianceClass,
-      sortBy,
-      getSortIndicator,
-      refreshData,
-      dismissStarBanner,
-    };
-  },
-};
-</script>
-
 <style scoped>
 .app {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
+  background: var(--bg-app);
 }
 
-.header {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 2rem 0;
+/* --- Navigation --- */
+.nav {
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border-subtle);
+  position: sticky;
+  top: 0;
+  z-index: 40;
+}
+
+.nav-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+  height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+}
+
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: var(--c-primary);
+  font-weight: 700;
+  font-size: 1.125rem;
+}
+
+.nav-title {
+  color: var(--text-main);
+}
+
+.nav-links {
+  display: flex;
+  gap: 4px;
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-family: var(--font-sans);
+}
+
+.nav-link:hover {
+  background: var(--bg-app);
+  color: var(--text-main);
+}
+
+.nav-link.active {
+  background: var(--c-primary);
   color: white;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.nav-github {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  color: var(--text-muted);
+  transition: all 0.2s;
+}
+
+.nav-github:hover {
+  background: var(--bg-app);
+  color: var(--text-main);
+}
+
+.btn-theme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.btn-theme:hover {
+  background: var(--bg-app);
+  color: var(--text-main);
+}
+
+/* --- Main Content --- */
+.main {
+  flex: 1;
+  padding: 32px 0;
 }
 
 .container {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 2rem;
+  padding: 0 24px;
 }
 
-.title {
-  font-size: 2.5rem;
-  font-weight: 700;
-  margin-bottom: 0.5rem;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
+.page-header {
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
-.icon {
-  font-size: 2rem;
-}
-
-.subtitle {
-  font-size: 1.1rem;
-  opacity: 0.9;
-}
-
-.header-top {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 2rem;
-}
-
-.refresh-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: 2px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
-  font-size: 1rem;
-  font-weight: 600;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s;
-  white-space: nowrap;
-}
-
-.refresh-button:hover:not(:disabled) {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-  transform: translateY(-2px);
-}
-
-.refresh-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.refresh-icon {
-  font-size: 1.2rem;
-  display: inline-block;
-  transition: transform 0.3s;
-}
-
-.refresh-icon.spinning {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-.github-star-link {
-  display: inline-flex;
-  gap: 0.4rem;
-  margin-top: 0.75rem;
-  padding: 0.4rem 0.75rem;
-  background: rgba(255, 215, 0, 0.15);
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  border-radius: 6px;
-  color: rgba(255, 255, 255, 0.9);
-  text-decoration: none;
-  font-weight: 500;
-  transition: all 0.2s;
-}
-
-.github-star-link:hover {
-  background: rgba(255, 215, 0, 0.25);
-  border-color: rgba(255, 215, 0, 0.5);
-  color: #fff;
-  transform: translateY(-1px);
-}
-
-.github-star-icon {
-  font-size: 0.9rem;
-}
-
-@keyframes slideDown {
-  from {
-    opacity: 0;
-    transform: translateY(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.star-banner-content {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1.5rem;
-  padding: 1rem 0;
-  flex-wrap: wrap;
-}
-
-.star-banner-text {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex: 1;
-  min-width: 300px;
-}
-
-.star-banner-icon {
-  font-size: 2rem;
-  animation: pulse 2s ease-in-out infinite;
-  will-change: transform;
-}
-
-@keyframes pulse {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.1);
-  }
-}
-
-.star-banner-message {
-  color: white;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.star-banner-message strong {
-  font-weight: 600;
-  color: #ffd700;
-}
-
-.star-banner-actions {
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-}
-
-.star-button {
-  background: linear-gradient(135deg, #ffd700, #ffed4e);
-  color: #333;
-  padding: 0.65rem 1.5rem;
-  border-radius: 8px;
-  font-weight: 600;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: all 0.3s;
-  box-shadow: 0 4px 12px rgba(255, 215, 0, 0.3);
-  white-space: nowrap;
-}
-
-.star-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(255, 215, 0, 0.4);
-  background: linear-gradient(135deg, #ffed4e, #ffd700);
-}
-
-.star-button:focus-visible {
-  outline: 2px solid #333;
-  outline-offset: 2px;
-}
-.dismiss-button {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  color: white;
-  padding: 0.5rem;
-  width: 2.5rem;
-  height: 2.5rem;
-  border-radius: 6px;
+.page-title {
   font-size: 1.5rem;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.3s;
-  line-height: 1;
-}
-
-.dismiss-button:hover {
-  background: rgba(255, 255, 255, 0.3);
-  border-color: rgba(255, 255, 255, 0.5);
-}
-
-.dismiss-button:focus-visible {
-  outline: 2px solid white;
-  outline-offset: 2px;
-}
-.main {
-  flex: 1;
-  padding: 2rem 0;
-}
-
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
-  margin-bottom: 2rem;
-}
-
-.stat-card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s;
-}
-
-.stat-card:hover {
-  transform: translateY(-4px);
-}
-
-.stat-icon {
-  font-size: 2.5rem;
-}
-
-.stat-content {
-  flex: 1;
-}
-
-.stat-value {
-  font-size: 2rem;
   font-weight: 700;
-  color: #667eea;
+  color: var(--text-main);
+  margin: 0 0 4px 0;
 }
 
-.stat-label {
-  color: #666;
-  font-size: 0.9rem;
+.page-subtitle {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  margin: 0;
 }
 
+/* --- Sections --- */
 .section {
-  margin-bottom: 2rem;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 1rem;
+  margin-top: 24px;
 }
 
 .section-title {
-  color: white;
-  font-size: 1.5rem;
-  margin-bottom: 1rem;
+  font-size: 1rem;
   font-weight: 600;
-}
-
-.section-header .section-title {
-  margin-bottom: 0;
-}
-
-.section-toggle {
-  background: none;
-  border: none;
-  color: var(--color-text-inverse);
-  font-size: 1.5rem;
-  font-weight: 600;
-  cursor: pointer;
+  color: var(--text-main);
+  margin: 0 0 16px 0;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  padding: 0;
-  transition: opacity 0.2s;
+  gap: 8px;
 }
 
-.section-toggle:hover {
-  opacity: 0.8;
+.section-title svg {
+  color: var(--text-muted);
 }
 
-.section-toggle:focus-visible {
-  outline: 2px solid var(--color-accent, #007bff);
-  outline-offset: 2px;
-}
-.section-toggle .toggle-icon {
-  font-size: 0.9rem;
-  color: var(--color-text-inverse);
-  opacity: 0.7;
-}
-
-.section-badge {
-  font-size: 0.8rem;
-  color: var(--color-text-inverse);
-  opacity: 0.6;
-  background: rgba(255, 255, 255, 0.1);
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-}
-
+/* --- Card --- */
 .card {
-  background: white;
-  border-radius: 12px;
-  padding: 1.5rem;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: 20px;
+}
+
+/* --- Sources Card --- */
+.sources-card {
+  padding: 20px;
+}
+
+.sources-card .section-title {
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .source-list {
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 12px;
 }
 
 .source-item {
-  padding: 1rem;
-  background: #f8f9fa;
+  padding: 14px 16px;
+  background: var(--bg-app);
   border-radius: 8px;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 16px;
+  border: 1px solid var(--border-subtle);
 }
 
 .source-ip {
-  font-family: "Courier New", monospace;
   font-weight: 600;
-  color: #333;
-  min-width: 150px;
+  color: var(--text-main);
+  min-width: 140px;
+  font-size: 0.875rem;
 }
 
 .source-stats {
@@ -942,328 +664,153 @@ export default {
 }
 
 .source-count {
-  font-size: 0.9rem;
-  color: #666;
-  margin-bottom: 0.5rem;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  margin-bottom: 6px;
 }
 
 .source-bar {
-  height: 8px;
-  background: #e0e0e0;
-  border-radius: 4px;
+  height: 6px;
+  background: var(--border-subtle);
+  border-radius: 3px;
   overflow: hidden;
   display: flex;
-  margin-bottom: 0.5rem;
+  margin-bottom: 6px;
 }
 
 .source-bar-pass {
-  background: #4caf50;
+  background: var(--c-success);
   transition: width 0.3s;
 }
 
 .source-bar-fail {
-  background: #f44336;
+  background: var(--c-danger);
   transition: width 0.3s;
 }
 
 .source-legend {
   display: flex;
-  gap: 1rem;
-  font-size: 0.85rem;
+  gap: 12px;
+  font-size: 0.75rem;
 }
 
 .legend-pass {
-  color: #4caf50;
+  color: var(--c-success);
+  font-weight: 500;
 }
 
 .legend-fail {
-  color: #f44336;
+  color: var(--c-danger);
+  font-weight: 500;
 }
 
-.table-container {
-  overflow-x: auto;
-}
-
-.report-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.report-table th {
-  text-align: left;
-  padding: 0.75rem;
-  background: #f8f9fa;
-  font-weight: 600;
-  color: #333;
-  border-bottom: 2px solid #dee2e6;
-}
-
-.report-table th.sortable {
-  cursor: pointer;
-  user-select: none;
-  transition: background 0.2s;
-}
-
-.report-table th.sortable:hover {
-  background: #e9ecef;
-}
-
-.report-table td {
-  padding: 0.75rem;
-  border-bottom: 1px solid #dee2e6;
-}
-
-.report-row {
-  cursor: pointer;
-  transition: background 0.2s;
-}
-
-.report-row:hover {
-  background: #f8f9fa;
-}
-
-.date-cell {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-code {
-  background: #f8f9fa;
-  padding: 0.2rem 0.4rem;
-  border-radius: 4px;
-  font-family: "Courier New", monospace;
-  font-size: 0.9rem;
-}
-
-.compliance-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.compliance-badge.high {
-  background: #d4edda;
-  color: #155724;
-}
-
-.compliance-badge.medium {
-  background: #fff3cd;
-  color: #856404;
-}
-
-.compliance-badge.low {
-  background: #f8d7da;
-  color: #721c24;
-}
-
-.policy-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  background: #e7f3ff;
-  color: #0056b3;
-  font-size: 0.85rem;
-  font-weight: 600;
-  text-transform: uppercase;
-}
-
+/* --- Empty State --- */
 .empty-state {
   text-align: center;
-  padding: 3rem;
-  color: #666;
-}
-
-.modal {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 1000;
-  padding: 2rem;
-}
-
-.modal-content {
-  background: white;
-  border-radius: 12px;
-  max-width: 800px;
-  width: 100%;
-  max-height: 80vh;
-  overflow-y: auto;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-}
-
-.modal-header {
-  padding: 1.5rem;
-  border-bottom: 1px solid #dee2e6;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.modal-header h3 {
-  margin: 0;
-  font-size: 1.5rem;
-}
-
-.modal-close {
-  background: none;
-  border: none;
-  font-size: 2rem;
-  cursor: pointer;
-  color: #999;
-  padding: 0;
-  width: 2rem;
-  height: 2rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.modal-close:hover {
-  color: #333;
-}
-
-.modal-body {
-  padding: 1.5rem;
-}
-
-.detail-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 1rem;
-  margin-bottom: 1.5rem;
-}
-
-.detail-item {
-  padding: 0.75rem;
-  background: #f8f9fa;
-  border-radius: 6px;
-}
-
-.detail-subtitle {
-  margin: 1.5rem 0 1rem;
-  font-size: 1.2rem;
-}
-
-.records-list {
+  padding: 40px 20px;
+  color: var(--text-muted);
   display: flex;
   flex-direction: column;
-  gap: 0.75rem;
+  align-items: center;
+  gap: 12px;
 }
 
-.record-item {
-  border: 1px solid #dee2e6;
-  border-radius: 6px;
-  padding: 1rem;
+.empty-state svg {
+  opacity: 0.3;
 }
 
-.record-header {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 0.75rem;
-  font-weight: 600;
+.empty-state p {
+  margin: 0;
+  font-size: 0.875rem;
 }
 
-.record-ip {
-  font-family: "Courier New", monospace;
-  color: #667eea;
-}
-
-.record-count {
-  color: #666;
-  font-size: 0.9rem;
-}
-
-.record-details {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
-}
-
-.result-badge {
-  padding: 0.25rem 0.75rem;
-  border-radius: 12px;
-  font-size: 0.85rem;
-  background: #e9ecef;
-  color: #495057;
-}
-
-.result-badge.pass {
-  background: #d4edda;
-  color: #155724;
-}
-
-.result-badge.fail {
-  background: #f8d7da;
-  color: #721c24;
-}
-
+/* --- Footer --- */
 .footer {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 2rem 0 1rem;
-  color: white;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border-subtle);
+  padding: 32px 0 24px;
   margin-top: auto;
 }
 
 .footer-content {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 2rem;
-  margin-bottom: 1.5rem;
+  gap: 32px;
+  margin-bottom: 24px;
 }
 
 .footer-section h4 {
-  font-size: 1rem;
+  font-size: 0.875rem;
   font-weight: 600;
-  margin-bottom: 0.75rem;
-  color: rgba(255, 255, 255, 0.95);
+  margin: 0 0 12px 0;
+  color: var(--text-main);
 }
 
 .footer-section p {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
+  font-size: 0.8125rem;
+  color: var(--text-muted);
   margin: 0;
+  line-height: 1.5;
 }
 
 .footer-links {
   display: flex;
   flex-direction: column;
-  gap: 0.5rem;
+  gap: 8px;
 }
 
 .footer-links a {
-  color: rgba(255, 255, 255, 0.8);
+  color: var(--text-muted);
   text-decoration: none;
-  font-size: 0.85rem;
+  font-size: 0.8125rem;
   transition: color 0.2s;
 }
 
 .footer-links a:hover {
-  color: rgba(255, 255, 255, 1);
-  text-decoration: underline;
+  color: var(--c-primary);
+}
+
+.github-star-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 6px 12px;
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: 6px;
+  color: var(--text-main);
+  text-decoration: none;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.github-star-link:hover {
+  border-color: var(--c-warning);
+  background: var(--c-warning-soft);
+}
+
+.github-star-link svg {
+  color: var(--c-warning);
 }
 
 .footer-bottom {
-  border-top: 1px solid rgba(255, 255, 255, 0.1);
-  padding-top: 1rem;
+  border-top: 1px solid var(--border-subtle);
+  padding-top: 16px;
   text-align: center;
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.7);
 }
 
 .footer-bottom p {
-  margin: 0.25rem 0;
+  margin: 0;
+  font-size: 0.8125rem;
+  color: var(--text-muted);
 }
 
 .footer-bottom a {
-  color: rgba(255, 255, 255, 0.9);
+  color: var(--text-main);
   text-decoration: none;
+  font-weight: 500;
 }
 
 .footer-bottom a:hover {
@@ -1271,58 +818,40 @@ code {
 }
 
 .opensource-message {
-  font-size: 0.8rem;
-  color: rgba(255, 255, 255, 0.6);
-  margin-top: 0.5rem;
+  margin-top: 6px !important;
+  font-size: 0.75rem !important;
+  opacity: 0.7;
 }
 
-.docker-image {
-  background: rgba(0, 0, 0, 0.3);
-  padding: 0.2rem 0.5rem;
-  border-radius: 4px;
-  font-family: "Courier New", monospace;
-  font-size: 0.8rem;
-  color: #88ddff;
+/* --- Utilities --- */
+.font-mono {
+  font-family: var(--font-mono);
 }
 
+/* --- Responsive --- */
 @media (max-width: 768px) {
-  .title {
-    font-size: 1.75rem;
+  .nav-container {
+    padding: 0 16px;
   }
 
-  .header-top {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 1rem;
+  .nav-title {
+    display: none;
   }
 
-  .refresh-button {
-    width: 100%;
-    justify-content: center;
+  .nav-link span {
+    display: none;
   }
 
-  .star-banner-content {
-    flex-direction: column;
-    align-items: stretch;
-    gap: 1rem;
+  .nav-link {
+    padding: 8px 10px;
   }
 
-  .star-banner-text {
-    min-width: auto;
+  .main {
+    padding: 24px 0;
   }
 
-  .star-banner-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-
-  .star-button {
-    flex: 1;
-    justify-content: center;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
+  .container {
+    padding: 0 16px;
   }
 
   .source-item {
@@ -1332,23 +861,16 @@ code {
 
   .source-ip {
     min-width: auto;
+    margin-bottom: 8px;
+  }
+
+  .source-stats {
+    width: 100%;
   }
 
   .footer-content {
     grid-template-columns: 1fr;
-    gap: 1.5rem;
-  }
-
-  .footer-section {
-    text-align: center;
-  }
-
-  .footer-links {
-    align-items: center;
-  }
-
-  .github-star-link {
-    justify-content: center;
+    gap: 24px;
   }
 }
 </style>

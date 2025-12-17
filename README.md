@@ -13,7 +13,7 @@
 
 **Monitor who's sending email on behalf of your domain. Catch spoofing. Stop phishing.**
 
-[![Dashboard Screenshot](./assets/demo.png)](https://github.com/meysam81/parse-dmarc)
+[![Parse DMARC](./assets/social-preview.png)](https://github.com/meysam81/parse-dmarc)
 
 ## Deploy Your Own Instance
 

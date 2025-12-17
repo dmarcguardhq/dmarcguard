@@ -1,0 +1,164 @@
+:root {
+  /* Brand & Semantics */
+  --c-primary: #4f46e5;
+  --c-success: #10b981;
+  --c-success-soft: #d1fae5;
+  --c-warning: #f59e0b;
+  --c-warning-soft: #fef3c7;
+  --c-danger: #ef4444;
+  --c-danger-soft: #fee2e2;
+
+  /* Neutrals (Light Mode) */
+  --bg-app: #f8fafc;
+  --bg-card: #ffffff;
+  --border-subtle: #e2e8f0;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+
+  /* Typography */
+  --font-sans: "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "JetBrains Mono", monospace;
+
+  /* Spacing */
+  --radius-card: 8px;
+  --radius-sm: 4px;
+  --radius-lg: 12px;
+
+  /* Terminal Colors (Light Mode) */
+  --terminal-bg: #fafbfc;
+  --terminal-header-bg: #f1f3f5;
+  --terminal-code-bg: #ffffff;
+  --terminal-text: #0f172a;
+  --terminal-key: #64748b;
+  --terminal-value: #0ea5e9;
+  --terminal-string: #8b5cf6;
+  --terminal-btn-bg: #f1f5f9;
+  --terminal-btn-text: #334155;
+  --terminal-btn-hover: #e2e8f0;
+  --terminal-inline-btn-bg: rgba(148, 163, 184, 0.1);
+  --terminal-inline-btn-border: rgba(148, 163, 184, 0.2);
+  --terminal-inline-btn-text: #64748b;
+  --terminal-inline-btn-hover: rgba(148, 163, 184, 0.15);
+  --terminal-inline-btn-border-hover: rgba(148, 163, 184, 0.3);
+
+  /* Code block (for raw data views) */
+  --code-bg: #1e293b;
+}
+
+/* Dark Mode Overrides */
+[data-theme="dark"] {
+  --bg-app: #0f172a;
+  --bg-card: #1e293b;
+  --border-subtle: #334155;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+  --c-success-soft: #064e3b;
+  --c-danger-soft: #7f1d1d;
+  --c-warning-soft: #78350f;
+
+  /* Terminal Colors (Dark Mode) */
+  --terminal-bg: #1e293b;
+  --terminal-header-bg: #0f172a;
+  --terminal-code-bg: #1e293b;
+  --terminal-text: #e2e8f0;
+  --terminal-key: #94a3b8;
+  --terminal-value: #38bdf8;
+  --terminal-string: #a5f3fc;
+  --terminal-btn-bg: #334155;
+  --terminal-btn-text: #f1f5f9;
+  --terminal-btn-hover: #475569;
+  --terminal-inline-btn-bg: rgba(255, 255, 255, 0.1);
+  --terminal-inline-btn-border: rgba(255, 255, 255, 0.15);
+  --terminal-inline-btn-text: #94a3b8;
+  --terminal-inline-btn-hover: rgba(255, 255, 255, 0.15);
+  --terminal-inline-btn-border-hover: rgba(255, 255, 255, 0.3);
+
+  --code-bg: #0f172a;
+}
+
+/* Base Reset & Defaults */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-size: 16px;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  background-color: var(--bg-app);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  margin: 0;
+  padding: 0;
+  line-height: 1.5;
+  transition:
+    background-color 0.3s,
+    color 0.3s;
+}
+
+/* Utility Classes */
+.font-mono {
+  font-family: var(--font-mono);
+}
+
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-success {
+  color: var(--c-success);
+}
+
+.text-warning {
+  color: var(--c-warning);
+}
+
+.text-danger {
+  color: var(--c-danger);
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg-app);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-subtle);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--text-muted);
+}
+
+/* Selection */
+::selection {
+  background: var(--c-primary);
+  color: white;
+}
+
+/* Focus Styles */
+:focus-visible {
+  outline: 2px solid var(--c-primary);
+  outline-offset: 2px;
+}
+
+/* Links */
+a {
+  color: var(--c-primary);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
