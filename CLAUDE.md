@@ -141,6 +141,7 @@ go test -v ./internal/parser/...
 ## Running the Application
 
 ### Standard Mode (Dashboard + IMAP Fetching)
+
 ```bash
 # Continuous fetching and dashboard
 ./parse-dmarc --config config.json
@@ -153,6 +154,7 @@ go test -v ./internal/parser/...
 ```
 
 ### MCP Mode (AI Assistant Integration)
+
 ```bash
 # MCP over stdio (for Claude Desktop, etc.)
 ./parse-dmarc --mcp
@@ -168,19 +170,19 @@ go test -v ./internal/parser/...
 
 ## CLI Flags
 
-| Flag | Env Var | Description |
-|------|---------|-------------|
-| `--config, -c` | `PARSE_DMARC_CONFIG` | Config file path (default: config.json) |
-| `--gen-config` | `PARSE_DMARC_GEN_CONFIG` | Generate sample config |
-| `--fetch-once` | `PARSE_DMARC_FETCH_ONCE` | Fetch reports once and exit |
-| `--serve-only` | `PARSE_DMARC_SERVE_ONLY` | Dashboard only, no fetching |
-| `--fetch-interval` | `PARSE_DMARC_FETCH_INTERVAL` | Fetch interval in seconds (default: 300) |
-| `--metrics` | `PARSE_DMARC_METRICS` | Enable Prometheus metrics (default: true) |
-| `--mcp` | `PARSE_DMARC_MCP` | Run as MCP server over stdio |
-| `--mcp-http` | `PARSE_DMARC_MCP_HTTP` | Run MCP over HTTP at address |
-| `--mcp-oauth` | `PARSE_DMARC_MCP_OAUTH` | Enable OAuth2 for MCP HTTP |
-| `--mcp-oauth-issuer` | `PARSE_DMARC_MCP_OAUTH_ISSUER` | OAuth2/OIDC issuer URL |
-| `--mcp-oauth-audience` | `PARSE_DMARC_MCP_OAUTH_AUDIENCE` | Expected token audience |
+| Flag                   | Env Var                          | Description                               |
+| ---------------------- | -------------------------------- | ----------------------------------------- |
+| `--config, -c`         | `PARSE_DMARC_CONFIG`             | Config file path (default: config.json)   |
+| `--gen-config`         | `PARSE_DMARC_GEN_CONFIG`         | Generate sample config                    |
+| `--fetch-once`         | `PARSE_DMARC_FETCH_ONCE`         | Fetch reports once and exit               |
+| `--serve-only`         | `PARSE_DMARC_SERVE_ONLY`         | Dashboard only, no fetching               |
+| `--fetch-interval`     | `PARSE_DMARC_FETCH_INTERVAL`     | Fetch interval in seconds (default: 300)  |
+| `--metrics`            | `PARSE_DMARC_METRICS`            | Enable Prometheus metrics (default: true) |
+| `--mcp`                | `PARSE_DMARC_MCP`                | Run as MCP server over stdio              |
+| `--mcp-http`           | `PARSE_DMARC_MCP_HTTP`           | Run MCP over HTTP at address              |
+| `--mcp-oauth`          | `PARSE_DMARC_MCP_OAUTH`          | Enable OAuth2 for MCP HTTP                |
+| `--mcp-oauth-issuer`   | `PARSE_DMARC_MCP_OAUTH_ISSUER`   | OAuth2/OIDC issuer URL                    |
+| `--mcp-oauth-audience` | `PARSE_DMARC_MCP_OAUTH_AUDIENCE` | Expected token audience                   |
 
 ## Code Style
 
@@ -191,6 +193,7 @@ go test -v ./internal/parser/...
 ## Key Files
 
 ### Backend
+
 - `main.go` - CLI entry point with flag parsing, signal handling
 - `internal/api/server.go` - HTTP server, API routes, metrics middleware
 - `internal/config/config.go` - Configuration loading (JSON + env vars)
@@ -202,6 +205,7 @@ go test -v ./internal/parser/...
 - `internal/metrics/metrics.go` - Prometheus metrics definitions
 
 ### Frontend
+
 - `src/App.vue` - Main Vue.js dashboard component
 - `src/components/dashboard/DashboardHero.vue` - Statistics overview
 - `src/components/dashboard/RecentReports.vue` - Reports list
@@ -211,28 +215,30 @@ go test -v ./internal/parser/...
 ## API Endpoints
 
 ### REST API
+
 - `GET /api/statistics` - Dashboard statistics
 - `GET /api/reports` - List reports (paginated: `?limit=50&offset=0`)
 - `GET /api/reports/:id` - Single report details
 - `GET /api/top-sources` - Top sending source IPs
 
 ### Metrics
+
 - `GET /metrics` - Prometheus metrics endpoint
 
 ## MCP Tools
 
 When running in MCP mode, the following tools are available:
 
-| Tool | Description |
-|------|-------------|
-| `get_statistics` | Overall DMARC compliance statistics |
-| `get_reports` | List reports with pagination |
-| `get_report_by_id` | Get detailed report by ID |
-| `get_top_source_ips` | Top sending IP addresses |
-| `get_domain_stats` | Per-domain compliance stats |
-| `get_org_stats` | Stats by reporting organization |
-| `get_spf_stats` | SPF authentication result stats |
-| `get_dkim_stats` | DKIM authentication result stats |
+| Tool                 | Description                          |
+| -------------------- | ------------------------------------ |
+| `get_statistics`     | Overall DMARC compliance statistics  |
+| `get_reports`        | List reports with pagination         |
+| `get_report_by_id`   | Get detailed report by ID            |
+| `get_top_source_ips` | Top sending IP addresses             |
+| `get_domain_stats`   | Per-domain compliance stats          |
+| `get_org_stats`      | Stats by reporting organization      |
+| `get_spf_stats`      | SPF authentication result stats      |
+| `get_dkim_stats`     | DKIM authentication result stats     |
 | `parse_dmarc_report` | Parse raw DMARC XML (base64 encoded) |
 
 ## Prometheus Metrics
@@ -240,12 +246,14 @@ When running in MCP mode, the following tools are available:
 Key metrics exposed at `/metrics`:
 
 ### Report Processing
+
 - `parse_dmarc_reports_fetched_total` - Reports fetched from IMAP
 - `parse_dmarc_reports_parsed_total` - Successfully parsed reports
 - `parse_dmarc_reports_stored_total` - Reports saved to database
 - `parse_dmarc_reports_fetch_duration_seconds` - Fetch operation duration
 
 ### DMARC Statistics
+
 - `parse_dmarc_dmarc_reports_total` - Total reports in database
 - `parse_dmarc_dmarc_messages_total` - Total messages processed
 - `parse_dmarc_dmarc_compliance_rate` - Overall compliance rate
@@ -253,6 +261,7 @@ Key metrics exposed at `/metrics`:
 - `parse_dmarc_dmarc_compliance_rate_by_domain{domain}` - Per-domain compliance
 
 ### HTTP Server
+
 - `parse_dmarc_http_requests_total{method,path,status}` - Request count
 - `parse_dmarc_http_request_duration_seconds{method,path}` - Request latency
 
@@ -295,6 +304,7 @@ Environment variables: `IMAP_HOST`, `IMAP_PORT`, `IMAP_USERNAME`, `IMAP_PASSWORD
 ## Deployment Options
 
 ### Docker
+
 ```bash
 docker run -d -p 8080:8080 \
   -e IMAP_HOST=imap.example.com \
@@ -304,12 +314,15 @@ docker run -d -p 8080:8080 \
 ```
 
 ### Docker Compose
+
 See `compose.yml` for a complete example with persistence.
 
 ### Systemd
+
 See `parse-dmarc.service` for systemd service configuration.
 
 ### Platform-Specific
+
 - **DigitalOcean**: `deploy/digitalocean/` - Packer template for Marketplace
 - **Dokploy**: `deploy/dokploy/` - Docker Compose template
 - **Coolify**: `deploy/coolify.yaml`
@@ -348,15 +361,19 @@ See `CONTRIBUTING.md` for development setup and contribution guidelines. Key are
 ## Architecture Notes
 
 ### Database Schema
+
 - `reports` table: Stores report metadata and raw JSON
 - `records` table: Stores individual record data per report
 - Build tags (`cgo`/`!cgo`) select SQLite driver at compile time
 
 ### Frontend Embedding
+
 The Vue.js frontend is built to `dist/`, copied to `internal/api/dist/`, and embedded via Go's `embed` directive. The binary is self-contained.
 
 ### MCP Integration
+
 The MCP server uses the official `modelcontextprotocol/go-sdk`. It supports:
+
 - **stdio transport**: For desktop apps like Claude Desktop
 - **HTTP/SSE transport**: For web-based MCP clients
 - **OAuth2**: Optional authentication via OIDC/token introspection
