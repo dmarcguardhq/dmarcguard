@@ -595,7 +595,7 @@ function copyValueOnly() {
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
   margin-bottom: 24px;
 }
 
@@ -676,7 +676,9 @@ function copyValueOnly() {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background 0.2s, color 0.2s;
+  transition:
+    background 0.2s,
+    color 0.2s;
   border-top: 1px solid var(--border-subtle);
   font-family: var(--font-sans);
   font-size: 0.875rem;
