@@ -23,6 +23,26 @@
   --radius-card: 8px;
   --radius-sm: 4px;
   --radius-lg: 12px;
+
+  /* Terminal Colors (Light Mode) */
+  --terminal-bg: #FAFBFC;
+  --terminal-header-bg: #F1F3F5;
+  --terminal-code-bg: #FFFFFF;
+  --terminal-text: #0F172A;
+  --terminal-key: #64748B;
+  --terminal-value: #0EA5E9;
+  --terminal-string: #8B5CF6;
+  --terminal-btn-bg: #F1F5F9;
+  --terminal-btn-text: #334155;
+  --terminal-btn-hover: #E2E8F0;
+  --terminal-inline-btn-bg: rgba(148, 163, 184, 0.1);
+  --terminal-inline-btn-border: rgba(148, 163, 184, 0.2);
+  --terminal-inline-btn-text: #64748B;
+  --terminal-inline-btn-hover: rgba(148, 163, 184, 0.15);
+  --terminal-inline-btn-border-hover: rgba(148, 163, 184, 0.3);
+  
+  /* Code block (for raw data views) */
+  --code-bg: #1E293B;
 }
 
 /* Dark Mode Overrides */
@@ -35,6 +55,26 @@
   --c-success-soft: #064e3b;
   --c-danger-soft: #7f1d1d;
   --c-warning-soft: #78350f;
+
+
+  /* Terminal Colors (Dark Mode) */
+  --terminal-bg: #1E293B;
+  --terminal-header-bg: #0F172A;
+  --terminal-code-bg: #1E293B;
+  --terminal-text: #E2E8F0;
+  --terminal-key: #94A3B8;
+  --terminal-value: #38BDF8;
+  --terminal-string: #A5F3FC;
+  --terminal-btn-bg: #334155;
+  --terminal-btn-text: #F1F5F9;
+  --terminal-btn-hover: #475569;
+  --terminal-inline-btn-bg: rgba(255, 255, 255, 0.1);
+  --terminal-inline-btn-border: rgba(255, 255, 255, 0.15);
+  --terminal-inline-btn-text: #94A3B8;
+  --terminal-inline-btn-hover: rgba(255, 255, 255, 0.15);
+  --terminal-inline-btn-border-hover: rgba(255, 255, 255, 0.3);
+  
+  --code-bg: #0F172A;
 }
 
 /* Base Reset & Defaults */

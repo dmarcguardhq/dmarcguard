@@ -591,25 +591,28 @@ function copyValueOnly() {
 }
 
 .terminal-window {
-  background: #1e293b;
+  background: var(--terminal-bg);
+  border: 1px solid var(--border-subtle);
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   margin-bottom: 24px;
 }
 
 .terminal-header {
-  background: #0f172a;
+  background: var(--terminal-header-bg);
   padding: 10px 16px;
   display: flex;
   align-items: center;
   gap: 6px;
+  border-bottom: 1px solid var(--border-subtle);
 }
 
 .dot {
   width: 10px;
   height: 10px;
   border-radius: 50%;
+  opacity: 0.6;
 }
 .red {
   background: #ef4444;
@@ -624,15 +627,17 @@ function copyValueOnly() {
 .terminal-title {
   margin-left: 8px;
   font-size: 0.75rem;
-  color: #64748b;
+  color: var(--text-muted);
   font-family: var(--font-sans);
+  font-weight: 500;
 }
 
 .code-content {
   padding: 20px;
   font-family: var(--font-mono);
   font-size: 0.875rem;
-  color: #e2e8f0;
+  color: var(--terminal-text);
+  background: var(--terminal-code-bg);
 }
 
 .line {
@@ -644,24 +649,26 @@ function copyValueOnly() {
 }
 
 .key {
-  color: #94a3b8;
+  color: var(--terminal-key);
   min-width: 50px;
+  font-weight: 500;
 }
 
 .value {
-  color: #38bdf8;
+  color: var(--terminal-value);
+  font-weight: 500;
 }
 
 .string {
-  color: #a5f3fc;
+  color: var(--terminal-string);
   word-break: break-all;
 }
 
 .btn-copy {
   width: 100%;
-  background: #334155;
+  background: var(--terminal-btn-bg);
   border: none;
-  color: white;
+  color: var(--terminal-btn-text);
   padding: 14px;
   cursor: pointer;
   font-weight: 600;
@@ -669,14 +676,14 @@ function copyValueOnly() {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  transition: background 0.2s;
-  border-top: 1px solid #475569;
+  transition: background 0.2s, color 0.2s;
+  border-top: 1px solid var(--border-subtle);
   font-family: var(--font-sans);
   font-size: 0.875rem;
 }
 
 .btn-copy:hover {
-  background: #475569;
+  background: var(--terminal-btn-hover);
 }
 
 .btn-copy.copied {
@@ -685,8 +692,8 @@ function copyValueOnly() {
 }
 
 .btn-copy-inline {
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--terminal-inline-btn-bg);
+  border: 1px solid var(--terminal-inline-btn-border);
   border-radius: 4px;
   padding: 4px 6px;
   cursor: pointer;
@@ -694,14 +701,13 @@ function copyValueOnly() {
   align-items: center;
   justify-content: center;
   transition: all 0.2s;
-  color: #94a3b8;
+  color: var(--terminal-inline-btn-text);
   margin-left: 8px;
 }
 
 .btn-copy-inline:hover {
-  background: rgba(255, 255, 255, 0.15);
-  border-color: rgba(255, 255, 255, 0.3);
-  color: #e2e8f0;
+  background: var(--terminal-inline-btn-hover);
+  border-color: var(--terminal-inline-btn-border-hover);
 }
 
 .btn-copy-inline.copied {
