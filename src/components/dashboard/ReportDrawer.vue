@@ -1,82 +1,86 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref } from "vue";
 
 const props = defineProps({
   isOpen: Boolean,
   report: {
     type: Object,
-    default: null
+    default: null,
   },
   loading: {
     type: Boolean,
-    default: false
-  }
-})
+    default: false,
+  },
+});
 
-const emit = defineEmits(['close'])
+const emit = defineEmits(["close"]);
 
-const activeTab = ref('overview')
+const activeTab = ref("overview");
 
 // Close on backdrop click
 const handleBackdropClick = () => {
-  emit('close')
-}
+  emit("close");
+};
 
 // Close on escape key
 const handleKeydown = (e) => {
-  if (e.key === 'Escape') emit('close')
-}
+  if (e.key === "Escape") emit("close");
+};
 
 // Helpers for status styling
 const getResultColor = (result) => {
-  const r = result?.toLowerCase()
-  if (r === 'pass') return 'text-success'
-  if (r === 'fail' || r === 'hardfail') return 'text-danger'
-  return 'text-warning'
-}
+  const r = result?.toLowerCase();
+  if (r === "pass") return "text-success";
+  if (r === "fail" || r === "hardfail") return "text-danger";
+  return "text-warning";
+};
 
 const getBadgeClass = (result) => {
-  const r = result?.toLowerCase()
-  if (r === 'pass') return 'badge-success'
-  if (r === 'fail' || r === 'hardfail') return 'badge-danger'
-  return 'badge-warning'
-}
+  const r = result?.toLowerCase();
+  if (r === "pass") return "badge-success";
+  if (r === "fail" || r === "hardfail") return "badge-danger";
+  return "badge-warning";
+};
 
 // Compute overall DMARC result from records
 const dmarcResult = computed(() => {
-  if (!props.report?.Records?.length) return 'unknown'
-  const hasPass = props.report.Records.some(r =>
-    r.Row?.PolicyEvaluated?.DKIM === 'pass' || r.Row?.PolicyEvaluated?.SPF === 'pass'
-  )
-  return hasPass ? 'pass' : 'fail'
-})
+  if (!props.report?.Records?.length) return "unknown";
+  const hasPass = props.report.Records.some(
+    (r) =>
+      r.Row?.PolicyEvaluated?.DKIM === "pass" ||
+      r.Row?.PolicyEvaluated?.SPF === "pass",
+  );
+  return hasPass ? "pass" : "fail";
+});
 
 // Get total message count
 const totalMessages = computed(() => {
-  if (!props.report?.Records) return 0
-  return props.report.Records.reduce((sum, r) => sum + (r.Row?.Count || 0), 0)
-})
+  if (!props.report?.Records) return 0;
+  return props.report.Records.reduce((sum, r) => sum + (r.Row?.Count || 0), 0);
+});
 
 // Format date
 const formatDate = (timestamp) => {
-  if (!timestamp) return 'N/A'
-  const date = new Date(timestamp * 1000)
-  return new Intl.DateTimeFormat('en-US', {
-    year: 'numeric',
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
-}
+  if (!timestamp) return "N/A";
+  const date = new Date(timestamp * 1000);
+  return new Intl.DateTimeFormat("en-US", {
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+};
 
 // Check alignment - simple check if domain matches header_from
 const isAligned = (authDomain, record) => {
-  if (!authDomain || !record?.Identifiers?.HeaderFrom) return false
-  const headerFrom = record.Identifiers.HeaderFrom.toLowerCase()
-  return authDomain.toLowerCase().endsWith(headerFrom) ||
-         headerFrom.endsWith(authDomain.toLowerCase())
-}
+  if (!authDomain || !record?.Identifiers?.HeaderFrom) return false;
+  const headerFrom = record.Identifiers.HeaderFrom.toLowerCase();
+  return (
+    authDomain.toLowerCase().endsWith(headerFrom) ||
+    headerFrom.endsWith(authDomain.toLowerCase())
+  );
+};
 </script>
 
 <template>
@@ -86,21 +90,35 @@ const isAligned = (authDomain, record) => {
       :class="{ 'is-open': isOpen }"
       @keydown="handleKeydown"
     >
-
       <div class="backdrop" @click="handleBackdropClick"></div>
 
       <div class="panel" @click.stop>
-
         <!-- Header -->
         <header class="panel-header" v-if="report">
           <div>
-            <h2 class="panel-title">{{ report.ReportMetadata?.OrgName || 'Report Details' }}</h2>
+            <h2 class="panel-title">
+              {{ report.ReportMetadata?.OrgName || "Report Details" }}
+            </h2>
             <div class="panel-subtitle">
-              {{ report.PolicyPublished?.Domain || 'Unknown Domain' }}
+              {{ report.PolicyPublished?.Domain || "Unknown Domain" }}
             </div>
           </div>
-          <button class="btn-close" @click="emit('close')" aria-label="Close report details panel">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+          <button
+            class="btn-close"
+            @click="emit('close')"
+            aria-label="Close report details panel"
+          >
+            <svg
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <line x1="18" y1="6" x2="6" y2="18"></line>
+              <line x1="6" y1="6" x2="18" y2="18"></line>
+            </svg>
           </button>
         </header>
 
@@ -112,7 +130,6 @@ const isAligned = (authDomain, record) => {
 
         <!-- Body -->
         <div class="panel-body" v-else-if="report">
-
           <!-- DMARC Verdict Card -->
           <div class="verdict-card" :class="getBadgeClass(dmarcResult)">
             <div class="verdict-row">
@@ -120,8 +137,16 @@ const isAligned = (authDomain, record) => {
               <span class="verdict-value">{{ dmarcResult.toUpperCase() }}</span>
             </div>
             <div class="verdict-meta">
-              <span>Policy: <strong>{{ report.PolicyPublished?.P || 'none' }}</strong></span>
-              <span>Volume: <strong>{{ totalMessages.toLocaleString() }} emails</strong></span>
+              <span
+                >Policy:
+                <strong>{{ report.PolicyPublished?.P || "none" }}</strong></span
+              >
+              <span
+                >Volume:
+                <strong
+                  >{{ totalMessages.toLocaleString() }} emails</strong
+                ></span
+              >
             </div>
           </div>
 
@@ -152,11 +177,15 @@ const isAligned = (authDomain, record) => {
             <div class="info-grid">
               <div class="info-item">
                 <span class="info-label">Report ID</span>
-                <span class="info-value font-mono">{{ report.ReportMetadata?.ReportID || 'N/A' }}</span>
+                <span class="info-value font-mono">{{
+                  report.ReportMetadata?.ReportID || "N/A"
+                }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Contact Email</span>
-                <span class="info-value">{{ report.ReportMetadata?.Email || 'N/A' }}</span>
+                <span class="info-value">{{
+                  report.ReportMetadata?.Email || "N/A"
+                }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Date Range</span>
@@ -167,15 +196,21 @@ const isAligned = (authDomain, record) => {
               </div>
               <div class="info-item">
                 <span class="info-label">DKIM Alignment</span>
-                <span class="info-value">{{ report.PolicyPublished?.ADKIM === 's' ? 'Strict' : 'Relaxed' }}</span>
+                <span class="info-value">{{
+                  report.PolicyPublished?.ADKIM === "s" ? "Strict" : "Relaxed"
+                }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">SPF Alignment</span>
-                <span class="info-value">{{ report.PolicyPublished?.ASPF === 's' ? 'Strict' : 'Relaxed' }}</span>
+                <span class="info-value">{{
+                  report.PolicyPublished?.ASPF === "s" ? "Strict" : "Relaxed"
+                }}</span>
               </div>
               <div class="info-item">
                 <span class="info-label">Subdomain Policy</span>
-                <span class="info-value">{{ report.PolicyPublished?.SP || 'Same as domain' }}</span>
+                <span class="info-value">{{
+                  report.PolicyPublished?.SP || "Same as domain"
+                }}</span>
               </div>
             </div>
           </div>
@@ -193,45 +228,82 @@ const isAligned = (authDomain, record) => {
             >
               <div class="record-header">
                 <div class="record-ip">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
-                  <span class="font-mono">{{ record.Row?.SourceIP || 'N/A' }}</span>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                    <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                    <line x1="6" y1="6" x2="6.01" y2="6" />
+                    <line x1="6" y1="18" x2="6.01" y2="18" />
+                  </svg>
+                  <span class="font-mono">{{
+                    record.Row?.SourceIP || "N/A"
+                  }}</span>
                 </div>
-                <span class="record-count">{{ record.Row?.Count || 0 }} messages</span>
+                <span class="record-count"
+                  >{{ record.Row?.Count || 0 }} messages</span
+                >
               </div>
 
               <div class="auth-grid">
                 <!-- SPF Section -->
                 <section class="auth-col">
                   <h4 class="section-heading">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                    </svg>
                     SPF
-                    <span class="status-pill" :class="getResultColor(record.Row?.PolicyEvaluated?.SPF)">
-                      {{ record.Row?.PolicyEvaluated?.SPF || 'unknown' }}
+                    <span
+                      class="status-pill"
+                      :class="getResultColor(record.Row?.PolicyEvaluated?.SPF)"
+                    >
+                      {{ record.Row?.PolicyEvaluated?.SPF || "unknown" }}
                     </span>
                   </h4>
 
                   <div
                     v-for="(spf, spfIdx) in record.AuthResults?.SPF || []"
-                    :key="'spf-'+spfIdx"
+                    :key="'spf-' + spfIdx"
                     class="auth-item"
                   >
                     <div class="auth-header">
                       <span class="domain-mono">{{ spf.Domain }}</span>
-                      <span class="status-text" :class="getResultColor(spf.Result)">
+                      <span
+                        class="status-text"
+                        :class="getResultColor(spf.Result)"
+                      >
                         {{ spf.Result?.toUpperCase() }}
                       </span>
                     </div>
                     <div class="auth-details">
-                      <span>Scope: {{ spf.Scope || 'mfrom' }}</span>
+                      <span>Scope: {{ spf.Scope || "mfrom" }}</span>
                       <span
                         v-if="isAligned(spf.Domain, record)"
                         class="alignment-tag aligned"
-                      >Aligned</span>
-                      <span v-else class="alignment-tag unaligned">Unaligned</span>
+                        >Aligned</span
+                      >
+                      <span v-else class="alignment-tag unaligned"
+                        >Unaligned</span
+                      >
                     </div>
                   </div>
 
-                  <div v-if="!record.AuthResults?.SPF?.length" class="empty-auth">
+                  <div
+                    v-if="!record.AuthResults?.SPF?.length"
+                    class="empty-auth"
+                  >
                     No SPF results
                   </div>
                 </section>
@@ -239,44 +311,74 @@ const isAligned = (authDomain, record) => {
                 <!-- DKIM Section -->
                 <section class="auth-col">
                   <h4 class="section-heading">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                    >
+                      <rect x="3" y="11" width="18" height="11" rx="2" ry="2" />
+                      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                    </svg>
                     DKIM
-                    <span class="status-pill" :class="getResultColor(record.Row?.PolicyEvaluated?.DKIM)">
-                      {{ record.Row?.PolicyEvaluated?.DKIM || 'unknown' }}
+                    <span
+                      class="status-pill"
+                      :class="getResultColor(record.Row?.PolicyEvaluated?.DKIM)"
+                    >
+                      {{ record.Row?.PolicyEvaluated?.DKIM || "unknown" }}
                     </span>
                   </h4>
 
                   <div
                     v-for="(dkim, dkimIdx) in record.AuthResults?.DKIM || []"
-                    :key="'dkim-'+dkimIdx"
+                    :key="'dkim-' + dkimIdx"
                     class="auth-item"
                   >
                     <div class="auth-header">
                       <span class="domain-mono">{{ dkim.Domain }}</span>
-                      <span class="status-text" :class="getResultColor(dkim.Result)">
+                      <span
+                        class="status-text"
+                        :class="getResultColor(dkim.Result)"
+                      >
                         {{ dkim.Result?.toUpperCase() }}
                       </span>
                     </div>
                     <div class="auth-details">
-                      <span>Selector: {{ dkim.Selector || 'N/A' }}</span>
+                      <span>Selector: {{ dkim.Selector || "N/A" }}</span>
                       <span
                         v-if="isAligned(dkim.Domain, record)"
                         class="alignment-tag aligned"
-                      >Aligned</span>
-                      <span v-else class="alignment-tag unaligned">Unaligned</span>
+                        >Aligned</span
+                      >
+                      <span v-else class="alignment-tag unaligned"
+                        >Unaligned</span
+                      >
                     </div>
                   </div>
 
-                  <div v-if="!record.AuthResults?.DKIM?.length" class="empty-auth">
+                  <div
+                    v-if="!record.AuthResults?.DKIM?.length"
+                    class="empty-auth"
+                  >
                     No DKIM signatures
                   </div>
                 </section>
               </div>
 
               <div class="record-footer">
-                <span>Disposition: <strong>{{ record.Row?.PolicyEvaluated?.Disposition || 'none' }}</strong></span>
+                <span
+                  >Disposition:
+                  <strong>{{
+                    record.Row?.PolicyEvaluated?.Disposition || "none"
+                  }}</strong></span
+                >
                 <span v-if="record.Identifiers?.HeaderFrom">
-                  From: <span class="font-mono">{{ record.Identifiers.HeaderFrom }}</span>
+                  From:
+                  <span class="font-mono">{{
+                    record.Identifiers.HeaderFrom
+                  }}</span>
                 </span>
               </div>
             </div>
@@ -285,10 +387,11 @@ const isAligned = (authDomain, record) => {
           <!-- Raw Data Tab -->
           <div v-if="activeTab === 'raw'" class="tab-content">
             <div class="raw-data-section">
-              <pre class="code-block">{{ JSON.stringify(report, null, 2) }}</pre>
+              <pre class="code-block">{{
+                JSON.stringify(report, null, 2)
+              }}</pre>
             </div>
           </div>
-
         </div>
 
         <!-- Empty State -->
@@ -338,7 +441,7 @@ const isAligned = (authDomain, record) => {
   max-width: 540px;
   background: var(--bg-card);
   border-left: 1px solid var(--border-subtle);
-  box-shadow: -4px 0 24px rgba(0,0,0,0.15);
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.15);
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
   display: flex;
@@ -411,7 +514,9 @@ const isAligned = (authDomain, record) => {
 }
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* --- Panel Body --- */
@@ -437,9 +542,21 @@ const isAligned = (authDomain, record) => {
   border: 1px solid transparent;
 }
 
-.badge-success { background: var(--c-success-soft); border-color: var(--c-success); color: var(--c-success); }
-.badge-warning { background: var(--c-warning-soft); border-color: var(--c-warning); color: var(--c-warning); }
-.badge-danger  { background: var(--c-danger-soft); border-color: var(--c-danger); color: var(--c-danger); }
+.badge-success {
+  background: var(--c-success-soft);
+  border-color: var(--c-success);
+  color: var(--c-success);
+}
+.badge-warning {
+  background: var(--c-warning-soft);
+  border-color: var(--c-warning);
+  color: var(--c-warning);
+}
+.badge-danger {
+  background: var(--c-danger-soft);
+  border-color: var(--c-danger);
+  color: var(--c-danger);
+}
 
 .verdict-row {
   display: flex;
@@ -503,8 +620,14 @@ const isAligned = (authDomain, record) => {
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(4px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 /* --- Info Grid (Overview) --- */
@@ -628,9 +751,15 @@ const isAligned = (authDomain, record) => {
   font-size: 0.7rem;
   text-transform: uppercase;
 }
-.text-success { color: var(--c-success); }
-.text-warning { color: var(--c-warning); }
-.text-danger  { color: var(--c-danger); }
+.text-success {
+  color: var(--c-success);
+}
+.text-warning {
+  color: var(--c-warning);
+}
+.text-danger {
+  color: var(--c-danger);
+}
 
 .auth-details {
   font-size: 0.7rem;
@@ -647,8 +776,14 @@ const isAligned = (authDomain, record) => {
   text-transform: uppercase;
   font-weight: 600;
 }
-.aligned { background: var(--c-success-soft); color: var(--c-success); }
-.unaligned { background: var(--border-subtle); color: var(--text-muted); }
+.aligned {
+  background: var(--c-success-soft);
+  color: var(--c-success);
+}
+.unaligned {
+  background: var(--border-subtle);
+  color: var(--text-muted);
+}
 
 .empty-auth {
   font-size: 0.8125rem;

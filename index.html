@@ -48,12 +48,13 @@
     <style>
       /* Critical CSS to prevent flash of unstyled content */
       :root {
-        --bg-app: #F8FAFC;
+        --bg-app: #f8fafc;
       }
-      [data-theme='dark'] {
-        --bg-app: #0F172A;
+      [data-theme="dark"] {
+        --bg-app: #0f172a;
       }
-      html, body {
+      html,
+      body {
         margin: 0;
         padding: 0;
         min-height: 100vh;
@@ -64,10 +65,10 @@
     <!-- Theme initialization (prevents flash) -->
     <script>
       // Minimal blocking: only use stored preference, defer system preference to later
-      (function() {
-        var theme = localStorage.getItem('theme');
+      (function () {
+        var theme = localStorage.getItem("theme");
         if (theme) {
-          document.documentElement.setAttribute('data-theme', theme);
+          document.documentElement.setAttribute("data-theme", theme);
         }
       })();
     </script>

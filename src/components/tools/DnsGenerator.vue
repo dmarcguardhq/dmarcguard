@@ -1,100 +1,119 @@
 <script setup>
-import { reactive, computed, ref } from 'vue'
+import { reactive, computed, ref } from "vue";
 
 // State for the DMARC record parts
 const config = reactive({
-  domain: 'example.com',
-  policy: 'none',
-  subdomainPolicy: '',
-  emailRua: '',
-  emailRuf: '',
+  domain: "example.com",
+  policy: "none",
+  subdomainPolicy: "",
+  emailRua: "",
+  emailRuf: "",
   pct: 100,
-  alignment: 'r'
-})
+  alignment: "r",
+});
 
-const copied = ref(false)
-const copiedValue = ref(false)
+const copied = ref(false);
+const copiedValue = ref(false);
 
 // Generate the TXT record string
 const recordValue = computed(() => {
-  let parts = ['v=DMARC1']
+  let parts = ["v=DMARC1"];
 
   // Policy
-  parts.push(`p=${config.policy}`)
+  parts.push(`p=${config.policy}`);
 
   // Subdomain Policy (only if different or explicitly set)
   if (config.subdomainPolicy && config.subdomainPolicy !== config.policy) {
-    parts.push(`sp=${config.subdomainPolicy}`)
+    parts.push(`sp=${config.subdomainPolicy}`);
   }
 
   // Percentage
   if (config.pct < 100) {
-    parts.push(`pct=${config.pct}`)
+    parts.push(`pct=${config.pct}`);
   }
 
   // Reporting URIs (handle mailto prefix logic)
   if (config.emailRua) {
-    const emails = config.emailRua.split(',').map(e =>
-      e.trim().startsWith('mailto:') ? e.trim() : `mailto:${e.trim()}`
-    )
-    parts.push(`rua=${emails.join(',')}`)
+    const emails = config.emailRua
+      .split(",")
+      .map((e) =>
+        e.trim().startsWith("mailto:") ? e.trim() : `mailto:${e.trim()}`,
+      );
+    parts.push(`rua=${emails.join(",")}`);
   }
 
   if (config.emailRuf) {
-    const emails = config.emailRuf.split(',').map(e =>
-      e.trim().startsWith('mailto:') ? e.trim() : `mailto:${e.trim()}`
-    )
-    parts.push(`ruf=${emails.join(',')}`)
+    const emails = config.emailRuf
+      .split(",")
+      .map((e) =>
+        e.trim().startsWith("mailto:") ? e.trim() : `mailto:${e.trim()}`,
+      );
+    parts.push(`ruf=${emails.join(",")}`);
   }
 
   // Alignment
-  if (config.alignment === 's') {
-    parts.push('adkim=s')
-    parts.push('aspf=s')
+  if (config.alignment === "s") {
+    parts.push("adkim=s");
+    parts.push("aspf=s");
   }
 
-  return parts.join('; ')
-})
+  return parts.join("; ");
+});
 
 // Full DNS record for copying
 const fullRecord = computed(() => {
-  return `_dmarc.${config.domain} IN TXT "${recordValue.value}"`
-})
+  return `_dmarc.${config.domain} IN TXT "${recordValue.value}"`;
+});
 
 function copyToClipboard() {
-  navigator.clipboard.writeText(fullRecord.value)
-    .then(function() {
-      copied.value = true
-      setTimeout(function() { copied.value = false }, 2000)
+  navigator.clipboard
+    .writeText(fullRecord.value)
+    .then(function () {
+      copied.value = true;
+      setTimeout(function () {
+        copied.value = false;
+      }, 2000);
     })
-    .catch(function(err) {
-      console.error('Failed to copy:', err)
-    })
+    .catch(function (err) {
+      console.error("Failed to copy:", err);
+    });
 }
 
 function copyValueOnly() {
-  navigator.clipboard.writeText(recordValue.value)
-    .then(function() {
-      copiedValue.value = true
-      setTimeout(function() { copiedValue.value = false }, 2000)
+  navigator.clipboard
+    .writeText(recordValue.value)
+    .then(function () {
+      copiedValue.value = true;
+      setTimeout(function () {
+        copiedValue.value = false;
+      }, 2000);
     })
-    .catch(function(err) {
-      console.error('Failed to copy:', err)
-    })
+    .catch(function (err) {
+      console.error("Failed to copy:", err);
+    });
 }
 </script>
 
 <template>
   <div class="generator-layout">
-
     <div class="card controls-card">
       <h2 class="card-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+          <line x1="3" y1="9" x2="21" y2="9" />
+          <line x1="9" y1="21" x2="9" y2="9" />
+        </svg>
         DMARC Record Generator
       </h2>
 
       <form class="config-form" @submit.prevent>
-
         <div class="form-group">
           <label for="domain">Target Domain</label>
           <input
@@ -103,9 +122,10 @@ function copyValueOnly() {
             v-model="config.domain"
             class="input-text"
             placeholder="example.com"
-          >
+          />
           <p class="help-text">
-            The domain you want to protect with DMARC. Reports will be sent to the email addresses you specify below (rua/ruf).
+            The domain you want to protect with DMARC. Reports will be sent to
+            the email addresses you specify below (rua/ruf).
           </p>
         </div>
 
@@ -188,7 +208,7 @@ function copyValueOnly() {
             v-model="config.emailRua"
             class="input-text"
             placeholder="dmarc-reports@example.com"
-          >
+          />
           <p class="help-text">Where Parse DMARC will fetch reports from.</p>
         </div>
 
@@ -200,8 +220,10 @@ function copyValueOnly() {
             v-model="config.emailRuf"
             class="input-text"
             placeholder="dmarc-failures@example.com"
-          >
-          <p class="help-text">Optional. Receive immediate failure notifications.</p>
+          />
+          <p class="help-text">
+            Optional. Receive immediate failure notifications.
+          </p>
         </div>
 
         <div class="form-group">
@@ -215,7 +237,7 @@ function copyValueOnly() {
               max="100"
               step="5"
               class="input-range"
-            >
+            />
             <span class="range-value">{{ config.pct }}%</span>
           </div>
           <p class="help-text">Percentage of messages to apply policy to.</p>
@@ -228,18 +250,27 @@ function copyValueOnly() {
               id="strict"
               :checked="config.alignment === 's'"
               @change="config.alignment = $event.target.checked ? 's' : 'r'"
-            >
+            />
             <label for="strict">Strict Alignment (adkim=s, aspf=s)</label>
           </div>
           <p class="help-text">Require exact domain match for SPF and DKIM.</p>
         </div>
-
       </form>
     </div>
 
     <div class="card preview-card">
       <h2 class="card-title">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+        <svg
+          width="20"
+          height="20"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <polyline points="4 17 10 11 4 5" />
+          <line x1="12" y1="19" x2="20" y2="19" />
+        </svg>
         DNS Record Preview
       </h2>
 
@@ -263,35 +294,102 @@ function copyValueOnly() {
           <div class="line break-word">
             <span class="key">Value:</span>
             <span class="string">"{{ recordValue }}"</span>
-            <button class="btn-copy-inline" @click="copyValueOnly" :class="{ copied: copiedValue }" title="Copy value only">
-              <svg v-if="!copiedValue" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-              <svg v-else width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+            <button
+              class="btn-copy-inline"
+              @click="copyValueOnly"
+              :class="{ copied: copiedValue }"
+              title="Copy value only"
+            >
+              <svg
+                v-if="!copiedValue"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path
+                  d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+                />
+              </svg>
+              <svg
+                v-else
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+              >
+                <polyline points="20 6 9 17 4 12" />
+              </svg>
             </button>
           </div>
         </div>
 
-        <button class="btn-copy" @click="copyToClipboard" :class="{ copied: copied }">
-          <svg v-if="!copied" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-          <svg v-else width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
-          {{ copied ? 'Copied!' : 'Copy Full Record' }}
+        <button
+          class="btn-copy"
+          @click="copyToClipboard"
+          :class="{ copied: copied }"
+        >
+          <svg
+            v-if="!copied"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+          </svg>
+          <svg
+            v-else
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <polyline points="20 6 9 17 4 12" />
+          </svg>
+          {{ copied ? "Copied!" : "Copy Full Record" }}
         </button>
       </div>
 
       <div class="instructions">
         <h3>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="12" y1="16" x2="12" y2="12" />
+            <line x1="12" y1="8" x2="12.01" y2="8" />
+          </svg>
           Next Steps
         </h3>
         <ol>
           <li>Log in to your DNS provider (Cloudflare, GoDaddy, etc).</li>
           <li>Create a new <strong>TXT</strong> record.</li>
-          <li>Set name/host to <code>_dmarc</code> (or <code>_dmarc.{{ config.domain }}</code>).</li>
+          <li>
+            Set name/host to <code>_dmarc</code> (or
+            <code>_dmarc.{{ config.domain }}</code
+            >).
+          </li>
           <li>Paste the value from above.</li>
           <li>Wait for DNS propagation (up to 48 hours).</li>
         </ol>
       </div>
     </div>
-
   </div>
 </template>
 
@@ -398,11 +496,11 @@ function copyValueOnly() {
 .segmented-control button.active {
   background: var(--bg-card);
   color: var(--c-primary);
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
   font-weight: 600;
 }
 
-[data-theme='dark'] .segmented-control button.active {
+[data-theme="dark"] .segmented-control button.active {
   background: var(--c-primary);
   color: white;
 }
@@ -496,7 +594,7 @@ function copyValueOnly() {
   background: #1e293b;
   border-radius: 8px;
   overflow: hidden;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   margin-bottom: 24px;
 }
 
@@ -513,9 +611,15 @@ function copyValueOnly() {
   height: 10px;
   border-radius: 50%;
 }
-.red { background: #ef4444; }
-.yellow { background: #f59e0b; }
-.green { background: #10b981; }
+.red {
+  background: #ef4444;
+}
+.yellow {
+  background: #f59e0b;
+}
+.green {
+  background: #10b981;
+}
 
 .terminal-title {
   margin-left: 8px;

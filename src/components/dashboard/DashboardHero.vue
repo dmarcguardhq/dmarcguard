@@ -1,43 +1,43 @@
 <script setup>
-import { computed } from 'vue'
+import { computed } from "vue";
 
 const props = defineProps({
   complianceScore: { type: Number, required: true },
   volume: { type: Number, default: 0 },
   sourceCount: { type: Number, default: 0 },
-  dateRange: { type: String, default: 'Last 30 Days' },
-  loading: { type: Boolean, default: false }
-})
+  dateRange: { type: String, default: "Last 30 Days" },
+  loading: { type: Boolean, default: false },
+});
 
-const emit = defineEmits(['refresh'])
+const emit = defineEmits(["refresh"]);
 
 // Determine health state based on score
 const healthState = computed(() => {
-  if (props.complianceScore >= 95) return 'secure'
-  if (props.complianceScore >= 80) return 'warning'
-  return 'critical'
-})
+  if (props.complianceScore >= 95) return "secure";
+  if (props.complianceScore >= 80) return "warning";
+  return "critical";
+});
 
 // Format numbers (e.g. 12,450)
-const fmt = (n) => new Intl.NumberFormat('en-US').format(n)
+const fmt = (n) => new Intl.NumberFormat("en-US").format(n);
 
 // Dynamic status text
 const statusMessage = computed(() => {
-  if (healthState.value === 'secure') return 'Domain Protected'
-  if (healthState.value === 'warning') return 'Compliance Issues Detected'
-  return 'Critical Authentication Gaps'
-})
+  if (healthState.value === "secure") return "Domain Protected";
+  if (healthState.value === "warning") return "Compliance Issues Detected";
+  return "Critical Authentication Gaps";
+});
 
 const statusSubtext = computed(() => {
-  if (healthState.value === 'secure') return 'Traffic is fully authenticated.'
-  if (healthState.value === 'warning') return 'Some legitimate email may be failing.'
-  return 'High risk of spoofing. Immediate action required.'
-})
+  if (healthState.value === "secure") return "Traffic is fully authenticated.";
+  if (healthState.value === "warning")
+    return "Some legitimate email may be failing.";
+  return "High risk of spoofing. Immediate action required.";
+});
 </script>
 
 <template>
   <div class="hero-container">
-
     <header class="page-header">
       <div>
         <h1 class="page-title">Dashboard</h1>
@@ -45,19 +45,60 @@ const statusSubtext = computed(() => {
       </div>
       <div class="actions">
         <button class="btn-ghost" @click="emit('refresh')" :disabled="loading">
-          <svg :class="{ spinning: loading }" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+          <svg
+            :class="{ spinning: loading }"
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" />
+            <path d="M3 3v5h5" />
+            <path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" />
+            <path d="M16 21h5v-5" />
+          </svg>
           Refresh
         </button>
       </div>
     </header>
 
     <div class="stat-grid">
-
       <div class="card health-card" :class="healthState">
         <div class="health-content">
           <div class="icon-wrapper">
-             <svg v-if="healthState === 'secure'" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg>
-            <svg v-else width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>
+            <svg
+              v-if="healthState === 'secure'"
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="m9 12 2 2 4-4" />
+            </svg>
+            <svg
+              v-else
+              width="24"
+              height="24"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              <path d="M12 8v4" />
+              <path d="M12 16h.01" />
+            </svg>
           </div>
           <div>
             <div class="stat-label">System Health</div>
@@ -75,7 +116,19 @@ const statusSubtext = computed(() => {
       <div class="card metric-card">
         <div class="metric-header">
           <span class="stat-label">Total Volume</span>
-          <svg class="icon-subtle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+          <svg
+            class="icon-subtle"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12" />
+          </svg>
         </div>
         <div class="stat-value mono">{{ fmt(volume) }}</div>
         <div class="stat-desc">Emails processed</div>
@@ -84,12 +137,26 @@ const statusSubtext = computed(() => {
       <div class="card metric-card">
         <div class="metric-header">
           <span class="stat-label">Sending Sources</span>
-          <svg class="icon-subtle" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+          <svg
+            class="icon-subtle"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+            <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+            <line x1="6" y1="6" x2="6.01" y2="6" />
+            <line x1="6" y1="18" x2="6.01" y2="18" />
+          </svg>
         </div>
         <div class="stat-value mono">{{ fmt(sourceCount) }}</div>
         <div class="stat-desc">Unique IPs detected</div>
       </div>
-
     </div>
   </div>
 </template>
@@ -150,7 +217,7 @@ const statusSubtext = computed(() => {
   border: 1px solid var(--border-subtle);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 /* --- Text Utility --- */
@@ -306,8 +373,12 @@ const statusSubtext = computed(() => {
 
 /* Spinning animation for refresh */
 @keyframes spin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .spinning {
   animation: spin 1s linear infinite;

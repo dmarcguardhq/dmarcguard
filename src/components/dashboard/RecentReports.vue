@@ -1,78 +1,89 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed } from "vue";
 
 const props = defineProps({
   reports: {
     type: Array,
-    default: () => []
-  }
-})
+    default: () => [],
+  },
+});
 
-const emit = defineEmits(['view-details'])
+const emit = defineEmits(["view-details"]);
 
-const searchQuery = ref('')
+const searchQuery = ref("");
 
 // Filter reports based on search query
 const filteredReports = computed(() => {
-  if (!searchQuery.value) return props.reports
-  const query = searchQuery.value.toLowerCase()
-  return props.reports.filter(report =>
-    report.org_name?.toLowerCase().includes(query) ||
-    report.domain?.toLowerCase().includes(query)
-  )
-})
+  if (!searchQuery.value) return props.reports;
+  const query = searchQuery.value.toLowerCase();
+  return props.reports.filter(
+    (report) =>
+      report.org_name?.toLowerCase().includes(query) ||
+      report.domain?.toLowerCase().includes(query),
+  );
+});
 
 // Helper to format dates
 const formatDate = (timestamp) => {
-  if (!timestamp) return 'N/A'
+  if (!timestamp) return "N/A";
   // Handle unix timestamp (seconds)
-  const date = new Date(timestamp * 1000)
-  return new Intl.DateTimeFormat('en-US', {
-    month: 'short',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  }).format(date)
-}
+  const date = new Date(timestamp * 1000);
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+};
 
 // Helper for status badge styling
 const getStatusClass = (report) => {
-  const rate = report.compliance_rate ?? 0
-  if (rate >= 100) return 'status-pass'
-  if (rate >= 80) return 'status-warn'
-  return 'status-fail'
-}
+  const rate = report.compliance_rate ?? 0;
+  if (rate >= 100) return "status-pass";
+  if (rate >= 80) return "status-warn";
+  return "status-fail";
+};
 
 const getStatusLabel = (report) => {
-  const rate = report.compliance_rate ?? 0
-  if (rate >= 100) return 'PASS'
-  if (rate >= 80) return 'WARN'
-  return 'FAIL'
-}
+  const rate = report.compliance_rate ?? 0;
+  if (rate >= 100) return "PASS";
+  if (rate >= 80) return "WARN";
+  return "FAIL";
+};
 
 // Get policy badge class
 const getPolicyClass = (policy) => {
-  if (policy === 'reject') return 'policy-reject'
-  if (policy === 'quarantine') return 'policy-quarantine'
-  return 'policy-none'
-}
+  if (policy === "reject") return "policy-reject";
+  if (policy === "quarantine") return "policy-quarantine";
+  return "policy-none";
+};
 </script>
 
 <template>
   <div class="card table-container">
-
     <div class="table-toolbar">
       <h2 class="section-title">Recent Reports</h2>
 
       <div class="search-wrapper">
-        <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        <svg
+          class="search-icon"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+        >
+          <circle cx="11" cy="11" r="8" />
+          <path d="m21 21-4.3-4.3" />
+        </svg>
         <input
           type="text"
           v-model="searchQuery"
           placeholder="Filter domain or org..."
           class="search-input"
           aria-label="Filter domain or organization"
-        >
+        />
       </div>
     </div>
 
@@ -97,13 +108,23 @@ const getPolicyClass = (policy) => {
             @click="emit('view-details', report)"
             class="clickable-row"
           >
-
             <td class="col-org">
               <div class="org-cell">
                 <div class="org-icon">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 21h18"/><path d="M5 21V7l8-4 8 4v14"/><path d="M17 21v-5a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v5"/></svg>
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                  >
+                    <path d="M3 21h18" />
+                    <path d="M5 21V7l8-4 8 4v14" />
+                    <path d="M17 21v-5a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v5" />
+                  </svg>
                 </div>
-                <span class="org-name">{{ report.org_name || 'Unknown' }}</span>
+                <span class="org-name">{{ report.org_name || "Unknown" }}</span>
               </div>
             </td>
 
@@ -120,8 +141,11 @@ const getPolicyClass = (policy) => {
             </td>
 
             <td class="col-policy">
-              <span class="policy-badge" :class="getPolicyClass(report.policy_p)">
-                {{ report.policy_p || 'none' }}
+              <span
+                class="policy-badge"
+                :class="getPolicyClass(report.policy_p)"
+              >
+                {{ report.policy_p || "none" }}
               </span>
             </td>
 
@@ -137,20 +161,42 @@ const getPolicyClass = (policy) => {
             </td>
 
             <td class="col-action">
-              <svg class="arrow-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+              <svg
+                class="arrow-icon"
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
             </td>
-
           </tr>
         </tbody>
       </table>
     </div>
 
     <div v-if="filteredReports.length === 0" class="empty-table">
-      <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg>
+      <svg
+        width="48"
+        height="48"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.5"
+      >
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+        <polyline points="14 2 14 8 20 8" />
+        <line x1="12" y1="18" x2="12" y2="12" />
+        <line x1="9" y1="15" x2="15" y2="15" />
+      </svg>
       <p v-if="searchQuery">No reports matching "{{ searchQuery }}"</p>
       <p v-else>No reports found.</p>
     </div>
-
   </div>
 </template>
 
@@ -298,7 +344,9 @@ td {
 
 .arrow-icon {
   color: var(--border-subtle);
-  transition: transform 0.2s, color 0.2s;
+  transition:
+    transform 0.2s,
+    color 0.2s;
 }
 
 /* --- Policy Badge --- */
@@ -396,7 +444,8 @@ td {
     width: 100%;
   }
 
-  th, td {
+  th,
+  td {
     padding: 12px 16px;
   }
 }

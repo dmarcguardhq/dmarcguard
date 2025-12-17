@@ -1,144 +1,142 @@
 <script setup>
-import { computed, onMounted, onUnmounted, ref } from 'vue'
-import DashboardHero from './components/dashboard/DashboardHero.vue'
-import RecentReports from './components/dashboard/RecentReports.vue'
-import ReportDrawer from './components/dashboard/ReportDrawer.vue'
-import DnsGenerator from './components/tools/DnsGenerator.vue'
-import './assets/base.css'
+import { computed, onMounted, onUnmounted, ref } from "vue";
+import DashboardHero from "./components/dashboard/DashboardHero.vue";
+import RecentReports from "./components/dashboard/RecentReports.vue";
+import ReportDrawer from "./components/dashboard/ReportDrawer.vue";
+import DnsGenerator from "./components/tools/DnsGenerator.vue";
+import "./assets/base.css";
 
 // State
-const statistics = ref(null)
-const topSources = ref([])
-const reports = ref([])
-const selectedReport = ref(null)
-const loading = ref(true)
-const loadingDetail = ref(false)
-const isDrawerOpen = ref(false)
-const currentView = ref('dashboard') // 'dashboard' | 'generator'
-const theme = ref('light')
+const statistics = ref(null);
+const topSources = ref([]);
+const reports = ref([]);
+const selectedReport = ref(null);
+const loading = ref(true);
+const loadingDetail = ref(false);
+const isDrawerOpen = ref(false);
+const currentView = ref("dashboard"); // 'dashboard' | 'generator'
+const theme = ref("light");
 
 // Auto-refresh interval
-let refreshInterval = null
+let refreshInterval = null;
 
 // Theme management
 const initTheme = () => {
-  const savedTheme = localStorage.getItem('theme')
-  const systemPrefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches
-  theme.value = savedTheme || (systemPrefersDark ? 'dark' : 'light')
-  document.documentElement.setAttribute('data-theme', theme.value)
-}
+  const savedTheme = localStorage.getItem("theme");
+  const systemPrefersDark = window.matchMedia(
+    "(prefers-color-scheme: dark)",
+  ).matches;
+  theme.value = savedTheme || (systemPrefersDark ? "dark" : "light");
+  document.documentElement.setAttribute("data-theme", theme.value);
+};
 
 const toggleTheme = () => {
-  theme.value = theme.value === 'light' ? 'dark' : 'light'
-  document.documentElement.setAttribute('data-theme', theme.value)
-  localStorage.setItem('theme', theme.value)
-}
+  theme.value = theme.value === "light" ? "dark" : "light";
+  document.documentElement.setAttribute("data-theme", theme.value);
+  localStorage.setItem("theme", theme.value);
+};
 
 // Data fetching
 const fetchStatistics = async () => {
   try {
-    const response = await fetch('/api/statistics')
-    statistics.value = await response.json()
+    const response = await fetch("/api/statistics");
+    statistics.value = await response.json();
   } catch (error) {
-    console.error('Failed to fetch statistics:', error)
+    console.error("Failed to fetch statistics:", error);
   }
-}
+};
 
 const fetchTopSources = async () => {
   try {
-    const response = await fetch('/api/top-sources?limit=10')
-    topSources.value = await response.json()
+    const response = await fetch("/api/top-sources?limit=10");
+    topSources.value = await response.json();
   } catch (error) {
-    console.error('Failed to fetch top sources:', error)
+    console.error("Failed to fetch top sources:", error);
   }
-}
+};
 
 const fetchReports = async () => {
   try {
-    const response = await fetch('/api/reports?limit=20')
-    reports.value = await response.json()
+    const response = await fetch("/api/reports?limit=20");
+    reports.value = await response.json();
   } catch (error) {
-    console.error('Failed to fetch reports:', error)
+    console.error("Failed to fetch reports:", error);
   }
-}
+};
 
 const loadData = async () => {
-  loading.value = true
-  await Promise.all([
-    fetchStatistics(),
-    fetchTopSources(),
-    fetchReports()
-  ])
-  loading.value = false
-}
+  loading.value = true;
+  await Promise.all([fetchStatistics(), fetchTopSources(), fetchReports()]);
+  loading.value = false;
+};
 
 const refreshData = () => {
-  loadData()
-}
+  loadData();
+};
 
 // Report detail handling
 const openReportDetails = async (report) => {
-  isDrawerOpen.value = true
-  loadingDetail.value = true
+  isDrawerOpen.value = true;
+  loadingDetail.value = true;
   try {
-    const response = await fetch(`/api/reports/${report.id}`)
-    selectedReport.value = await response.json()
+    const response = await fetch(`/api/reports/${report.id}`);
+    selectedReport.value = await response.json();
   } catch (error) {
-    console.error('Failed to fetch report details:', error)
-    selectedReport.value = null
+    console.error("Failed to fetch report details:", error);
+    selectedReport.value = null;
   } finally {
-    loadingDetail.value = false
+    loadingDetail.value = false;
   }
-}
+};
 
 const closeDrawer = () => {
-  isDrawerOpen.value = false
+  isDrawerOpen.value = false;
   setTimeout(() => {
-    selectedReport.value = null
-  }, 300)
-}
+    selectedReport.value = null;
+  }, 300);
+};
 
 // Computed values for hero component
 const complianceScore = computed(() => {
-  return statistics.value?.compliance_rate ?? 0
-})
+  return statistics.value?.compliance_rate ?? 0;
+});
 
 const totalVolume = computed(() => {
-  return statistics.value?.total_messages ?? 0
-})
+  return statistics.value?.total_messages ?? 0;
+});
 
 const sourceCount = computed(() => {
-  return statistics.value?.unique_source_ips ?? 0
-})
+  return statistics.value?.unique_source_ips ?? 0;
+});
 
 // Helpers
 const getPassPercentage = (source) => {
-  const total = source.count
-  return total > 0 ? (source.pass / total) * 100 : 0
-}
+  const total = source.count;
+  return total > 0 ? (source.pass / total) * 100 : 0;
+};
 
 const getFailPercentage = (source) => {
-  const total = source.count
-  return total > 0 ? (source.fail / total) * 100 : 0
-}
+  const total = source.count;
+  return total > 0 ? (source.fail / total) * 100 : 0;
+};
 
 const formatNumber = (num) => {
-  return new Intl.NumberFormat().format(num)
-}
+  return new Intl.NumberFormat().format(num);
+};
 
 // Lifecycle
 onMounted(() => {
-  initTheme()
-  loadData()
+  initTheme();
+  loadData();
   // Auto-refresh every 5 minutes
-  refreshInterval = setInterval(loadData, 5 * 60 * 1000)
-})
+  refreshInterval = setInterval(loadData, 5 * 60 * 1000);
+});
 
 onUnmounted(() => {
   if (refreshInterval) {
-    clearInterval(refreshInterval)
+    clearInterval(refreshInterval);
   }
-})
+});
 </script>
 
 <template>
@@ -147,7 +145,18 @@ onUnmounted(() => {
     <nav class="nav">
       <div class="nav-container">
         <div class="nav-brand">
-          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <svg
+            width="28"
+            height="28"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
           <span class="nav-title">Parse DMARC</span>
         </div>
 
@@ -157,7 +166,19 @@ onUnmounted(() => {
             :class="{ active: currentView === 'dashboard' }"
             @click="currentView = 'dashboard'"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="7" height="9" />
+              <rect x="14" y="3" width="7" height="5" />
+              <rect x="14" y="12" width="7" height="9" />
+              <rect x="3" y="16" width="7" height="5" />
+            </svg>
             Dashboard
           </button>
           <button
@@ -165,15 +186,58 @@ onUnmounted(() => {
             :class="{ active: currentView === 'generator' }"
             @click="currentView = 'generator'"
           >
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/></svg>
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <rect x="3" y="3" width="18" height="18" rx="2" ry="2" />
+              <line x1="3" y1="9" x2="21" y2="9" />
+              <line x1="9" y1="21" x2="9" y2="9" />
+            </svg>
             DNS Generator
           </button>
         </div>
 
         <div class="nav-actions">
           <button class="btn-theme" @click="toggleTheme" title="Toggle theme">
-            <svg v-if="theme === 'light'" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2"/><path d="M12 20v2"/><path d="m4.93 4.93 1.41 1.41"/><path d="m17.66 17.66 1.41 1.41"/><path d="M2 12h2"/><path d="M20 12h2"/><path d="m6.34 17.66-1.41 1.41"/><path d="m19.07 4.93-1.41 1.41"/></svg>
-            <svg v-else width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+            <svg
+              v-if="theme === 'light'"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="4" />
+              <path d="M12 2v2" />
+              <path d="M12 20v2" />
+              <path d="m4.93 4.93 1.41 1.41" />
+              <path d="m17.66 17.66 1.41 1.41" />
+              <path d="M2 12h2" />
+              <path d="M20 12h2" />
+              <path d="m6.34 17.66-1.41 1.41" />
+              <path d="m19.07 4.93-1.41 1.41" />
+            </svg>
+            <svg
+              v-else
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
           </button>
           <a
             href="https://github.com/meysam81/parse-dmarc"
@@ -182,7 +246,11 @@ onUnmounted(() => {
             class="nav-github"
             title="Star on GitHub"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"
+              />
+            </svg>
           </a>
         </div>
       </div>
@@ -205,7 +273,19 @@ onUnmounted(() => {
           <section class="section">
             <div class="card sources-card">
               <h2 class="section-title">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="2" y="2" width="20" height="8" rx="2" ry="2" />
+                  <rect x="2" y="14" width="20" height="8" rx="2" ry="2" />
+                  <line x1="6" y1="6" x2="6.01" y2="6" />
+                  <line x1="6" y1="18" x2="6.01" y2="18" />
+                </svg>
                 Top Sending Sources
               </h2>
 
@@ -238,8 +318,21 @@ onUnmounted(() => {
                 </div>
               </div>
               <div v-else class="empty-state">
-                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-                <p>No data available yet. Reports will appear here once fetched.</p>
+                <svg
+                  width="40"
+                  height="40"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.5"
+                >
+                  <circle cx="12" cy="12" r="10" />
+                  <line x1="12" y1="8" x2="12" y2="12" />
+                  <line x1="12" y1="16" x2="12.01" y2="16" />
+                </svg>
+                <p>
+                  No data available yet. Reports will appear here once fetched.
+                </p>
               </div>
             </div>
           </section>
@@ -257,7 +350,9 @@ onUnmounted(() => {
         <template v-else-if="currentView === 'generator'">
           <div class="page-header">
             <h1 class="page-title">DMARC DNS Generator</h1>
-            <p class="page-subtitle">Generate your DMARC TXT record for DNS configuration</p>
+            <p class="page-subtitle">
+              Generate your DMARC TXT record for DNS configuration
+            </p>
           </div>
           <DnsGenerator />
         </template>
@@ -285,29 +380,72 @@ onUnmounted(() => {
               rel="noopener noreferrer"
               class="github-star-link"
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+              >
+                <polygon
+                  points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"
+                />
+              </svg>
               <span>Star on GitHub</span>
             </a>
           </div>
           <div class="footer-section">
             <h4>Links</h4>
             <div class="footer-links">
-              <a href="https://github.com/meysam81/parse-dmarc" target="_blank" rel="noopener">GitHub</a>
-              <a href="https://github.com/meysam81/parse-dmarc/issues" target="_blank" rel="noopener">Issues</a>
-              <a href="https://github.com/meysam81/parse-dmarc/blob/main/README.md" target="_blank" rel="noopener">Documentation</a>
+              <a
+                href="https://github.com/meysam81/parse-dmarc"
+                target="_blank"
+                rel="noopener"
+                >GitHub</a
+              >
+              <a
+                href="https://github.com/meysam81/parse-dmarc/issues"
+                target="_blank"
+                rel="noopener"
+                >Issues</a
+              >
+              <a
+                href="https://github.com/meysam81/parse-dmarc/blob/main/README.md"
+                target="_blank"
+                rel="noopener"
+                >Documentation</a
+              >
             </div>
           </div>
           <div class="footer-section">
             <h4>Resources</h4>
             <div class="footer-links">
-              <a href="https://datatracker.ietf.org/doc/html/rfc7489" target="_blank" rel="noopener">RFC 7489</a>
-              <a href="https://dmarc.org/" target="_blank" rel="noopener">DMARC.org</a>
-              <a href="https://github.com/meysam81/parse-dmarc/blob/main/LICENSE" target="_blank" rel="noopener">Apache-2.0 License</a>
+              <a
+                href="https://datatracker.ietf.org/doc/html/rfc7489"
+                target="_blank"
+                rel="noopener"
+                >RFC 7489</a
+              >
+              <a href="https://dmarc.org/" target="_blank" rel="noopener"
+                >DMARC.org</a
+              >
+              <a
+                href="https://github.com/meysam81/parse-dmarc/blob/main/LICENSE"
+                target="_blank"
+                rel="noopener"
+                >Apache-2.0 License</a
+              >
             </div>
           </div>
         </div>
         <div class="footer-bottom">
-          <p>Built with <a href="https://vuejs.org/" target="_blank" rel="noopener">Vue 3</a> + <a href="https://golang.org/" target="_blank" rel="noopener">Go</a></p>
+          <p>
+            Built with
+            <a href="https://vuejs.org/" target="_blank" rel="noopener"
+              >Vue 3</a
+            >
+            +
+            <a href="https://golang.org/" target="_blank" rel="noopener">Go</a>
+          </p>
           <p class="opensource-message">Free and Open Source Software</p>
         </div>
       </div>
