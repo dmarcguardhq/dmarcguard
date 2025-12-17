@@ -104,6 +104,9 @@ function copyValueOnly() {
             class="input-text"
             placeholder="example.com"
           >
+          <p class="help-text">
+            The domain you want to protect with DMARC. Reports will be sent to the email addresses you specify below (rua/ruf).
+          </p>
         </div>
 
         <div class="form-group">
