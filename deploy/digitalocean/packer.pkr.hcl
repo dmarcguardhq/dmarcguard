@@ -41,9 +41,20 @@ variable "droplet_size" {
   default     = "s-1vcpu-1gb"
 }
 
+variable "base_image" {
+  type        = string
+  description = <<EOT
+The DigitalOcean image slug or snapshot ID to use as the base image.
+Default is "ubuntu-24-04-x64" (the latest Ubuntu 24.04 LTS image at build time).
+For reproducible builds, specify a snapshot ID (e.g., "12345678").
+See https://docs.digitalocean.com/products/images/ for details.
+EOT
+  default     = "ubuntu-24-04-x64"
+}
+
 source "digitalocean" "parse-dmarc" {
   api_token     = var.do_api_token
-  image         = "ubuntu-24-04-x64"
+  image         = var.base_image
   region        = var.droplet_region
   size          = var.droplet_size
   ssh_username  = "root"

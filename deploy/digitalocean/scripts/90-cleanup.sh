@@ -32,7 +32,10 @@ truncate -s 0 /etc/machine-id
 rm -f /var/lib/dbus/machine-id
 
 # Clear cloud-init state
-cloud-init clean --logs || true
+# Only clean cloud-init if present; fail if cleaning fails
+if command -v cloud-init >/dev/null 2>&1; then
+    cloud-init clean --logs
+fi
 
 # Remove any sensitive data
 rm -f /root/.ssh/authorized_keys

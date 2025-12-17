@@ -1,6 +1,6 @@
 services:
   parse-dmarc:
-    image: meysam81/parse-dmarc:v1
+    image: meysam81/parse-dmarc:${PARSE_DMARC_VERSION:-v1}
     restart: unless-stopped
     environment:
       - DATABASE_PATH=/data/parse-dmarc.db
@@ -15,7 +15,7 @@ services:
       - PARSE_DMARC_FETCH_INTERVAL=${FETCH_INTERVAL:-300}
       - PARSE_DMARC_METRICS=${METRICS_ENABLED:-true}
     ports:
-      - 8080
+      - 8080:8080
     volumes:
       - parse-dmarc-data:/data
     healthcheck:

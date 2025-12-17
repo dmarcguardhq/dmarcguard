@@ -23,10 +23,10 @@ path = "/"
 
 [config.env]
 env = [
-    "IMAP_HOST=",
+    "IMAP_HOST=REQUIRED",
     "IMAP_PORT=993",
-    "IMAP_USERNAME=",
-    "IMAP_PASSWORD=",
+    "IMAP_USERNAME=REQUIRED",
+    "IMAP_PASSWORD=REQUIRED",
     "IMAP_MAILBOX=INBOX",
     "IMAP_USE_TLS=true",
     "FETCH_INTERVAL=300",

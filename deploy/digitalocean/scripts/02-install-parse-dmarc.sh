@@ -17,13 +17,14 @@ fi
 
 echo "==> Downloading from: ${DOWNLOAD_URL}"
 cd /tmp
-curl -sLO "$DOWNLOAD_URL"
+TARBALL="$(basename "$DOWNLOAD_URL")"
+curl -sLo "$TARBALL" "$DOWNLOAD_URL"
 
 # Extract and install
-tar -xzf parse-dmarc_*.tar.gz
+tar -xzf "$TARBALL"
 mv parse-dmarc /opt/parse-dmarc/parse-dmarc
 chmod +x /opt/parse-dmarc/parse-dmarc
-rm -f parse-dmarc_*.tar.gz
+rm -f "$TARBALL"
 
 # Create symlink
 ln -sf /opt/parse-dmarc/parse-dmarc /usr/local/bin/parse-dmarc
