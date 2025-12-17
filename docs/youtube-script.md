@@ -3,16 +3,18 @@
 ## SEO Keyword Strategy
 
 ### Primary High-Intent Keywords (Target in Title/Description)
-| Keyword | Search Intent | Competition |
-|---------|---------------|-------------|
-| DMARC monitoring tool | Solution-aware | Medium |
-| emails going to spam fix | Problem-aware | High |
-| self-hosted DMARC analyzer | Solution-aware | Low |
-| DMARC setup guide 2025 | How-to | Medium |
-| email deliverability fix | Problem-aware | High |
-| read DMARC reports | How-to | Medium |
+
+| Keyword                    | Search Intent  | Competition |
+| -------------------------- | -------------- | ----------- |
+| DMARC monitoring tool      | Solution-aware | Medium      |
+| emails going to spam fix   | Problem-aware  | High        |
+| self-hosted DMARC analyzer | Solution-aware | Low         |
+| DMARC setup guide 2025     | How-to         | Medium      |
+| email deliverability fix   | Problem-aware  | High        |
+| read DMARC reports         | How-to         | Medium      |
 
 ### Adjacent Keywords (Natural inclusion in script)
+
 - SPF DKIM DMARC setup
 - Google Yahoo email requirements 2024/2025
 - email authentication tutorial
@@ -24,6 +26,7 @@
 - email spoofing protection
 
 ### Long-tail Keywords (For description/tags)
+
 - "why are my emails going to spam"
 - "how to fix email deliverability"
 - "free DMARC monitoring tool"
@@ -36,12 +39,14 @@
 ## Video Metadata Recommendations
 
 ### Title Options (Pick One)
+
 1. **"Stop Emails Going to Spam: Self-Hosted DMARC Monitoring (Free & Open Source)"** ← RECOMMENDED
 2. "DMARC Monitoring in 5 Minutes: Free Tool That Actually Works"
 3. "I Built a DMARC Dashboard So You Don't Have To (Self-Hosted)"
 4. "Why Your Emails Land in Spam & How to Fix It (DMARC Tutorial 2025)"
 
 ### Description (Copy-paste ready)
+
 ```
 Are your emails going to spam? With Google & Yahoo's new requirements and 87% of domains lacking proper DMARC protection, email deliverability is harder than ever.
 
@@ -74,6 +79,7 @@ In this video, I'll show you Parse DMARC - a free, open-source, self-hosted DMAR
 ```
 
 ### Tags (Copy-paste ready)
+
 ```
 dmarc, dmarc monitoring, dmarc setup, email going to spam, fix email deliverability, spf dkim dmarc, email authentication, dmarc tutorial, self hosted, open source, email security, google email requirements, yahoo email requirements, dmarc reports, dmarc analyzer, homelab, devops, email marketing, bulk sender, domain reputation, email spoofing, phishing protection, parse dmarc, mcp claude ai
 ```
@@ -83,6 +89,7 @@ dmarc, dmarc monitoring, dmarc setup, email going to spam, fix email deliverabil
 ## Video Script
 
 ### HOOK (0:00 - 0:30)
+
 **[Screen: Email in spam folder or "Message blocked" notification]**
 
 ```
@@ -106,6 +113,7 @@ tool that takes 30 seconds to deploy.
 ---
 
 ### PROBLEM AGITATION (0:30 - 1:45)
+
 **[Screen: Statistics graphics, news headlines about email changes]**
 
 ```
@@ -137,6 +145,7 @@ to some SaaS tool that's holding your data hostage.
 ---
 
 ### QUICK DMARC EXPLAINER (1:45 - 3:30)
+
 **[Screen: Simple animated diagram or whiteboard explanation]**
 
 ```
@@ -178,6 +187,7 @@ That's where Parse DMARC comes in.
 ---
 
 ### THE PROBLEM WITH EXISTING TOOLS (3:30 - 5:00)
+
 **[Screen: Pricing pages of competitors, then Parse DMARC comparison]**
 
 ```
@@ -218,6 +228,7 @@ Let me show you what it does.
 ---
 
 ### DEMO & FEATURES (5:00 - 7:30)
+
 **[Screen: Live dashboard walkthrough]**
 
 ```
@@ -276,6 +287,7 @@ Get notified the moment something goes wrong.
 ---
 
 ### INSTALLATION (7:30 - 9:00)
+
 **[Screen: Terminal with Docker commands]**
 
 ```
@@ -320,6 +332,7 @@ Whatever your deployment style, it's covered.
 ---
 
 ### READING YOUR REPORTS (9:00 - 10:30)
+
 **[Screen: Dashboard with real report data - blur sensitive IPs if needed]**
 
 ```
@@ -365,6 +378,7 @@ That's how you know your email authentication is solid.
 ---
 
 ### AI INTEGRATION - MCP (10:30 - 11:30)
+
 **[Screen: Claude Desktop or similar with MCP integration]**
 
 ```
@@ -406,6 +420,7 @@ is exactly the kind of workflow I want in 2025.
 ---
 
 ### CALL TO ACTION & WRAP-UP (11:30 - 12:30)
+
 **[Screen: GitHub page, then face cam or logo]**
 
 ```
@@ -444,35 +459,38 @@ See you in the next one.
 
 ## B-Roll Shot List
 
-| Timestamp | Shot Description |
-|-----------|------------------|
-| 0:00-0:15 | Email landing in spam folder (screen recording) |
-| 0:15-0:30 | Quick cuts: Dashboard → Docker → Terminal |
-| 0:45-1:00 | Statistics graphics (animated text overlays) |
-| 1:45-3:30 | Animated diagram: SPF → DKIM → DMARC flow |
-| 3:00-3:15 | Raw XML DMARC report (ugly code view) |
-| 3:30-5:00 | Competitor pricing pages (blur logos if needed) |
-| 5:00-7:30 | Full dashboard walkthrough (live recording) |
-| 7:30-9:00 | Terminal: Docker commands being typed |
-| 9:00-10:30 | Dashboard: Report analysis |
-| 10:30-11:30 | MCP/AI demo (Claude Desktop or similar) |
-| 11:30-12:30 | GitHub repo, Star button, Subscribe animation |
+| Timestamp   | Shot Description                                |
+| ----------- | ----------------------------------------------- |
+| 0:00-0:15   | Email landing in spam folder (screen recording) |
+| 0:15-0:30   | Quick cuts: Dashboard → Docker → Terminal       |
+| 0:45-1:00   | Statistics graphics (animated text overlays)    |
+| 1:45-3:30   | Animated diagram: SPF → DKIM → DMARC flow       |
+| 3:00-3:15   | Raw XML DMARC report (ugly code view)           |
+| 3:30-5:00   | Competitor pricing pages (blur logos if needed) |
+| 5:00-7:30   | Full dashboard walkthrough (live recording)     |
+| 7:30-9:00   | Terminal: Docker commands being typed           |
+| 9:00-10:30  | Dashboard: Report analysis                      |
+| 10:30-11:30 | MCP/AI demo (Claude Desktop or similar)         |
+| 11:30-12:30 | GitHub repo, Star button, Subscribe animation   |
 
 ---
 
 ## Thumbnail Concepts
 
 **Option A (Problem-focused):**
+
 - Split screen: Left = sad face + "SPAM" red stamp, Right = happy face + inbox
 - Text: "FIX DMARC" in bold
 - Small: "FREE TOOL" badge
 
 **Option B (Tool-focused):**
+
 - Dashboard screenshot with blur effect
 - Face cam reaction (surprised/excited)
 - Text: "This FREE Tool..."
 
 **Option C (Stats hook):**
+
 - Large "87%" text
 - Subtext: "of domains are VULNERABLE"
 - Arrow pointing to dashboard preview
