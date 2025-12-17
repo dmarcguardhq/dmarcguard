@@ -1,6 +1,7 @@
 :root {
   /* Brand & Semantics */
   --c-primary: #4f46e5;
+  --c-primary-soft: #eef2ff;
   --c-success: #10b981;
   --c-success-soft: #d1fae5;
   --c-warning: #f59e0b;
@@ -52,6 +53,7 @@
   --border-subtle: #334155;
   --text-main: #f1f5f9;
   --text-muted: #94a3b8;
+  --c-primary-soft: #312e81;
   --c-success-soft: #064e3b;
   --c-danger-soft: #7f1d1d;
   --c-warning-soft: #78350f;

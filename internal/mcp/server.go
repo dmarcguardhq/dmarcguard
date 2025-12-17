@@ -82,10 +82,11 @@ Available tools:
 func (s *Server) loggingMiddleware() mcp.Middleware {
 	return func(next mcp.MethodHandler) mcp.MethodHandler {
 		return func(ctx context.Context, method string, req mcp.Request) (mcp.Result, error) {
-			logger := s.logger.With().
-				Str("method", method).
-				Str("session_id", req.GetSession().ID()).
-				Logger()
+			logCtx := s.logger.With().Str("method", method)
+			if session := req.GetSession(); session != nil {
+				logCtx = logCtx.Str("session_id", session.ID())
+			}
+			logger := logCtx.Logger()
 
 			logger.Debug().
 				Bool("has_params", req.GetParams() != nil).
@@ -131,8 +132,9 @@ func (s *Server) RunStdio(ctx context.Context) error {
 	return s.mcpServer.Run(ctx, &mcp.StdioTransport{})
 }
 
-// RunHTTP runs the MCP server over HTTP/SSE transport.
-func (s *Server) RunHTTP(ctx context.Context, addr string, oauthCfg *oauth.Config) error {
+// Handler returns an http.Handler for the MCP server that can be mounted
+// on an existing HTTP server. The basePath is used for OAuth metadata URLs.
+func (s *Server) Handler(basePath string, oauthCfg *oauth.Config) (http.Handler, error) {
 	mcpHandler := mcp.NewStreamableHTTPHandler(func(*http.Request) *mcp.Server {
 		return s.mcpServer
 	}, nil)
@@ -146,7 +148,7 @@ func (s *Server) RunHTTP(ctx context.Context, addr string, oauthCfg *oauth.Confi
 	// Check if OAuth is enabled and properly configured
 	if oauthCfg != nil && oauthCfg.Enabled {
 		if err := oauthCfg.Validate(); err != nil {
-			return fmt.Errorf("OAuth config validation failed: %w", err)
+			return nil, fmt.Errorf("OAuth config validation failed: %w", err)
 		}
 
 		// Register the Protected Resource Metadata endpoint (RFC 9728)
@@ -165,12 +167,22 @@ func (s *Server) RunHTTP(ctx context.Context, addr string, oauthCfg *oauth.Confi
 				Str("audience", oauthCfg.Audience).
 				Strs("scopes", oauthCfg.RequiredScopes).
 				Str("metadata_url", oauth.GetMetadataURL(oauthCfg.ResourceServerURL)).
-				Msg("OAuth2 authentication enabled")
+				Msg("OAuth2 authentication enabled for MCP")
 		}
 	}
 
 	// Register the MCP handler (with or without auth middleware)
 	mux.Handle("/", handler)
+
+	return mux, nil
+}
+
+// RunHTTP runs the MCP server over HTTP/SSE transport.
+func (s *Server) RunHTTP(ctx context.Context, addr string, oauthCfg *oauth.Config) error {
+	handler, err := s.Handler("", oauthCfg)
+	if err != nil {
+		return err
+	}
 
 	if s.logger != nil {
 		s.logger.Info().Str("addr", addr).Msg("starting MCP server over HTTP")
@@ -178,7 +190,7 @@ func (s *Server) RunHTTP(ctx context.Context, addr string, oauthCfg *oauth.Confi
 
 	server := &http.Server{
 		Addr:           addr,
-		Handler:        mux,
+		Handler:        handler,
 		ReadTimeout:    15 * time.Second,
 		WriteTimeout:   15 * time.Second,
 		IdleTimeout:    60 * time.Second,

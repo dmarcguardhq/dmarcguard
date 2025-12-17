@@ -393,3 +393,52 @@ func (s *Storage) GetDKIMStats() ([]AuthResultStats, error) {
 	}
 	return stats, nil
 }
+
+// Setting represents a key-value setting
+type Setting struct {
+	Key       string `json:"key"`
+	Value     string `json:"value"`
+	UpdatedAt int64  `json:"updated_at"`
+}
+
+// GetSetting retrieves a setting by key. Returns empty string if not found.
+func (s *Storage) GetSetting(key string) (string, error) {
+	var value string
+	err := s.db.QueryRow("SELECT value FROM settings WHERE key = ?", key).Scan(&value)
+	if err == sql.ErrNoRows {
+		return "", nil
+	}
+	if err != nil {
+		return "", err
+	}
+	return value, nil
+}
+
+// SetSetting stores or updates a setting.
+func (s *Storage) SetSetting(key, value string) error {
+	_, err := s.db.Exec(`
+		INSERT INTO settings (key, value, updated_at)
+		VALUES (?, ?, ?)
+		ON CONFLICT(key) DO UPDATE SET value = excluded.value, updated_at = excluded.updated_at
+	`, key, value, time.Now().Unix())
+	return err
+}
+
+// GetAllSettings retrieves all settings.
+func (s *Storage) GetAllSettings() ([]Setting, error) {
+	rows, err := s.db.Query("SELECT key, value, updated_at FROM settings ORDER BY key")
+	if err != nil {
+		return nil, err
+	}
+	defer func() { _ = rows.Close() }()
+
+	var settings []Setting
+	for rows.Next() {
+		var setting Setting
+		if err := rows.Scan(&setting.Key, &setting.Value, &setting.UpdatedAt); err != nil {
+			return nil, err
+		}
+		settings = append(settings, setting)
+	}
+	return settings, nil
+}

@@ -63,6 +63,12 @@ func (s *Storage) init() error {
 	CREATE INDEX IF NOT EXISTS idx_reports_domain ON reports(domain);
 	CREATE INDEX IF NOT EXISTS idx_records_report_id ON records(report_id);
 	CREATE INDEX IF NOT EXISTS idx_records_source_ip ON records(source_ip);
+
+	CREATE TABLE IF NOT EXISTS settings (
+		key TEXT PRIMARY KEY NOT NULL,
+		value TEXT NOT NULL,
+		updated_at INTEGER NOT NULL
+	);
 	`
 
 	_, err := s.db.Exec(schema)
