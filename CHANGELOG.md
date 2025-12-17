@@ -1,5 +1,24 @@
 # Changelog
 
+## [1.4.0](https://github.com/meysam81/parse-dmarc/compare/v1.3.10...v1.4.0) (2025-12-17)
+
+
+### Features
+
+* **docs:** add 1-click deployment at the top of README ([#41](https://github.com/meysam81/parse-dmarc/issues/41)) ([50d2ff2](https://github.com/meysam81/parse-dmarc/commit/50d2ff2c54a506801e802daa6b5d375b79d1281d))
+* **docs:** add northflank deployment button ([81215a5](https://github.com/meysam81/parse-dmarc/commit/81215a5b5e8cd87aa5f601f22fb460b4929d8d15))
+* **docs:** add the self-hosted options to deployments ([42ab966](https://github.com/meysam81/parse-dmarc/commit/42ab966218b9e875ed438a9cb4a4b4ac3adb9b33))
+* **docs:** add zeabur deployment template ([4abaa36](https://github.com/meysam81/parse-dmarc/commit/4abaa36d9b077f71a3e6da841af056dffbe046ba))
+* **UI:** revamp the dashboard for actionable insights ([#68](https://github.com/meysam81/parse-dmarc/issues/68)) ([dbe073d](https://github.com/meysam81/parse-dmarc/commit/dbe073d35a7f349770e9fab6df4923e221c350f2))
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/coreos/go-oidc/v3 to v3.17.0 ([#64](https://github.com/meysam81/parse-dmarc/issues/64)) ([306583c](https://github.com/meysam81/parse-dmarc/commit/306583cc37ba2c4fc7e7fffd542cdbab3edd119d))
+* **docs:** clean up the providers ([6879ca7](https://github.com/meysam81/parse-dmarc/commit/6879ca70d2a9e5d1adc7f7732d2a85869aecdd2e))
+* **docs:** reference dockerhub image ([b2d2b06](https://github.com/meysam81/parse-dmarc/commit/b2d2b0627dbf423d760b5ee9598060334b13f290))
+* update docker image reference to dockerhub ([6afcb3a](https://github.com/meysam81/parse-dmarc/commit/6afcb3abe19beda674d19ab7911019c384ba54b1))
+
 ## [1.3.10](https://github.com/meysam81/parse-dmarc/compare/v1.3.9...v1.3.10) (2025-12-13)
 
 
