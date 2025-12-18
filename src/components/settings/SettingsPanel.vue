@@ -144,20 +144,24 @@ onMounted(() => {
                     stroke="currentColor"
                     stroke-width="2"
                   >
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                    <path
+                      d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"
+                    />
                   </svg>
                   MCP Integration
                 </h3>
                 <p class="section-description">
-                  Model Context Protocol (MCP) allows AI assistants like Claude to interact with your DMARC data.
-                  When enabled, MCP tools are available at <code>{{ settings.mcp_path }}</code>
+                  Model Context Protocol (MCP) allows AI assistants like Claude
+                  to interact with your DMARC data. When enabled, MCP tools are
+                  available at <code>{{ settings.mcp_path }}</code>
                 </p>
 
                 <div class="setting-item">
                   <div class="setting-info">
                     <label class="setting-label">Enable MCP Server</label>
                     <span class="setting-hint">
-                      Allow AI assistants to query your DMARC reports and statistics
+                      Allow AI assistants to query your DMARC reports and
+                      statistics
                     </span>
                   </div>
                   <button
@@ -167,7 +171,9 @@ onMounted(() => {
                     @click="toggleMCP"
                   >
                     <span class="toggle-slider"></span>
-                    <span class="toggle-label">{{ settings.mcp_enabled ? 'Enabled' : 'Disabled' }}</span>
+                    <span class="toggle-label">{{
+                      settings.mcp_enabled ? "Enabled" : "Disabled"
+                    }}</span>
                   </button>
                 </div>
 
@@ -187,7 +193,13 @@ onMounted(() => {
                     </svg>
                     <div class="info-content">
                       <strong>MCP Endpoint Active</strong>
-                      <p>Configure your MCP client to connect to: <code>{{ window.location.origin }}{{ settings.mcp_path }}</code></p>
+                      <p>
+                        Configure your MCP client to connect to:
+                        <code
+                          >{{ window.location.origin
+                          }}{{ settings.mcp_path }}</code
+                        >
+                      </p>
                     </div>
                   </div>
                 </div>
