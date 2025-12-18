@@ -427,7 +427,12 @@ func (s *Server) handleMCPSetting(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Failed to read request body", http.StatusBadRequest)
 			return
 		}
-		defer r.Body.Close()
+		defer func() {
+			err = r.Body.Close()
+			if err != nil {
+				s.logger.Error().Err(err).Msg("failed closing response body")
+			}
+		}()
 
 		var req MCPSettingRequest
 		if err := json.Unmarshal(body, &req); err != nil {

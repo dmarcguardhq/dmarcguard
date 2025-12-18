@@ -1,5 +1,14 @@
 <script setup>
-import { ref, onMounted, watch } from "vue";
+import { ref, onMounted, watch, computed } from "vue";
+
+var currentHostname = computed(() => {
+  if (typeof window !== "undefined") {
+    return window.location.origin.endsWith("/")
+      ? window.location.origin.slice(0, -1)
+      : window.location.origin;
+  }
+  return "";
+});
 
 const props = defineProps({
   isOpen: {
@@ -58,7 +67,11 @@ const toggleMCP = async () => {
       if (contentType.includes("application/json")) {
         try {
           const data = await response.json();
-          if (data && typeof data.error === "string" && data.error.trim() !== "") {
+          if (
+            data &&
+            typeof data.error === "string" &&
+            data.error.trim() !== ""
+          ) {
             errorMessage = data.error;
           }
         } catch (_parseErr) {
@@ -209,8 +222,7 @@ onMounted(() => {
                       <p>
                         Configure your MCP client to connect to:
                         <code
-                          >{{ location.origin
-                          }}{{ settings.mcp_path }}</code
+                          >{{ currentHostname }}{{ settings.mcp_path }}</code
                         >
                       </p>
                     </div>

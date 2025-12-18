@@ -9,6 +9,9 @@ import (
 	"syscall"
 	"time"
 
+	"github.com/rs/zerolog"
+	"github.com/urfave/cli/v3"
+
 	"github.com/meysam81/parse-dmarc/internal/api"
 	"github.com/meysam81/parse-dmarc/internal/config"
 	"github.com/meysam81/parse-dmarc/internal/imap"
@@ -18,8 +21,6 @@ import (
 	"github.com/meysam81/parse-dmarc/internal/metrics"
 	"github.com/meysam81/parse-dmarc/internal/parser"
 	"github.com/meysam81/parse-dmarc/internal/storage"
-	"github.com/rs/zerolog"
-	"github.com/urfave/cli/v3"
 )
 
 var (
@@ -329,7 +330,7 @@ func run(ctx context.Context, cmd *cli.Command) error {
 		return nil
 	}
 
-	log.Info().Int64("interval_seconds", fetchInterval).Msg("starting continuous fetch mode")
+	log.Info().Int("interval_seconds", fetchInterval).Msg("starting continuous fetch mode")
 
 	if err := fetchReports(cfg, store, m); err != nil {
 		log.Error().Err(err).Msg("initial fetch failed")
