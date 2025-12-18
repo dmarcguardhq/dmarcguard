@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.1](https://github.com/meysam81/parse-dmarc/compare/v1.4.0...v1.4.1) (2025-12-18)
+
+
+### Features
+
+* add DigitalOcean Droplet and Dokploy deployment options ([#67](https://github.com/meysam81/parse-dmarc/issues/67)) ([21d494f](https://github.com/meysam81/parse-dmarc/commit/21d494f60d7b7450d29cfd9a50fa25a914b100e8))
+* **CI:** add mcp registry publishing to goreleaser ([a0d6f88](https://github.com/meysam81/parse-dmarc/commit/a0d6f88eb54df004c3b35ef7e256bb8d7be36cc9))
+
+
+### Bug Fixes
+
+* **docs:** add the missing png ([c9937ce](https://github.com/meysam81/parse-dmarc/commit/c9937cea0649a48ed92c973f223a25f8ef112f0f))
+* use png for favicon ([4704ad7](https://github.com/meysam81/parse-dmarc/commit/4704ad7c23fbd31913adf677e50f001393a1adda))
+
 ## [1.4.0](https://github.com/meysam81/parse-dmarc/compare/v1.3.10...v1.4.0) (2025-12-17)
 
 
