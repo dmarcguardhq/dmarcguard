@@ -52,8 +52,21 @@ const toggleMCP = async () => {
     });
 
     if (!response.ok) {
-      const data = await response.json();
-      throw new Error(data.error || "Failed to update setting");
+      let errorMessage = "Failed to update setting";
+      const contentType = response.headers.get("content-type") || "";
+
+      if (contentType.includes("application/json")) {
+        try {
+          const data = await response.json();
+          if (data && typeof data.error === "string" && data.error.trim() !== "") {
+            errorMessage = data.error;
+          }
+        } catch (_parseErr) {
+          // If JSON parsing fails, fall back to the default error message.
+        }
+      }
+
+      throw new Error(errorMessage);
     }
 
     const data = await response.json();
@@ -196,7 +209,7 @@ onMounted(() => {
                       <p>
                         Configure your MCP client to connect to:
                         <code
-                          >{{ window.location.origin
+                          >{{ location.origin
                           }}{{ settings.mcp_path }}</code
                         >
                       </p>

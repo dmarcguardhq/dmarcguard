@@ -170,7 +170,8 @@ func (s *Server) Start(ctx context.Context) error {
 		fileServer := http.FileServer(http.FS(distFiles))
 		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			// Don't serve static files for API or MCP routes
-			if strings.HasPrefix(r.URL.Path, "/api/") || strings.HasPrefix(r.URL.Path, "/mcp") {
+			if strings.HasPrefix(r.URL.Path, "/api/") ||
+				r.URL.Path == "/mcp" || strings.HasPrefix(r.URL.Path, "/mcp/") {
 				http.NotFound(w, r)
 				return
 			}
@@ -256,13 +257,9 @@ func (s *Server) handleMCP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Strip /mcp prefix for the MCP handler
-	r.URL.Path = strings.TrimPrefix(r.URL.Path, "/mcp")
-	if r.URL.Path == "" {
-		r.URL.Path = "/"
-	}
-
-	handler.ServeHTTP(w, r)
+	// Strip /mcp prefix for the MCP handler using standard middleware
+	stripHandler := http.StripPrefix("/mcp", handler)
+	stripHandler.ServeHTTP(w, r)
 }
 
 // corsMiddleware adds CORS headers
