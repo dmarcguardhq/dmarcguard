@@ -139,6 +139,7 @@ dockers_v2:
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.source": "{{.GitURL}}"
       "org.opencontainers.image.version": "{{.Version}}"
+      "io.modelcontextprotocol.server.name": "io.github.meysam81/parse-dmarc"
     platforms:
       - linux/amd64
       - linux/arm64
@@ -162,6 +163,24 @@ docker_signs:
 docker_digest:
   name_template: "digest.txt"
   disable: "{{ .Env.NO_DIGEST }}"
+
+mcp:
+  name: io.github.meysam81/parse-dmarc
+  title: Parse-DMARC MCP Server
+  description: Parse DMARC is a lightweight, self-hosted DMARC report parser that automatically fetches email authentication reports from your inbox and visualizes them in a beautiful dashboard—all in a single all-batteries included binary.
+  homepage: https://github.com/meysam81/parse-dmarc
+  auth:
+    type: none
+  repository:
+    url: "https://github.com/meysam81/parse-dmarc.git"
+    source: github
+    id: "1089959979"
+  packages:
+    - registry_type: oci
+      identifier: "ghcr.io/meysam81/parse-dmarc:{{ .Version }}"
+      transport:
+        type: streamable-http
+  disable: false
 
 report_sizes: true
 
