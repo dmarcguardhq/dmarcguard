@@ -1,0 +1,135 @@
+# DigitalOcean Marketplace Submission Metadata
+# https://marketplace.digitalocean.com/
+
+name: Parse DMARC
+slug: parse-dmarc
+tagline: Monitor who's sending email on behalf of your domain
+logo_url: https://raw.githubusercontent.com/meysam81/parse-dmarc/main/assets/icon-256x256.png
+
+categories:
+  - Security
+  - Monitoring
+
+summary: |
+  Parse DMARC automatically fetches DMARC reports from your IMAP inbox,
+  parses them, and displays everything in a beautiful dashboard. Catch
+  spoofing. Stop phishing. Monitor email authentication in real-time.
+
+description: |
+  ## What is Parse DMARC?
+
+  Parse DMARC is a lightweight, self-hosted solution for monitoring DMARC
+  (Domain-based Message Authentication, Reporting & Conformance) reports.
+  When you enable DMARC on your domain, email providers like Gmail, Outlook,
+  and Yahoo send aggregate reports showing who's sending email claiming to
+  be from your domain.
+
+  ## Features
+
+  - **Auto-fetch**: Automatically fetches reports from any IMAP inbox
+  - **Beautiful Dashboard**: Real-time statistics and visualizations
+  - **Lightweight**: Single 14MB binary, no external databases required
+  - **Prometheus Metrics**: Built-in monitoring and alerting
+  - **Dark Mode**: Easy on the eyes
+  - **DNS Generator**: Built-in tool to generate DMARC DNS records
+
+  ## Getting Started
+
+  After creating your Droplet:
+
+  1. SSH into your Droplet
+  2. Edit the configuration file:
+     ```
+     sudo nano /etc/parse-dmarc/config.json
+     ```
+  3. Add your IMAP credentials:
+     - host: Your IMAP server (e.g., imap.gmail.com)
+     - username: Your email address
+     - password: Your email password or app password
+  4. Restart the service:
+     ```
+     sudo systemctl restart parse-dmarc
+     ```
+  5. Access the dashboard at http://your-droplet-ip:8080
+
+  ## Requirements
+
+  - An email inbox where you receive DMARC reports
+  - IMAP access to that inbox
+  - For Gmail: An App Password (not your regular password)
+
+  ## Support
+
+  - Documentation: https://github.com/meysam81/parse-dmarc
+  - Issues: https://github.com/meysam81/parse-dmarc/issues
+
+support_email: support@parsedmarc.com
+support_url: https://github.com/meysam81/parse-dmarc/issues
+
+license: Apache-2.0
+license_url: https://github.com/meysam81/parse-dmarc/blob/main/LICENSE
+
+# Software included
+software:
+  - name: Parse DMARC
+    version: latest
+    website: https://github.com/meysam81/parse-dmarc
+    license: Apache-2.0
+
+  - name: Ubuntu
+    version: "24.04"
+    website: https://ubuntu.com
+    license: GPL
+
+# System requirements
+system_requirements:
+  minimum_disk_size: 10
+  minimum_memory: 512
+  recommended_memory: 1024
+
+# Default size recommendation
+default_droplet_size: s-1vcpu-1gb
+
+# Ports
+ports:
+  - port: 22
+    protocol: tcp
+    service: SSH
+
+  - port: 8080
+    protocol: tcp
+    service: Parse DMARC Dashboard
+
+# Variables for user configuration
+variables:
+  - name: IMAP_HOST
+    label: IMAP Server Host
+    description: Your IMAP server hostname (e.g., imap.gmail.com)
+    required: true
+    type: string
+
+  - name: IMAP_USERNAME
+    label: IMAP Username
+    description: Your email address for IMAP login
+    required: true
+    type: string
+
+  - name: IMAP_PASSWORD
+    label: IMAP Password
+    description: Your email password or app password
+    required: true
+    type: password
+
+  - name: IMAP_PORT
+    label: IMAP Port
+    description: IMAP server port (default 993 for TLS)
+    required: false
+    type: number
+    default: 993
+
+  - name: IMAP_MAILBOX
+    label: IMAP Mailbox
+    description: Mailbox to fetch reports from
+    required: false
+    type: string
+    default: INBOX

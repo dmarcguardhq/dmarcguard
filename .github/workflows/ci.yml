@@ -25,6 +25,8 @@ jobs:
         run: bunx prettier@v3 -w .
       - name: Commit if changed
         if: github.event_name == 'pull_request'
+        env:
+          HEAD_REF: ${{ github.head_ref }}
         run: |
           if [[ -n "$(git status --porcelain)" ]]; then
             echo "The following files were changed by prettier:"
@@ -34,9 +36,9 @@ jobs:
             git config user.email "${{ github.actor_id }}+github-actions@users.noreply.github.com"
             git add .
             git commit -m "chore: format code with prettier" -m 'skip ci'
-            git fetch origin ${{ github.head_ref }}
-            git rebase origin/${{ github.head_ref }}
-            git push origin HEAD:${{ github.head_ref }}
+            git fetch origin "$HEAD_REF"
+            git rebase "origin/$HEAD_REF"
+            git push origin "HEAD:$HEAD_REF"
           else
             echo "No changes to commit"
           fi

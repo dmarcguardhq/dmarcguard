@@ -1,0 +1,29 @@
+services:
+  parse-dmarc:
+    image: meysam81/parse-dmarc:${PARSE_DMARC_VERSION:-v1}
+    restart: unless-stopped
+    environment:
+      - DATABASE_PATH=/data/parse-dmarc.db
+      - IMAP_HOST=${IMAP_HOST}
+      - IMAP_PORT=${IMAP_PORT:-993}
+      - IMAP_USERNAME=${IMAP_USERNAME}
+      - IMAP_PASSWORD=${IMAP_PASSWORD}
+      - IMAP_MAILBOX=${IMAP_MAILBOX:-INBOX}
+      - IMAP_USE_TLS=${IMAP_USE_TLS:-true}
+      - SERVER_PORT=8080
+      - SERVER_HOST=0.0.0.0
+      - PARSE_DMARC_FETCH_INTERVAL=${FETCH_INTERVAL:-300}
+      - PARSE_DMARC_METRICS=${METRICS_ENABLED:-true}
+    ports:
+      - 8080:8080
+    volumes:
+      - parse-dmarc-data:/data
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:8080/api/statistics"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  parse-dmarc-data:

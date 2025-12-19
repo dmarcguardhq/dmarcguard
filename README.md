@@ -31,11 +31,18 @@ Deploy Parse DMARC to your favorite cloud provider with one click:
 
 ### Self-Hosted
 
-| Provider     | Deploy                                                                                                                                              | Notes                          |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------ |
-| **CapRover** | [![Deploy to CapRover](https://img.shields.io/badge/Deploy-CapRover-0072CE?style=for-the-badge&logo=docker)](./deploy/captain-definition)           | Self-hosted PaaS               |
-| **Coolify**  | [![Deploy to Coolify](https://img.shields.io/badge/Deploy-Coolify-6B46C1?style=for-the-badge&logo=docker)](./deploy/coolify.yaml)                   | Open-source Heroku alternative |
-| **Docker**   | [![Docker](https://img.shields.io/badge/Docker-Pull%20Image-2496ED?style=for-the-badge&logo=docker)](https://hub.docker.com/r/meysam81/parse-dmarc) | Run anywhere                   |
+| Provider     | Deploy                                                                                                                                              | Notes                           |
+| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| **CapRover** | [![Deploy to CapRover](https://img.shields.io/badge/Deploy-CapRover-0072CE?style=for-the-badge&logo=docker)](./deploy/captain-definition)           | Self-hosted PaaS                |
+| **Coolify**  | [![Deploy to Coolify](https://img.shields.io/badge/Deploy-Coolify-6B46C1?style=for-the-badge&logo=docker)](./deploy/coolify.yaml)                   | Open-source Heroku alternative  |
+| **Dokploy**  | [![Deploy to Dokploy](https://img.shields.io/badge/Deploy-Dokploy-00B4D8?style=for-the-badge&logo=docker)](./deploy/dokploy/)                       | Self-hosted deployment platform |
+| **Docker**   | [![Docker](https://img.shields.io/badge/Docker-Pull%20Image-2496ED?style=for-the-badge&logo=docker)](https://hub.docker.com/r/meysam81/parse-dmarc) | Run anywhere                    |
+
+### Infrastructure
+
+| Provider                 | Deploy                                                                                                                                             | Notes                |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
+| **DigitalOcean Droplet** | [![Deploy to DigitalOcean](https://img.shields.io/badge/Deploy-DigitalOcean-0080FF?style=for-the-badge&logo=digitalocean)](./deploy/digitalocean/) | VM with Packer image |
 
 > **Note**: All deployments require IMAP credentials. See [Configuration](#configuration-options) for details on setting up Gmail, Outlook, or other email providers.
 

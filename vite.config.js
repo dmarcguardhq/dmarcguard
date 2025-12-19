@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { defineConfig } from "vite";
 import compression from "vite-plugin-compression2";
+import { createHtmlPlugin } from "vite-plugin-html";
 
 var __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -11,6 +12,9 @@ export default defineConfig({
   base: "./",
   plugins: [
     vue(),
+    createHtmlPlugin({
+      minify: true,
+    }),
     compression({
       algorithm: "brotliCompress",
       exclude: [/\.(br)$/, /\.(gz)$/],

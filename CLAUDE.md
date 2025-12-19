@@ -1,40 +1,86 @@
 # Parse DMARC - Project Guide
 
-A Go application that fetches DMARC reports from IMAP mailboxes, parses them, and displays them in a Vue.js dashboard.
+A Go application that fetches DMARC reports from IMAP mailboxes, parses them, and displays them in a Vue.js dashboard. Also supports MCP (Model Context Protocol) for AI assistant integration.
 
 ## Tech Stack
 
-- **Backend**: Go 1.24.7
+- **Backend**: Go 1.25+ (see go.mod for exact version)
 - **Frontend**: Vue.js 3 with Vite
 - **Database**: SQLite (supports both CGO and pure-Go variants)
 - **Package Manager**: Bun (for frontend)
 - **Task Runner**: Just (Justfile)
 - **CLI Framework**: urfave/cli/v3
 - **JSON Library**: goccy/go-json (high-performance)
+- **Logging**: rs/zerolog (structured logging)
+- **Metrics**: Prometheus client_golang
+- **MCP SDK**: modelcontextprotocol/go-sdk
 
 ## Project Structure
 
 ```
 parse-dmarc/
-├── main.go                # Main application entry point
+├── main.go                    # Main application entry point
 ├── internal/
-│   ├── api/               # REST API server and embedded frontend
-│   ├── config/            # Configuration management (JSON + env vars)
-│   ├── imap/              # IMAP client for fetching emails
-│   ├── parser/            # DMARC XML parser
-│   └── storage/           # SQLite database layer (CGO + pure-Go)
-├── src/                   # Vue.js 3 frontend source
-│   ├── App.vue            # Main application component (dashboard)
+│   ├── api/                   # REST API server and embedded frontend
+│   │   └── server.go          # HTTP server, routes, metrics middleware
+│   ├── config/                # Configuration management (JSON + env vars)
+│   │   └── config.go          # Config loading and validation
+│   ├── imap/                  # IMAP client for fetching emails
+│   │   └── client.go          # Email fetching logic
+│   ├── logger/                # Structured logging setup
+│   │   └── logger.go          # Zerolog configuration
+│   ├── mcp/                   # MCP (Model Context Protocol) server
+│   │   ├── server.go          # MCP server (stdio and HTTP/SSE)
+│   │   ├── tools.go           # MCP tool implementations
+│   │   └── oauth/             # OAuth2 authentication for MCP
+│   │       ├── config.go      # OAuth configuration
+│   │       ├── middleware.go  # Bearer auth middleware
+│   │       ├── metadata.go    # RFC 9728 metadata endpoint
+│   │       └── verifier.go    # Token verification
+│   ├── metrics/               # Prometheus metrics
+│   │   └── metrics.go         # Metrics definitions and HTTP middleware
+│   ├── parser/                # DMARC XML parser
+│   │   ├── dmarc.go           # Parsing logic
+│   │   └── dmarc_test.go      # Parser tests
+│   └── storage/               # SQLite database layer
+│       ├── common.go          # Shared SQL queries and types
+│       ├── sqlite_cgo.go      # CGO SQLite (mattn/go-sqlite3)
+│       └── sqlite_no_cgo.go   # Pure Go SQLite (modernc.org/sqlite)
+├── src/                       # Vue.js 3 frontend source
+│   ├── App.vue                # Main application component
+│   ├── main.js                # Vue entry point
+│   ├── assets/
+│   │   └── base.css           # Base styles
 │   └── components/
-│       └── DnsGenerator.vue  # DMARC DNS record generator tool
-├── public/                # Static frontend assets
-├── assets/                # Project assets (icons, images)
-├── scripts/               # Utility scripts (SVG to PNG conversion)
-├── Justfile               # Build commands
-├── Dockerfile             # Multi-stage Docker build
-├── ROADMAP.md             # Product roadmap and feature planning
-├── CONTRIBUTING.md        # Contribution guidelines
-└── .goreleaser.yaml       # Release automation
+│       ├── dashboard/
+│       │   ├── DashboardHero.vue   # Dashboard header/hero section
+│       │   ├── RecentReports.vue   # Recent reports list
+│       │   └── ReportDrawer.vue    # Report detail drawer
+│       └── tools/
+│           └── DnsGenerator.vue    # DMARC DNS record generator
+├── public/                    # Static frontend assets (favicons, logos)
+├── assets/                    # Project assets (screenshots, images)
+├── deploy/                    # Deployment configurations
+│   ├── coolify.yaml           # Coolify deployment
+│   ├── captain-definition     # CapRover deployment
+│   ├── digitalocean/          # DigitalOcean Droplet/Marketplace
+│   │   ├── packer.pkr.hcl     # Packer image build
+│   │   └── scripts/           # Setup scripts
+│   └── dokploy/               # Dokploy deployment
+│       ├── template.toml
+│       └── docker-compose.yml
+├── grafana/                   # Grafana monitoring
+│   ├── dashboard.json         # Pre-built dashboard
+│   └── provisioning.yaml      # Auto-provisioning config
+├── scripts/                   # Utility scripts
+├── Justfile                   # Build commands
+├── Dockerfile                 # Multi-stage Docker build
+├── compose.yml                # Docker Compose for local dev
+├── parse-dmarc.service        # systemd service file
+├── ROADMAP.md                 # Product roadmap
+├── CONTRIBUTING.md            # Contribution guidelines
+├── .goreleaser.yml            # Release automation
+└── .github/workflows/ci.yml   # CI/CD pipeline
 ```
 
 ## Development Commands
@@ -92,71 +138,218 @@ go test -v ./...
 go test -v ./internal/parser/...
 ```
 
+## Running the Application
+
+### Standard Mode (Dashboard + IMAP Fetching)
+
+```bash
+# Continuous fetching and dashboard
+./parse-dmarc --config config.json
+
+# Fetch once and exit
+./parse-dmarc --config config.json --fetch-once
+
+# Dashboard only (no IMAP fetching)
+./parse-dmarc --config config.json --serve-only
+```
+
+### MCP Mode (AI Assistant Integration)
+
+```bash
+# MCP over stdio (for Claude Desktop, etc.)
+./parse-dmarc --mcp
+
+# MCP over HTTP/SSE
+./parse-dmarc --mcp-http :8081
+
+# MCP with OAuth2 authentication
+./parse-dmarc --mcp-http :8081 --mcp-oauth \
+  --mcp-oauth-issuer https://auth.example.com \
+  --mcp-oauth-audience https://mcp.example.com
+```
+
+## CLI Flags
+
+| Flag                   | Env Var                          | Description                               |
+| ---------------------- | -------------------------------- | ----------------------------------------- |
+| `--config, -c`         | `PARSE_DMARC_CONFIG`             | Config file path (default: config.json)   |
+| `--gen-config`         | `PARSE_DMARC_GEN_CONFIG`         | Generate sample config                    |
+| `--fetch-once`         | `PARSE_DMARC_FETCH_ONCE`         | Fetch reports once and exit               |
+| `--serve-only`         | `PARSE_DMARC_SERVE_ONLY`         | Dashboard only, no fetching               |
+| `--fetch-interval`     | `PARSE_DMARC_FETCH_INTERVAL`     | Fetch interval in seconds (default: 300)  |
+| `--metrics`            | `PARSE_DMARC_METRICS`            | Enable Prometheus metrics (default: true) |
+| `--mcp`                | `PARSE_DMARC_MCP`                | Run as MCP server over stdio              |
+| `--mcp-http`           | `PARSE_DMARC_MCP_HTTP`           | Run MCP over HTTP at address              |
+| `--mcp-oauth`          | `PARSE_DMARC_MCP_OAUTH`          | Enable OAuth2 for MCP HTTP                |
+| `--mcp-oauth-issuer`   | `PARSE_DMARC_MCP_OAUTH_ISSUER`   | OAuth2/OIDC issuer URL                    |
+| `--mcp-oauth-audience` | `PARSE_DMARC_MCP_OAUTH_AUDIENCE` | Expected token audience                   |
+
 ## Code Style
 
 - Go: Standard gofmt formatting, golangci-lint for linting
-- Frontend: Vue 3 Composition API
+- Frontend: Vue 3 Composition API, Prettier for formatting
 - Pre-commit hooks configured in `.pre-commit-config.yaml`
 
 ## Key Files
 
-- `./main.go` - CLI entry point with flag parsing
-- `internal/api/server.go` - HTTP server and API routes
-- `internal/config/config.go` - Configuration loading (JSON file + env vars)
-- `internal/parser/dmarc.go` - DMARC XML parsing logic
+### Backend
+
+- `main.go` - CLI entry point with flag parsing, signal handling
+- `internal/api/server.go` - HTTP server, API routes, metrics middleware
+- `internal/config/config.go` - Configuration loading (JSON + env vars)
+- `internal/parser/dmarc.go` - DMARC XML parsing (gzip, zip, raw XML)
 - `internal/imap/client.go` - IMAP email fetching
-- `internal/storage/common.go` - Shared storage logic and SQL queries
-- `internal/storage/sqlite_no_cgo.go` - Pure Go SQLite implementation (modernc.org/sqlite)
-- `internal/storage/sqlite_cgo.go` - CGO SQLite implementation (mattn/go-sqlite3)
+- `internal/storage/common.go` - SQL queries, data types
+- `internal/mcp/server.go` - MCP server implementation
+- `internal/mcp/tools.go` - MCP tool handlers
+- `internal/metrics/metrics.go` - Prometheus metrics definitions
+
+### Frontend
+
 - `src/App.vue` - Main Vue.js dashboard component
-- `src/components/DnsGenerator.vue` - DMARC DNS record generator component
+- `src/components/dashboard/DashboardHero.vue` - Statistics overview
+- `src/components/dashboard/RecentReports.vue` - Reports list
+- `src/components/dashboard/ReportDrawer.vue` - Report detail view
+- `src/components/tools/DnsGenerator.vue` - DMARC DNS record generator
 
 ## API Endpoints
 
+### REST API
+
 - `GET /api/statistics` - Dashboard statistics
-- `GET /api/reports` - List reports (paginated)
+- `GET /api/reports` - List reports (paginated: `?limit=50&offset=0`)
 - `GET /api/reports/:id` - Single report details
 - `GET /api/top-sources` - Top sending source IPs
+
+### Metrics
+
+- `GET /metrics` - Prometheus metrics endpoint
+
+## MCP Tools
+
+When running in MCP mode, the following tools are available:
+
+| Tool                 | Description                          |
+| -------------------- | ------------------------------------ |
+| `get_statistics`     | Overall DMARC compliance statistics  |
+| `get_reports`        | List reports with pagination         |
+| `get_report_by_id`   | Get detailed report by ID            |
+| `get_top_source_ips` | Top sending IP addresses             |
+| `get_domain_stats`   | Per-domain compliance stats          |
+| `get_org_stats`      | Stats by reporting organization      |
+| `get_spf_stats`      | SPF authentication result stats      |
+| `get_dkim_stats`     | DKIM authentication result stats     |
+| `parse_dmarc_report` | Parse raw DMARC XML (base64 encoded) |
+
+## Prometheus Metrics
+
+Key metrics exposed at `/metrics`:
+
+### Report Processing
+
+- `parse_dmarc_reports_fetched_total` - Reports fetched from IMAP
+- `parse_dmarc_reports_parsed_total` - Successfully parsed reports
+- `parse_dmarc_reports_stored_total` - Reports saved to database
+- `parse_dmarc_reports_fetch_duration_seconds` - Fetch operation duration
+
+### DMARC Statistics
+
+- `parse_dmarc_dmarc_reports_total` - Total reports in database
+- `parse_dmarc_dmarc_messages_total` - Total messages processed
+- `parse_dmarc_dmarc_compliance_rate` - Overall compliance rate
+- `parse_dmarc_dmarc_messages_by_domain{domain}` - Per-domain message count
+- `parse_dmarc_dmarc_compliance_rate_by_domain{domain}` - Per-domain compliance
+
+### HTTP Server
+
+- `parse_dmarc_http_requests_total{method,path,status}` - Request count
+- `parse_dmarc_http_request_duration_seconds{method,path}` - Request latency
 
 ## Frontend Features
 
 The Vue.js dashboard includes:
 
-- **Dashboard Statistics** - Overview of DMARC report metrics
-- **Reports List** - Paginated view of all DMARC reports
-- **Report Details** - Detailed view of individual reports
+- **Dashboard Hero** - Overview statistics with compliance rate
+- **Recent Reports** - Paginated list of DMARC reports
+- **Report Drawer** - Detailed view of individual reports
 - **Top Sources** - Visualization of top sending source IPs
-- **DMARC DNS Generator** - Interactive tool to generate DMARC DNS TXT records with configurable policies (none/quarantine/reject), subdomain policies, reporting options (rua/ruf), and alignment modes
+- **DMARC DNS Generator** - Interactive tool to generate DMARC DNS TXT records
 
 ## Configuration
 
 Config via JSON file or environment variables (using caarlos0/env):
 
-- IMAP settings (host, port, username, password, mailbox, TLS)
-- Database path
-- Server host/port
+```json
+{
+  "imap": {
+    "host": "imap.example.com",
+    "port": 993,
+    "username": "dmarc@example.com",
+    "password": "your-password",
+    "mailbox": "INBOX",
+    "use_tls": true
+  },
+  "database": {
+    "path": "~/.parse-dmarc/db.sqlite"
+  },
+  "server": {
+    "host": "0.0.0.0",
+    "port": 8080
+  }
+}
+```
 
-Example: `config.example.json`
+Environment variables: `IMAP_HOST`, `IMAP_PORT`, `IMAP_USERNAME`, `IMAP_PASSWORD`, `IMAP_MAILBOX`, `IMAP_USE_TLS`, `DATABASE_PATH`, `SERVER_HOST`, `SERVER_PORT`
+
+## Deployment Options
+
+### Docker
+
+```bash
+docker run -d -p 8080:8080 \
+  -e IMAP_HOST=imap.example.com \
+  -e IMAP_USERNAME=dmarc@example.com \
+  -e IMAP_PASSWORD=secret \
+  ghcr.io/meysam81/parse-dmarc:latest
+```
+
+### Docker Compose
+
+See `compose.yml` for a complete example with persistence.
+
+### Systemd
+
+See `parse-dmarc.service` for systemd service configuration.
+
+### Platform-Specific
+
+- **DigitalOcean**: `deploy/digitalocean/` - Packer template for Marketplace
+- **Dokploy**: `deploy/dokploy/` - Docker Compose template
+- **Coolify**: `deploy/coolify.yaml`
+- **CapRover**: `deploy/captain-definition`
 
 ## CI/CD
 
 - GitHub Actions workflow in `.github/workflows/ci.yml`
+- Prettier for code formatting (auto-commit in PRs)
 - golangci-lint for Go linting
 - Docker build with cosign signing
+- Kubescape security scanning
 - Release automation via release-please and goreleaser
+- Multi-platform Docker images (amd64, arm64)
 
 ## Roadmap
 
 See `ROADMAP.md` for the comprehensive product roadmap including:
 
-- Phase 1: Delightful Defaults (dark mode, DNS generator, health score, exports)
-- Phase 2: Proactive Intelligence (alerting, trends, GeoIP maps, DNS validator)
-- Phase 3: Enterprise Ready (auth, multi-org, RBAC, Prometheus metrics)
-- Phase 4: AI-Powered Security (AI assistant, anomaly detection, forensic reports)
+- **Phase 1**: Delightful Defaults (dark mode, DNS generator ✅, health score, exports)
+- **Phase 2**: Proactive Intelligence (alerting, trends, GeoIP maps, DNS validator)
+- **Phase 3**: Enterprise Ready (auth, multi-org, RBAC, Prometheus metrics ✅)
+- **Phase 4**: AI-Powered Security (AI assistant, anomaly detection, forensic reports)
 
 ## Contributing
 
-See `CONTRIBUTING.md` for development setup and contribution guidelines. Key areas for contribution:
+See `CONTRIBUTING.md` for development setup and contribution guidelines. Key areas:
 
 - Forensic Reports (RUF support)
 - OAuth2 for IMAP authentication
@@ -164,3 +357,23 @@ See `CONTRIBUTING.md` for development setup and contribution guidelines. Key are
 - Email alerts for compliance issues
 - Historical trend analysis
 - Test coverage improvements
+
+## Architecture Notes
+
+### Database Schema
+
+- `reports` table: Stores report metadata and raw JSON
+- `records` table: Stores individual record data per report
+- Build tags (`cgo`/`!cgo`) select SQLite driver at compile time
+
+### Frontend Embedding
+
+The Vue.js frontend is built to `dist/`, copied to `internal/api/dist/`, and embedded via Go's `embed` directive. The binary is self-contained.
+
+### MCP Integration
+
+The MCP server uses the official `modelcontextprotocol/go-sdk`. It supports:
+
+- **stdio transport**: For desktop apps like Claude Desktop
+- **HTTP/SSE transport**: For web-based MCP clients
+- **OAuth2**: Optional authentication via OIDC/token introspection
