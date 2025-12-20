@@ -48,17 +48,20 @@ type ServerConfig struct {
 
 func defaultDBPath() (string, error) {
 	home, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
+	if err != nil || home == "" {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return "", errors.New("cannot determine home directory or current working directory")
+		}
+		return filepath.Join(cwd, ".parse-dmarc/db.sqlite"), nil
 	}
 	return filepath.Join(home, ".parse-dmarc/db.sqlite"), nil
 }
 
 func ensureDBPathExists(dbPath string) error {
 	parent := filepath.Dir(dbPath)
-	err := os.MkdirAll(parent, 0755)
-	if err != nil {
-		return err
+	if err := os.MkdirAll(parent, 0755); err != nil {
+		return errors.New("failed to create database directory at " + parent + ": " + err.Error() + " - ensure the path is writable or set DATABASE_PATH environment variable")
 	}
 	return nil
 }
