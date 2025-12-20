@@ -4,6 +4,12 @@ import DashboardHero from "./components/dashboard/DashboardHero.vue";
 import RecentReports from "./components/dashboard/RecentReports.vue";
 import ReportDrawer from "./components/dashboard/ReportDrawer.vue";
 import DnsGenerator from "./components/tools/DnsGenerator.vue";
+import {
+  getStatistics,
+  getTopSources,
+  getReports,
+  getReportById,
+} from "./lib/api.js";
 import "./assets/base.css";
 
 // State
@@ -39,8 +45,7 @@ const toggleTheme = () => {
 // Data fetching
 const fetchStatistics = async () => {
   try {
-    const response = await fetch("/api/statistics");
-    statistics.value = await response.json();
+    statistics.value = await getStatistics();
   } catch (error) {
     console.error("Failed to fetch statistics:", error);
   }
@@ -48,8 +53,7 @@ const fetchStatistics = async () => {
 
 const fetchTopSources = async () => {
   try {
-    const response = await fetch("/api/top-sources?limit=10");
-    topSources.value = await response.json();
+    topSources.value = await getTopSources(10);
   } catch (error) {
     console.error("Failed to fetch top sources:", error);
   }
@@ -57,8 +61,7 @@ const fetchTopSources = async () => {
 
 const fetchReports = async () => {
   try {
-    const response = await fetch("/api/reports?limit=20");
-    reports.value = await response.json();
+    reports.value = await getReports({ limit: 20 });
   } catch (error) {
     console.error("Failed to fetch reports:", error);
   }
@@ -79,8 +82,7 @@ const openReportDetails = async (report) => {
   isDrawerOpen.value = true;
   loadingDetail.value = true;
   try {
-    const response = await fetch(`/api/reports/${report.id}`);
-    selectedReport.value = await response.json();
+    selectedReport.value = await getReportById(report.id);
   } catch (error) {
     console.error("Failed to fetch report details:", error);
     selectedReport.value = null;
