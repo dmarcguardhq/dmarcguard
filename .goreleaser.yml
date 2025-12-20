@@ -167,7 +167,7 @@ docker_digest:
 mcp:
   name: io.github.meysam81/parse-dmarc
   title: Parse-DMARC MCP Server
-  description: Parse DMARC is a lightweight, self-hosted DMARC report parser that automatically fetches email authentication reports from your inbox and visualizes them in a beautiful dashboard—all in a single all-batteries included binary.
+  description: "Lightweight DMARC parser: auto-fetch email reports, visualize compliance in a single all-in-one app"
   homepage: https://github.com/meysam81/parse-dmarc
   auth:
     type: none
