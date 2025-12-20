@@ -1,7 +1,21 @@
 import { defineStore } from "pinia";
 import { ref, computed } from "vue";
+import { z } from "zod";
 
 const STORAGE_KEY = "settings";
+
+var urlSchema = z
+  .string()
+  .url()
+  .refine(
+    function checkProtocol(url) {
+      var parsed = new URL(url);
+      return parsed.protocol === "http:" || parsed.protocol === "https:";
+    },
+    {
+      message: "URL must use HTTP or HTTPS protocol",
+    },
+  );
 
 /**
  * Compute the default API URL based on environment
@@ -26,18 +40,18 @@ function validateUrl(url) {
     return { valid: false, error: "URL is required" };
   }
 
-  const trimmed = url.trim();
+  var trimmed = url.trim();
   if (!trimmed) {
     return { valid: false, error: "URL cannot be empty" };
   }
 
   try {
-    const parsed = new URL(trimmed);
-    if (!["http:", "https:"].includes(parsed.protocol)) {
-      return { valid: false, error: "URL must use HTTP or HTTPS protocol" };
-    }
+    urlSchema.parse(trimmed);
     return { valid: true };
-  } catch {
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return { valid: false, error: error.errors[0].message };
+    }
     return { valid: false, error: "Invalid URL format" };
   }
 }

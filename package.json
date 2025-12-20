@@ -3,7 +3,8 @@
   "dependencies": {
     "ky": "^1.14.1",
     "pinia": "^3.0.4",
-    "vue": "^3.5.22"
+    "vue": "^3.5.22",
+    "zod": "^4.2.1"
   },
   "description": "DMARC Report Parser and Dashboard",
   "devDependencies": {
