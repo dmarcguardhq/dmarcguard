@@ -1,4 +1,8 @@
 import ky from "ky";
+import { BASE_API_URL } from "@/config.js";
+import log from "@/logger.js";
+
+var requestTimings = new WeakMap();
 
 /**
  * Configured ky instance for API requests.
@@ -10,7 +14,7 @@ import ky from "ky";
  * - Configurable timeout
  */
 const api = ky.create({
-  prefixUrl: "/api",
+  prefixUrl: BASE_API_URL,
   timeout: 30000,
   retry: {
     limit: 2,
@@ -18,9 +22,24 @@ const api = ky.create({
     statusCodes: [408, 500, 502, 503, 504],
   },
   hooks: {
+    beforeRequest: [
+      function logBeforeRequest(request) {
+        requestTimings.set(request, Date.now());
+        log.debug(`API Request: ${request.method} ${request.url}`);
+      },
+    ],
+    afterResponse: [
+      function logAfterResponse(request, options, response) {
+        var startTime = requestTimings.get(request);
+        var duration = startTime ? Date.now() - startTime : 0;
+        log.debug(
+          `API Response: ${request.method} ${request.url} - ${response.status} ${response.statusText} (${duration}ms)`,
+        );
+      },
+    ],
     beforeError: [
-      (error) => {
-        const { response } = error;
+      function logBeforeError(error) {
+        var { response } = error;
         if (response?.body) {
           error.message = `API Error: ${response.status} ${response.statusText}`;
         }
