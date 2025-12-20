@@ -12,7 +12,11 @@ app.use(pinia);
 const themeStore = useThemeStore();
 const settingsStore = useSettingsStore();
 
-themeStore.init();
-settingsStore.init();
+try {
+  themeStore.init();
+  settingsStore.init();
+} catch (error) {
+  console.error("Failed to initialize stores:", error);
+}
 
 app.mount("#app");
