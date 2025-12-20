@@ -4,13 +4,18 @@ import DashboardHero from "./components/dashboard/DashboardHero.vue";
 import RecentReports from "./components/dashboard/RecentReports.vue";
 import ReportDrawer from "./components/dashboard/ReportDrawer.vue";
 import DnsGenerator from "./components/tools/DnsGenerator.vue";
+import SettingsModal from "./components/settings/SettingsModal.vue";
 import {
   getStatistics,
   getTopSources,
   getReports,
   getReportById,
 } from "./lib/api.js";
+import { useThemeStore } from "./stores";
 import "./assets/base.css";
+
+// Stores
+const themeStore = useThemeStore();
 
 // State
 const statistics = ref(null);
@@ -20,27 +25,11 @@ const selectedReport = ref(null);
 const loading = ref(true);
 const loadingDetail = ref(false);
 const isDrawerOpen = ref(false);
+const isSettingsOpen = ref(false);
 const currentView = ref("dashboard"); // 'dashboard' | 'generator'
-const theme = ref("light");
 
 // Auto-refresh interval
 let refreshInterval = null;
-
-// Theme management
-const initTheme = () => {
-  const savedTheme = localStorage.getItem("theme");
-  const systemPrefersDark = window.matchMedia(
-    "(prefers-color-scheme: dark)",
-  ).matches;
-  theme.value = savedTheme || (systemPrefersDark ? "dark" : "light");
-  document.documentElement.setAttribute("data-theme", theme.value);
-};
-
-const toggleTheme = () => {
-  theme.value = theme.value === "light" ? "dark" : "light";
-  document.documentElement.setAttribute("data-theme", theme.value);
-  localStorage.setItem("theme", theme.value);
-};
 
 // Data fetching
 const fetchStatistics = async () => {
@@ -128,7 +117,6 @@ const formatNumber = (num) => {
 
 // Lifecycle
 onMounted(() => {
-  initTheme();
   loadData();
   // Auto-refresh every 5 minutes
   refreshInterval = setInterval(loadData, 5 * 60 * 1000);
@@ -205,9 +193,9 @@ onUnmounted(() => {
         </div>
 
         <div class="nav-actions">
-          <button class="btn-theme" @click="toggleTheme" title="Toggle theme">
+          <button class="btn-icon" @click="themeStore.cycleTheme()" title="Toggle theme">
             <svg
-              v-if="theme === 'light'"
+              v-if="themeStore.resolvedTheme === 'light'"
               width="20"
               height="20"
               viewBox="0 0 24 24"
@@ -239,6 +227,23 @@ onUnmounted(() => {
               stroke-linejoin="round"
             >
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
+            </svg>
+          </button>
+          <button class="btn-icon" @click="isSettingsOpen = true" title="Settings">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="12" r="3" />
+              <path
+                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
+              />
             </svg>
           </button>
           <a
@@ -367,6 +372,12 @@ onUnmounted(() => {
       :report="selectedReport"
       :loading="loadingDetail"
       @close="closeDrawer"
+    />
+
+    <!-- Settings Modal -->
+    <SettingsModal
+      :is-open="isSettingsOpen"
+      @close="isSettingsOpen = false"
     />
 
     <!-- Footer -->
@@ -549,7 +560,7 @@ onUnmounted(() => {
   color: var(--text-main);
 }
 
-.btn-theme {
+.btn-icon {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -563,7 +574,7 @@ onUnmounted(() => {
   transition: all 0.2s;
 }
 
-.btn-theme:hover {
+.btn-icon:hover {
   background: var(--bg-app);
   color: var(--text-main);
 }
