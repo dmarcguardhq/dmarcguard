@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.2](https://github.com/meysam81/parse-dmarc/compare/v1.4.1...v1.4.2) (2025-12-20)
+
+
+### Bug Fixes
+
+* **CI:** change mcp auth type to gh oidc ([1132b50](https://github.com/meysam81/parse-dmarc/commit/1132b5038c16fda2c83fe90a83f9f6e802c06af4))
+* **dev:** minify html with vite plugin ([10eb4f7](https://github.com/meysam81/parse-dmarc/commit/10eb4f73ce936cc7def91d5aa633f2398b19fa33))
+
 ## [1.4.1](https://github.com/meysam81/parse-dmarc/compare/v1.4.0...v1.4.1) (2025-12-18)
 
 
