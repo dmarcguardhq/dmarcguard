@@ -38,6 +38,9 @@ const api = ky.create({
     beforeError: [
       function logBeforeError(error) {
         var { response } = error;
+        log.error(
+          `API Error: ${response?.status} ${response?.statusText} - ${error.message}`,
+        );
         if (response?.body) {
           error.message = `API Error: ${response.status} ${response.statusText}`;
         }

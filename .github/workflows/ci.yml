@@ -62,31 +62,8 @@ jobs:
       - name: golangci-lint
         uses: golangci/golangci-lint-action@v9
 
-  build-pr:
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      packages: write
-      id-token: write
-    steps:
-      - name: Build docker
-        uses: meysam81/build-docker@main
-        with:
-          build-args: |
-            VERSION=pr-${{ github.event.pull_request.number }}-${{ github.sha }}
-            COMMIT=${{ github.sha }}
-            DATE=${{ github.event.head_commit.timestamp }}
-            BUILT_BY=github-actions
-          cosign: true
-          image-name: ghcr.io/${{ github.repository }}
-          image-extra-tags: |
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-            ghcr.io/${{ github.repository }}:pr-${{ github.event.pull_request.number }}
-          kubescape: true
-
   build-dev:
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name == 'push' || github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: write
