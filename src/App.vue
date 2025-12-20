@@ -193,7 +193,11 @@ onUnmounted(() => {
         </div>
 
         <div class="nav-actions">
-          <button class="btn-icon" @click="themeStore.cycleTheme()" title="Toggle theme">
+          <button
+            class="btn-icon"
+            @click="themeStore.cycleTheme()"
+            title="Toggle theme"
+          >
             <svg
               v-if="themeStore.resolvedTheme === 'light'"
               width="20"
@@ -229,7 +233,11 @@ onUnmounted(() => {
               <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
             </svg>
           </button>
-          <button class="btn-icon" @click="isSettingsOpen = true" title="Settings">
+          <button
+            class="btn-icon"
+            @click="isSettingsOpen = true"
+            title="Settings"
+          >
             <svg
               width="20"
               height="20"
@@ -375,10 +383,7 @@ onUnmounted(() => {
     />
 
     <!-- Settings Modal -->
-    <SettingsModal
-      :is-open="isSettingsOpen"
-      @close="isSettingsOpen = false"
-    />
+    <SettingsModal :is-open="isSettingsOpen" @close="isSettingsOpen = false" />
 
     <!-- Footer -->
     <footer class="footer">

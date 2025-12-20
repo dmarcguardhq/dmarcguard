@@ -148,7 +148,9 @@ export const useSettingsStore = defineStore("settings", () => {
 
     try {
       // Test by hitting the statistics endpoint
-      const testUrl = url.endsWith("/") ? `${url}statistics` : `${url}/statistics`;
+      const testUrl = url.endsWith("/")
+        ? `${url}statistics`
+        : `${url}/statistics`;
       const response = await fetch(testUrl, {
         method: "GET",
         headers: { Accept: "application/json" },
@@ -193,8 +195,12 @@ export const useSettingsStore = defineStore("settings", () => {
 
       if (error.name === "TimeoutError" || error.name === "AbortError") {
         message = "Connection timed out after 10 seconds";
-      } else if (error.message.includes("Failed to fetch") || error.message.includes("NetworkError")) {
-        message = "Network error - check if the server is running and CORS is configured";
+      } else if (
+        error.message.includes("Failed to fetch") ||
+        error.message.includes("NetworkError")
+      ) {
+        message =
+          "Network error - check if the server is running and CORS is configured";
       } else if (error.message) {
         message = error.message;
       }

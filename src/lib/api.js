@@ -80,6 +80,7 @@ export const getReports = ({ limit = 20, offset = 0 } = {}) =>
  * Get a single report by ID
  * @param {string|number} id - Report ID
  */
-export const getReportById = (id) => createApiClient().get(`reports/${id}`).json();
+export const getReportById = (id) =>
+  createApiClient().get(`reports/${id}`).json();
 
 export default createApiClient;

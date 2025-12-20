@@ -69,7 +69,9 @@ export const useThemeStore = defineStore("theme", () => {
    */
   function setTheme(newTheme) {
     if (!VALID_THEMES.includes(newTheme)) {
-      console.warn(`Invalid theme: ${newTheme}. Must be one of: ${VALID_THEMES.join(", ")}`);
+      console.warn(
+        `Invalid theme: ${newTheme}. Must be one of: ${VALID_THEMES.join(", ")}`,
+      );
       return;
     }
     theme.value = newTheme;

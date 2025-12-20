@@ -89,7 +89,12 @@ const themeOptions = [
   <Teleport to="body">
     <Transition name="modal">
       <div v-if="isOpen" class="modal-backdrop" @click="handleBackdropClick">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="settings-title">
+        <div
+          class="modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="settings-title"
+        >
           <div class="modal-header">
             <h2 id="settings-title" class="modal-title">
               <svg
@@ -109,7 +114,11 @@ const themeOptions = [
               </svg>
               Settings
             </h2>
-            <button class="btn-close" @click="closeModal" aria-label="Close settings">
+            <button
+              class="btn-close"
+              @click="closeModal"
+              aria-label="Close settings"
+            >
               <svg
                 width="20"
                 height="20"
@@ -255,7 +264,10 @@ const themeOptions = [
               <div
                 v-if="settingsStore.lastTestResult"
                 class="test-result"
-                :class="{ success: settingsStore.lastTestResult.success, error: !settingsStore.lastTestResult.success }"
+                :class="{
+                  success: settingsStore.lastTestResult.success,
+                  error: !settingsStore.lastTestResult.success,
+                }"
               >
                 <svg
                   v-if="settingsStore.lastTestResult.success"
@@ -603,7 +615,9 @@ const themeOptions = [
 
 .modal-enter-active .modal,
 .modal-leave-active .modal {
-  transition: transform 0.2s ease, opacity 0.2s ease;
+  transition:
+    transform 0.2s ease,
+    opacity 0.2s ease;
 }
 
 .modal-enter-from,
