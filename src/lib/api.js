@@ -17,9 +17,7 @@ const api = ky.create({
   prefixUrl: BASE_API_URL,
   timeout: 30000,
   retry: {
-    limit: 2,
-    methods: ["get"],
-    statusCodes: [408, 500, 502, 503, 504],
+    limit: 3,
   },
   hooks: {
     beforeRequest: [
