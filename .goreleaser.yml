@@ -125,10 +125,11 @@ dockers_v2:
       - meysam81/{{ .ProjectName }}
       - ghcr.io/meysam81/{{ .ProjectName }}
     tags:
-      - "v{{ .Version }}"
-      - "v{{ .Major }}"
-      - "v{{ .Major }}.{{ .Minor }}"
-      - "v{{ .Major }}.{{ .Minor }}.{{ .Patch }}"
+      - "{{ if not .IsSnapshot }}v{{ .Version }}{{ end }}"
+      - "{{ if not .IsSnapshot }}v{{ .Major }}{{ end }}"
+      - "{{ if not .IsSnapshot }}v{{ .Major }}.{{ .Minor }}{{ end }}"
+      - "{{ if not .IsSnapshot }}v{{ .Major }}.{{ .Minor }}.{{ .Patch }}{{ end }}"
+      - "{{ .FullCommit }}"
       - "{{ if .IsNightly }}latest{{ end }}"
     extra_files:
       - ./
@@ -143,7 +144,6 @@ dockers_v2:
     platforms:
       - linux/amd64
       - linux/arm64
-    disable: "{{ .IsSnapshot }}"
     sbom: "{{ not .Env.DISABLE_SBOM }}"
     build_args:
       VERSION: "{{.Version}}"
