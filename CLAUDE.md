@@ -183,25 +183,25 @@ go test -v ./internal/parser/...
 
 ## CLI Flags
 
-| Flag                               | Env Var                                    | Description                                         |
-| ---------------------------------- | ------------------------------------------ | --------------------------------------------------- |
-| `--config, -c`                     | `PARSE_DMARC_CONFIG`                       | Config file path (default: config.json)             |
-| `--gen-config`                     | `PARSE_DMARC_GEN_CONFIG`                   | Generate sample config                              |
-| `--fetch-once`                     | `PARSE_DMARC_FETCH_ONCE`                   | Fetch reports once and exit                         |
-| `--serve-only`                     | `PARSE_DMARC_SERVE_ONLY`                   | Dashboard only, no fetching                         |
-| `--fetch-interval`                 | `PARSE_DMARC_FETCH_INTERVAL`               | Fetch interval in seconds (default: 300)            |
-| `--metrics`                        | `PARSE_DMARC_METRICS`                      | Enable Prometheus metrics (default: true)           |
-| `--mcp`                            | `PARSE_DMARC_MCP`                          | Run as MCP server over stdio                        |
-| `--mcp-http`                       | `PARSE_DMARC_MCP_HTTP`                     | Run MCP over HTTP at address                        |
-| `--mcp-oauth`                      | `PARSE_DMARC_MCP_OAUTH`                    | Enable OAuth2 for MCP HTTP                          |
-| `--mcp-oauth-issuer`               | `PARSE_DMARC_MCP_OAUTH_ISSUER`             | OAuth2/OIDC issuer URL                              |
-| `--mcp-oauth-audience`             | `PARSE_DMARC_MCP_OAUTH_AUDIENCE`           | Expected token audience                             |
-| `--mcp-oauth-client-id`            | `PARSE_DMARC_MCP_OAUTH_CLIENT_ID`          | OAuth2 client ID for token introspection            |
-| `--mcp-oauth-client-secret`        | `PARSE_DMARC_MCP_OAUTH_CLIENT_SECRET`      | OAuth2 client secret for token introspection        |
-| `--mcp-oauth-scopes`               | `PARSE_DMARC_MCP_OAUTH_SCOPES`             | Required scopes (comma-separated, default: mcp:tools) |
-| `--mcp-oauth-introspection-endpoint` | `PARSE_DMARC_MCP_OAUTH_INTROSPECTION_ENDPOINT` | Token introspection endpoint URL              |
-| `--mcp-oauth-resource-name`        | `PARSE_DMARC_MCP_OAUTH_RESOURCE_NAME`      | Human-readable name for MCP server metadata         |
-| `--mcp-oauth-insecure`             | `PARSE_DMARC_MCP_OAUTH_INSECURE`           | Skip TLS certificate verification (dev only)        |
+| Flag                                 | Env Var                                        | Description                                           |
+| ------------------------------------ | ---------------------------------------------- | ----------------------------------------------------- |
+| `--config, -c`                       | `PARSE_DMARC_CONFIG`                           | Config file path (default: config.json)               |
+| `--gen-config`                       | `PARSE_DMARC_GEN_CONFIG`                       | Generate sample config                                |
+| `--fetch-once`                       | `PARSE_DMARC_FETCH_ONCE`                       | Fetch reports once and exit                           |
+| `--serve-only`                       | `PARSE_DMARC_SERVE_ONLY`                       | Dashboard only, no fetching                           |
+| `--fetch-interval`                   | `PARSE_DMARC_FETCH_INTERVAL`                   | Fetch interval in seconds (default: 300)              |
+| `--metrics`                          | `PARSE_DMARC_METRICS`                          | Enable Prometheus metrics (default: true)             |
+| `--mcp`                              | `PARSE_DMARC_MCP`                              | Run as MCP server over stdio                          |
+| `--mcp-http`                         | `PARSE_DMARC_MCP_HTTP`                         | Run MCP over HTTP at address                          |
+| `--mcp-oauth`                        | `PARSE_DMARC_MCP_OAUTH`                        | Enable OAuth2 for MCP HTTP                            |
+| `--mcp-oauth-issuer`                 | `PARSE_DMARC_MCP_OAUTH_ISSUER`                 | OAuth2/OIDC issuer URL                                |
+| `--mcp-oauth-audience`               | `PARSE_DMARC_MCP_OAUTH_AUDIENCE`               | Expected token audience                               |
+| `--mcp-oauth-client-id`              | `PARSE_DMARC_MCP_OAUTH_CLIENT_ID`              | OAuth2 client ID for token introspection              |
+| `--mcp-oauth-client-secret`          | `PARSE_DMARC_MCP_OAUTH_CLIENT_SECRET`          | OAuth2 client secret for token introspection          |
+| `--mcp-oauth-scopes`                 | `PARSE_DMARC_MCP_OAUTH_SCOPES`                 | Required scopes (comma-separated, default: mcp:tools) |
+| `--mcp-oauth-introspection-endpoint` | `PARSE_DMARC_MCP_OAUTH_INTROSPECTION_ENDPOINT` | Token introspection endpoint URL                      |
+| `--mcp-oauth-resource-name`          | `PARSE_DMARC_MCP_OAUTH_RESOURCE_NAME`          | Human-readable name for MCP server metadata           |
+| `--mcp-oauth-insecure`               | `PARSE_DMARC_MCP_OAUTH_INSECURE`               | Skip TLS certificate verification (dev only)          |
 
 ## Code Style
 
@@ -399,6 +399,7 @@ The Vue.js frontend is built to `dist/`, copied to `internal/api/dist/`, and emb
 ### State Management
 
 The frontend uses a custom reactive store pattern (similar to Pinia):
+
 - `theme.js` - Manages light/dark/system theme with localStorage persistence
 - `settings.js` - Manages custom API endpoint with validation and connection testing
 
