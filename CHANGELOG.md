@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.4.3](https://github.com/meysam81/parse-dmarc/compare/v1.4.2...v1.4.3) (2025-12-21)
+
+
+### Features
+
+* allow changing api endpoint from the settings modal ([#76](https://github.com/meysam81/parse-dmarc/issues/76)) ([e6cb48b](https://github.com/meysam81/parse-dmarc/commit/e6cb48be538e5c3e997d86dda9250068a2fb377e))
+
+
+### Miscellaneous Chores
+
+* prepare next release 1.4.3 ([141e2ed](https://github.com/meysam81/parse-dmarc/commit/141e2ed8c97a34e3d24d359645c0aa67237a47eb))
+
 ## [1.4.2](https://github.com/meysam81/parse-dmarc/compare/v1.4.1...v1.4.2) (2025-12-20)
 
 
