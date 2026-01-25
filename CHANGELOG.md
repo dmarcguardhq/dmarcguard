@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.5](https://github.com/meysam81/parse-dmarc/compare/v1.4.4...v1.4.5) (2026-01-25)
+
+
+### Bug Fixes
+
+* address unhandled charset ([#87](https://github.com/meysam81/parse-dmarc/issues/87)) ([99c245a](https://github.com/meysam81/parse-dmarc/commit/99c245a670ce1cb44f5d08b24b5d0c99c502ec69))
+
 ## [1.4.4](https://github.com/meysam81/parse-dmarc/compare/v1.4.3...v1.4.4) (2026-01-17)
 
 
