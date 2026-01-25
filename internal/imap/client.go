@@ -9,8 +9,8 @@ import (
 
 	"github.com/emersion/go-imap"
 	"github.com/emersion/go-imap/client"
-	"github.com/emersion/go-message/mail"
 	_ "github.com/emersion/go-message/charset"
+	"github.com/emersion/go-message/mail"
 	"github.com/meysam81/parse-dmarc/internal/config"
 )
 
