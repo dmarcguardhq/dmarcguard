@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.4.6](https://github.com/meysam81/parse-dmarc/compare/v1.4.5...v1.4.6) (2026-02-01)
+
+
+### Bug Fixes
+
+* make linter happy ([900e314](https://github.com/meysam81/parse-dmarc/commit/900e314e9c32909475db562c5b6d4b038496550e))
+* **UI:** handle no data in compliance score ([#90](https://github.com/meysam81/parse-dmarc/issues/90)) ([eced435](https://github.com/meysam81/parse-dmarc/commit/eced435ab7b08a73829d4b7b6e09ed31d324834b))
+
 ## [1.4.5](https://github.com/meysam81/parse-dmarc/compare/v1.4.4...v1.4.5) (2026-01-25)
 
 
