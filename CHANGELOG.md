@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.4.7](https://github.com/meysam81/parse-dmarc/compare/v1.4.6...v1.4.7) (2026-02-01)
+
+
+### Bug Fixes
+
+* **CI:** update mcp registry version identifier ([a135890](https://github.com/meysam81/parse-dmarc/commit/a135890747ef5fc07e43a7c9ed16e4dc21ac592b))
+
 ## [1.4.6](https://github.com/meysam81/parse-dmarc/compare/v1.4.5...v1.4.6) (2026-02-01)
 
 
