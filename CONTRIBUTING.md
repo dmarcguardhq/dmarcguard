@@ -8,6 +8,8 @@ Thank you for your interest in contributing to Parse DMARC! This document provid
 
 - Go 1.21 or higher
 - Node.js 18+ and npm
+- Bun
+- Just
 - Git
 
 ### Getting Started
@@ -22,69 +24,51 @@ cd parse-dmarc
 2. Install dependencies:
 
 ```bash
-make install-deps
+just install-deps
 ```
 
 3. Build the project:
 
 ```bash
-make build
+just build
 ```
 
 ## Project Structure
 
 ```
 parse-dmarc/
-├── cmd/parse-dmarc/       # Main application entry point
+├── main.go                # Main application entry point
 ├── internal/
 │   ├── api/               # REST API and web server
 │   ├── config/            # Configuration management
 │   ├── imap/              # IMAP client for fetching emails
 │   ├── parser/            # DMARC XML parser
 │   └── storage/           # SQLite database layer
-├── frontend/              # Vue.js 3 dashboard
-│   ├── src/
-│   │   ├── components/
-│   │   ├── views/
-│   │   └── App.vue
-│   └── package.json
-├── Makefile
+├── src/                   # Vue.js 3 dashboard
+│   ├── assets/
+│   ├── components/
+│   ├── lib/
+│   ├── stores/
+│   ├── App.vue
+│   └── main.js
+├── package.json
+├── Justfile
 ├── Dockerfile
 └── README.md
 ```
 
 ## Development Workflow
 
-### Backend Development
-
 Run the application in development mode:
 
 ```bash
-make dev
+just dev
 ```
 
 Run tests:
 
 ```bash
-go test ./...
-```
-
-Add tests for new features in `*_test.go` files.
-
-### Frontend Development
-
-Start the frontend dev server with hot reload:
-
-```bash
-cd frontend
-npm run dev
-```
-
-Build the frontend:
-
-```bash
-cd frontend
-npm run build
+just test
 ```
 
 ### Making Changes
@@ -130,7 +114,7 @@ git push origin feature/your-feature-name
 Add tests for all new functionality:
 
 ```bash
-go test -v ./...
+just test
 ```
 
 ### Manual Testing

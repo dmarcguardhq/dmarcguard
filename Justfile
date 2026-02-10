@@ -30,7 +30,7 @@ build-cgo: frontend backend-cgo
 
 dev:
     @echo "Starting development server..."
-    air
+    go tool air
 
 config:
     go run . -gen-config
@@ -48,9 +48,6 @@ test:
 install: build
     @echo "Installing to /usr/local/bin..."
     sudo cp bin/parse-dmarc /usr/local/bin/
-
-frontend-dev:
-    bun run dev
 
 update-zeabur-template:
     bunx zeabur@latest template update -f zeabur.yml -c YB3TS7
