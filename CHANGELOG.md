@@ -1,5 +1,16 @@
 # Changelog
 
+## [1.4.8](https://github.com/meysam81/parse-dmarc/compare/v1.4.7...v1.4.8) (2026-02-11)
+
+
+### Bug Fixes
+
+* **CI:** remove incomplete mcp docker from goreleaser ([356bb7b](https://github.com/meysam81/parse-dmarc/commit/356bb7b8ead6c3b783811178e49e10145a876d29))
+* do not overwrite release notes from goreleaser ([43bec10](https://github.com/meysam81/parse-dmarc/commit/43bec1038b8a4ee46c6a898c89d918596bab0fdc))
+* **mcp:** handle json error ([d17a04f](https://github.com/meysam81/parse-dmarc/commit/d17a04f23994911118f30522ea3ca909fb203efd))
+* propagate errors with context ([85014c8](https://github.com/meysam81/parse-dmarc/commit/85014c8aafaf03a6d6b512a7be7eaccab971a4b0))
+* stay compliant with brew core version print contraint ([35f8261](https://github.com/meysam81/parse-dmarc/commit/35f826169b3864811cc7684e7c87190518c373a5))
+
 ## [1.4.7](https://github.com/meysam81/parse-dmarc/compare/v1.4.6...v1.4.7) (2026-02-01)
 
 
