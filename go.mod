@@ -13,7 +13,7 @@ require (
 	github.com/prometheus/client_golang v1.23.2
 	github.com/rs/zerolog v1.34.0
 	github.com/urfave/cli/v3 v3.6.2
-	modernc.org/sqlite v1.40.0
+	modernc.org/sqlite v1.45.0
 )
 
 require (
@@ -40,7 +40,7 @@ require (
 	golang.org/x/sys v0.37.0 // indirect
 	golang.org/x/text v0.30.0 // indirect
 	google.golang.org/protobuf v1.36.8 // indirect
-	modernc.org/libc v1.66.10 // indirect
+	modernc.org/libc v1.67.6 // indirect
 	modernc.org/mathutil v1.7.1 // indirect
 	modernc.org/memory v1.11.0 // indirect
 )
