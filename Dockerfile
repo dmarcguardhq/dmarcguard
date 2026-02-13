@@ -11,7 +11,7 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 COPY . .
 RUN bun run build
 
-FROM golang:1.25 AS mod
+FROM golang:1.26 AS mod
 
 WORKDIR /app
 
@@ -20,7 +20,7 @@ RUN --mount=type=bind,source=go.mod,target=go.mod \
     --mount=type=cache,target=/go/pkg/mod \
     go mod download
 
-FROM golang:1.25 AS backend-builder
+FROM golang:1.26 AS backend-builder
 
 ARG VERSION=dev
 ARG COMMIT=none
