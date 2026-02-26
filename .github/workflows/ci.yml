@@ -193,10 +193,10 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
           HOMEBREW_TAP_GITHUB_TOKEN: ${{ secrets.HOMEBREW_TAP_GITHUB_TOKEN }}
           NO_DIGEST: ${{ vars.NO_DIGEST }}
-      - uses: actions/attest-build-provenance@v3
+      - uses: actions/attest-build-provenance@v4
         with:
           subject-checksums: ./.goreleaser-dist/checksums.txt
-      - uses: actions/attest-build-provenance@v3
+      - uses: actions/attest-build-provenance@v4
         if: env.NO_DIGEST != 'false'
         with:
           subject-checksums: ./.goreleaser-dist/digest.txt
