@@ -126,7 +126,7 @@ Reports typically start arriving within 24-48 hours.
 docker run -d \
   --name parse-dmarc \
   -p 8080:8080 \
-  -e IMAP_SERVER=imap.gmail.com \
+  -e IMAP_HOST=imap.gmail.com \
   -e IMAP_PORT=993 \
   -e IMAP_USERNAME=your-email@gmail.com \
   -e IMAP_PASSWORD=your-app-password \
