@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.2](https://github.com/meysam81/parse-dmarc/compare/v1.5.1...v1.5.2) (2026-03-13)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/modelcontextprotocol/go-sdk to v1.4.1 ([#127](https://github.com/meysam81/parse-dmarc/issues/127)) ([ce63d91](https://github.com/meysam81/parse-dmarc/commit/ce63d9146a8865e1f1bf5869b6502b6f62c30dc5))
+* use PEEK when mark-seen is set to false ([#125](https://github.com/meysam81/parse-dmarc/issues/125)) ([e54e269](https://github.com/meysam81/parse-dmarc/commit/e54e26900faed10f916afed47d23b3a2a1f65467))
+
 ## [1.5.1](https://github.com/meysam81/parse-dmarc/compare/v1.5.0...v1.5.1) (2026-03-13)
 
 
