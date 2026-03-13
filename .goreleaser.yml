@@ -172,7 +172,8 @@ mcp:
       identifier: "ghcr.io/meysam81/parse-dmarc-mcp:v{{ .Version }}"
       transport:
         type: stdio
-  disable: false
+  # TODO: the server requires a config to run and I currently don't know how!
+  disable: true
 
 report_sizes: true
 
