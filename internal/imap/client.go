@@ -122,7 +122,7 @@ func (c *Client) FetchDMARCReports() (*FetchResult, error) {
 	messages := make(chan *imap.Message, 10)
 	done := make(chan error, 1)
 
-	section := &imap.BodySectionName{}
+	section := &imap.BodySectionName{Peek: !c.config.MarkAsSeen}
 	items := []imap.FetchItem{section.FetchItem(), imap.FetchEnvelope, imap.FetchFlags}
 
 	go func() {
