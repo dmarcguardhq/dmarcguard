@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/meysam81/parse-dmarc/compare/v1.5.0...v1.5.1) (2026-03-13)
+
+
+### Bug Fixes
+
+* **CI:** remove mcp entry from goreleaser altogether ([1d769a4](https://github.com/meysam81/parse-dmarc/commit/1d769a45d05ea5afc5340e87fb60cec3fe3514ce))
+
 ## [1.5.0](https://github.com/meysam81/parse-dmarc/compare/v1.4.8...v1.5.0) (2026-03-13)
 
 
