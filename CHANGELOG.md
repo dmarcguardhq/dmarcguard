@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.5.0](https://github.com/meysam81/parse-dmarc/compare/v1.4.8...v1.5.0) (2026-03-13)
+
+
+### Features
+
+* allow customizing SEEN & move-folder behavior after processing ([80346df](https://github.com/meysam81/parse-dmarc/commit/80346dfddc56844dd59c9474fb788ca1d0d9312c)), closes [#118](https://github.com/meysam81/parse-dmarc/issues/118)
+
+
+### Bug Fixes
+
+* **CI:** disable publishing to mcp registry ([c2e3969](https://github.com/meysam81/parse-dmarc/commit/c2e3969e90554479921437be4df0d011b4214a89))
+* **CI:** use oxc the default vite minifier ([2cc92e1](https://github.com/meysam81/parse-dmarc/commit/2cc92e1d85734bc1cc34b91b209eb66b13336b5d))
+* **deps:** update module github.com/caarlos0/env/v11 to v11.4.0 ([#104](https://github.com/meysam81/parse-dmarc/issues/104)) ([e14e6d2](https://github.com/meysam81/parse-dmarc/commit/e14e6d2d7e8ecbfd8d7e5564c600b165b4135946))
+* **deps:** update module github.com/goccy/go-json to v0.10.6 ([#119](https://github.com/meysam81/parse-dmarc/issues/119)) ([7ad51d3](https://github.com/meysam81/parse-dmarc/commit/7ad51d3a0b0395d99b542293ae5dd2a0b1e7ad32))
+* **deps:** update module github.com/mattn/go-sqlite3 to v1.14.34 ([#85](https://github.com/meysam81/parse-dmarc/issues/85)) ([5336d3a](https://github.com/meysam81/parse-dmarc/commit/5336d3a64e647c32f46ddeb7d08c76fabd2a1200))
+* **deps:** update module github.com/modelcontextprotocol/go-sdk to v1 ([#49](https://github.com/meysam81/parse-dmarc/issues/49)) ([58c0e79](https://github.com/meysam81/parse-dmarc/commit/58c0e79699392fe6661a8e6cce3092c4dd0d598f))
+* **deps:** update module github.com/modelcontextprotocol/go-sdk to v1.3.1 ([#102](https://github.com/meysam81/parse-dmarc/issues/102)) ([68a80a4](https://github.com/meysam81/parse-dmarc/commit/68a80a4ab077af0ce4f45046211aaa77288de42b))
+* **deps:** update module github.com/modelcontextprotocol/go-sdk to v1.4.0 ([#107](https://github.com/meysam81/parse-dmarc/issues/107)) ([39f1fcb](https://github.com/meysam81/parse-dmarc/commit/39f1fcb833098df1e2b3ab9d89c47350475055e6))
+* **deps:** update module github.com/urfave/cli/v3 to v3.6.2 ([#25](https://github.com/meysam81/parse-dmarc/issues/25)) ([955e4e0](https://github.com/meysam81/parse-dmarc/commit/955e4e04d4d1d40617721ac4ec4aa70eaabad4ca))
+* **deps:** update module github.com/urfave/cli/v3 to v3.7.0 ([#110](https://github.com/meysam81/parse-dmarc/issues/110)) ([8ce7090](https://github.com/meysam81/parse-dmarc/commit/8ce7090ce717ce25b563d2532b6a1a4abe7555b0))
+* **deps:** update module modernc.org/sqlite to v1.45.0 ([#27](https://github.com/meysam81/parse-dmarc/issues/27)) ([2daa3b4](https://github.com/meysam81/parse-dmarc/commit/2daa3b4177bd5298e0f04eea8405fede27446ac2))
+* **deps:** update module modernc.org/sqlite to v1.46.1 ([#101](https://github.com/meysam81/parse-dmarc/issues/101)) ([087c4e7](https://github.com/meysam81/parse-dmarc/commit/087c4e79f1fe433f82e2245a654c4e09701b69de))
+* **docs:** update imap-host env var ([#116](https://github.com/meysam81/parse-dmarc/issues/116)) ([6d5aa4f](https://github.com/meysam81/parse-dmarc/commit/6d5aa4f32a13956723138ed786f599ad81b229c8))
+* **goreleaser:** take build arg for copying binary in dockerfile ([5fb9504](https://github.com/meysam81/parse-dmarc/commit/5fb9504f1d7a946edf0c7c0a62eed13c1abbeb8d))
+
 ## [1.4.8](https://github.com/meysam81/parse-dmarc/compare/v1.4.7...v1.4.8) (2026-02-11)
 
 
