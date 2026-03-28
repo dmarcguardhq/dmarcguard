@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.5.3](https://github.com/meysam81/parse-dmarc/compare/v1.5.2...v1.5.3) (2026-03-28)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/urfave/cli/v3 to v3.8.0 ([#135](https://github.com/meysam81/parse-dmarc/issues/135)) ([dc06765](https://github.com/meysam81/parse-dmarc/commit/dc06765f9d65c0dd67a2debcb12ed3499813ed05))
+* **docker:** create DB parent dirs ([e8d6497](https://github.com/meysam81/parse-dmarc/commit/e8d6497227119e4e7e0d348f10386e4b657b630d)), closes [#138](https://github.com/meysam81/parse-dmarc/issues/138)
+
 ## [1.5.2](https://github.com/meysam81/parse-dmarc/compare/v1.5.1...v1.5.2) (2026-03-13)
 
 
