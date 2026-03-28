@@ -35,7 +35,8 @@ COPY . .
 COPY --from=frontend-builder /build/frontend/dist ./internal/api/dist
 
 RUN --mount=type=cache,target=/go/pkg/mod \
-    go build -ldflags="-s -w -extldflags '-static' -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE} -X main.builtBy=${BUILT_BY}" -trimpath -o parse-dmarc .
+    go build -ldflags="-s -w -extldflags '-static' -X main.version=${VERSION} -X main.commit=${COMMIT} -X main.date=${DATE} -X main.builtBy=${BUILT_BY}" -trimpath -o parse-dmarc . && \
+    mkdir -p /data /tmp
 
 FROM scratch AS final
 
@@ -44,9 +45,11 @@ ENV PARSE_DMARC_CONFIG=/app/config.json \
     DATABASE_PATH=/data/parse-dmarc.db
 
 COPY --from=backend-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
-COPY --from=backend-builder /app/parse-dmarc /app/parse-dmarc
+COPY --from=backend-builder /app/parse-dmarc /usr/local/bin/parse-dmarc
+COPY --from=backend-builder /data /data
+COPY --from=backend-builder /tmp /tmp
 
 EXPOSE 8080
 
-ENTRYPOINT ["/app/parse-dmarc"]
+ENTRYPOINT ["/usr/local/bin/parse-dmarc"]
 CMD ["--config=/app/config.json"]

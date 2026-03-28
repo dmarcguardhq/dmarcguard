@@ -8,7 +8,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./config.json:/app/config.json
+      - ./config.json:/app/config.json:ro
       - parse-dmarc:/data
 
 volumes:

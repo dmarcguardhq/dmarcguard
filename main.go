@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"os/signal"
+	"path/filepath"
 	"strings"
 	"syscall"
 	"time"
@@ -203,6 +204,10 @@ func run(ctx context.Context, cmd *cli.Command) error {
 		if err := cfg.Validate(); err != nil {
 			return fmt.Errorf("configuration error: %w", err)
 		}
+	}
+
+	if err := os.MkdirAll(filepath.Dir(cfg.Database.Path), 0o755); err != nil {
+		return fmt.Errorf("create database directory: %w", err)
 	}
 
 	store, err := storage.NewStorage(cfg.Database.Path)
