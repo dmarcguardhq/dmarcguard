@@ -5,6 +5,9 @@ services:
     image: ${IMAGE_NAME:-meysam81/parse-dmarc}
     environment:
       DATABASE_PATH: /data/parse-dmarc.db
+    env_file:
+      - path: .env
+        required: false
     ports:
       - "8080:8080"
     volumes:

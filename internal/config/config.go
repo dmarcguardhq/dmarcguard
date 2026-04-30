@@ -17,6 +17,25 @@ var (
 	ErrMissingIMAPUsername = errors.New("IMAP_USERNAME is required: set via environment variable or config file")
 	// ErrMissingIMAPPassword is returned when IMAP password is not configured
 	ErrMissingIMAPPassword = errors.New("IMAP_PASSWORD is required: set via environment variable or config file")
+	// ErrMissingOAuthClientID is returned when an XOAUTH2 auth block lacks a client ID
+	ErrMissingOAuthClientID = errors.New("imap.auth.client_id is required for xoauth2 (set IMAP_AUTH_CLIENT_ID)")
+	// ErrMissingOAuthClientSecret is returned when an XOAUTH2 auth block lacks a client secret
+	ErrMissingOAuthClientSecret = errors.New("imap.auth.client_secret is required for xoauth2 (set IMAP_AUTH_CLIENT_SECRET)")
+	// ErrUnknownOAuthProvider is returned when the auth provider is not supported
+	ErrUnknownOAuthProvider = errors.New("imap.auth.provider must be one of: google")
+	// ErrUnknownAuthType is returned when imap.auth.type is set to an unsupported value
+	ErrUnknownAuthType = errors.New(`imap.auth.type must be one of: "password", "xoauth2"`)
+)
+
+// Auth method identifiers used in IMAPAuthConfig.Type.
+const (
+	AuthTypePassword = "password"
+	AuthTypeXOAUTH2  = "xoauth2"
+)
+
+// OAuth provider identifiers used in IMAPAuthConfig.Provider.
+const (
+	OAuthProviderGoogle = "google"
 )
 
 // Config holds the application configuration
@@ -39,6 +58,22 @@ type IMAPConfig struct {
 
 	MarkAsSeen       bool   `json:"mark_as_seen" env:"IMAP_MARK_AS_SEEN" envDefault:"true"`
 	ProcessedMailbox string `json:"processed_mailbox" env:"IMAP_PROCESSED_MAILBOX"`
+
+	Auth IMAPAuthConfig `json:"auth" envPrefix:"IMAP_AUTH_"`
+}
+
+// IMAPAuthConfig selects how the IMAP client authenticates.
+// When Type is empty the daemon falls back to password auth (backwards compat).
+type IMAPAuthConfig struct {
+	Type         string `json:"type" env:"TYPE"`
+	Provider     string `json:"provider" env:"PROVIDER"`
+	ClientID     string `json:"client_id" env:"CLIENT_ID"`
+	ClientSecret string `json:"client_secret" env:"CLIENT_SECRET"`
+}
+
+// IsXOAUTH2 reports whether the auth block selects XOAUTH2.
+func (a IMAPAuthConfig) IsXOAUTH2() bool {
+	return a.Type == AuthTypeXOAUTH2
 }
 
 // DatabaseConfig holds database configuration
@@ -123,8 +158,8 @@ func Load(path string) (*Config, error) {
 }
 
 // Validate checks that all required configuration values are set.
-// Required fields: IMAP host, username, and password.
-// Returns nil if valid, or an error describing the missing configuration.
+// Host and username are always required. Password is required for password auth;
+// client_id/client_secret are required for xoauth2 auth.
 func (c *Config) Validate() error {
 	if c.IMAP.Host == "" {
 		return ErrMissingIMAPHost
@@ -132,10 +167,32 @@ func (c *Config) Validate() error {
 	if c.IMAP.Username == "" {
 		return ErrMissingIMAPUsername
 	}
-	if c.IMAP.Password == "" {
-		return ErrMissingIMAPPassword
+
+	switch c.IMAP.Auth.Type {
+	case "", AuthTypePassword:
+		if c.IMAP.Password == "" {
+			return ErrMissingIMAPPassword
+		}
+	case AuthTypeXOAUTH2:
+		if c.IMAP.Auth.Provider != OAuthProviderGoogle {
+			return ErrUnknownOAuthProvider
+		}
+		if c.IMAP.Auth.ClientID == "" {
+			return ErrMissingOAuthClientID
+		}
+		if c.IMAP.Auth.ClientSecret == "" {
+			return ErrMissingOAuthClientSecret
+		}
+	default:
+		return ErrUnknownAuthType
 	}
 	return nil
+}
+
+// SecretsPath returns the on-disk path for the OAuth refresh token store,
+// co-located with the database file (e.g. ~/.parse-dmarc/secrets.json).
+func (c *Config) SecretsPath() string {
+	return filepath.Join(filepath.Dir(c.Database.Path), "secrets.json")
 }
 
 // GenerateSample creates a sample configuration file

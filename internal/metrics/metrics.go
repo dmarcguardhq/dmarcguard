@@ -36,6 +36,7 @@ type Metrics struct {
 	// IMAP connection metrics
 	IMAPConnectionsTotal   *prometheus.CounterVec
 	IMAPConnectionDuration prometheus.Histogram
+	IMAPAuthRequired       prometheus.Gauge
 
 	// DMARC statistics (gauges that reflect current state)
 	TotalReports      prometheus.Gauge
@@ -177,6 +178,14 @@ func New(version, commit, buildDate string) *Metrics {
 				Name:      "connection_duration_seconds",
 				Help:      "Duration of IMAP connection establishment",
 				Buckets:   prometheus.ExponentialBuckets(0.01, 2, 10), // 10ms to ~5s
+			},
+		),
+		IMAPAuthRequired: prometheus.NewGauge(
+			prometheus.GaugeOpts{
+				Namespace: namespace,
+				Subsystem: "imap",
+				Name:      "auth_required",
+				Help:      "1 when the IMAP OAuth refresh token has been rejected and human re-auth is required, 0 otherwise",
 			},
 		),
 
@@ -342,6 +351,7 @@ func New(version, commit, buildDate string) *Metrics {
 		// IMAP
 		m.IMAPConnectionsTotal,
 		m.IMAPConnectionDuration,
+		m.IMAPAuthRequired,
 
 		// DMARC statistics
 		m.TotalReports,

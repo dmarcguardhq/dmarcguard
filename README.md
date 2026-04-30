@@ -134,9 +134,107 @@ docker run -d \
   meysam81/parse-dmarc
 ```
 
-**For Gmail users:** You'll need an [App Password](https://support.google.com/accounts/answer/185833), not your regular Gmail password.
+**For Gmail users:** You'll need an [App Password](https://support.google.com/accounts/answer/185833), not your regular Gmail password. Alternatively, see [Gmail / Google Workspace via OAuth2](#gmail--google-workspace-via-oauth2) below if your account doesn't allow App Passwords or you prefer not to use them.
 
 **Access the dashboard:** Open `http://localhost:8080` in your browser.
+
+### Gmail / Google Workspace via OAuth2
+
+Use OAuth2 instead of an App Password — required for Workspace tenants that
+disable App Passwords, and recommended for personal Gmail accounts since
+tokens can be revoked from Google's security page without changing your
+account password.
+
+Setup uses the OAuth2 **authorization code flow with PKCE** and a loopback
+redirect — the bootstrap step needs a browser on the machine running the
+binary, after which the daemon is fully headless. (Google's device flow does
+not allow the `https://mail.google.com/` IMAP scope, so it can't be used here.)
+
+**1. Google Cloud setup** (UI button names change; see
+[Google's current setup guide](https://support.google.com/cloud/answer/6158849)):
+
+- Create a Google Cloud project and **enable the Gmail API**.
+- Configure **Google Auth Platform** (formerly "OAuth consent screen"):
+  - Audience = **Internal** if you use Google Workspace, **External** if it's
+    a personal `@gmail.com` (then add your own email under "Test users").
+  - Add scope `https://mail.google.com/` (the only scope that grants IMAP
+    access — `gmail.readonly` etc. don't work over IMAP).
+- Create an **OAuth client** of type **Desktop app** ← required for the
+  loopback redirect flow; "TV and Limited Input devices" cannot request the
+  Gmail IMAP scope.
+- Copy the **client ID** and **client secret**.
+
+**2. Create `config.json`** next to your `compose.yml`:
+
+```json
+{
+  "imap": {
+    "host": "imap.gmail.com",
+    "port": 993,
+    "username": "you@yourdomain.com",
+    "mailbox": "DMARC",
+    "use_tls": true,
+    "auth": {
+      "type": "xoauth2",
+      "provider": "google",
+      "client_id": "PASTE.apps.googleusercontent.com",
+      "client_secret": "PASTE"
+    }
+  },
+  "database": { "path": "/data/parse-dmarc.db" },
+  "server":   { "host": "0.0.0.0", "port": 8080 }
+}
+```
+
+Note there is no `password` field — the `auth` block selects XOAUTH2.
+
+**3. Bootstrap the refresh token** on a machine with a browser. Build a host
+binary (`go build -o bin/parse-dmarc .`) and run:
+
+```bash
+./bin/parse-dmarc --oauth-login
+```
+
+The binary prints an auth URL, attempts to open it in your browser, and
+listens on a random loopback port for the callback. Sign in to the Google
+account that owns the DMARC mailbox and approve the consent screen. On
+success it prints the refresh token and a ready-to-paste env var line:
+
+```
+✓ Authorized as you@yourdomain.com
+⚠ Could not write /data/secrets.json: ... (this is expected for Docker)
+Add this env var to your compose.yml or run command:
+
+    IMAP_OAUTH_REFRESH_TOKEN=1//abc...xyz
+```
+
+**4. Add the token to `compose.yml`** under the `parse-dmarc` service:
+
+```yaml
+services:
+  parse-dmarc:
+    environment:
+      DATABASE_PATH: /data/parse-dmarc.db
+      IMAP_OAUTH_REFRESH_TOKEN: 1//abc...xyz
+```
+
+**5. Start the daemon:**
+
+```bash
+docker compose up -d
+```
+
+The daemon loads the refresh token from the env var and silently refreshes
+access tokens in memory.
+
+**Re-bootstrap is required when:**
+
+- You revoke the grant from Google's security page
+- The mailbox is unused for 6 months (Google's inactivity policy)
+- The OAuth client's scopes change
+
+The Prometheus metric `parse_dmarc_imap_auth_required` is `1` whenever
+re-bootstrap is required and `0` otherwise — alert on it if you care.
 
 ## What You'll See
 
