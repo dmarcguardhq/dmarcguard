@@ -202,6 +202,7 @@ go test -v ./internal/parser/...
 | `--mcp-oauth-introspection-endpoint` | `PARSE_DMARC_MCP_OAUTH_INTROSPECTION_ENDPOINT` | Token introspection endpoint URL                      |
 | `--mcp-oauth-resource-name`          | `PARSE_DMARC_MCP_OAUTH_RESOURCE_NAME`          | Human-readable name for MCP server metadata           |
 | `--mcp-oauth-insecure`               | `PARSE_DMARC_MCP_OAUTH_INSECURE`               | Skip TLS certificate verification (dev only)          |
+| `--oauth-login`                      | `PARSE_DMARC_OAUTH_LOGIN`                      | Run the IMAP OAuth2 device flow and save refresh token |
 
 ## Code Style
 
@@ -337,6 +338,69 @@ Environment variables:
 - `IMAP_USERNAME`
 - `SERVER_HOST`
 - `SERVER_PORT`
+- `IMAP_AUTH_TYPE` (`password` or `xoauth2`; defaults to `password` when an `imap.password` is set)
+- `IMAP_AUTH_PROVIDER` (currently only `google`)
+- `IMAP_AUTH_CLIENT_ID`, `IMAP_AUTH_CLIENT_SECRET` (XOAUTH2 client credentials from your Google Cloud project)
+- `IMAP_OAUTH_REFRESH_TOKEN` (read-only override for the refresh token in `secrets.json`)
+
+## Google OAuth2 (XOAUTH2) for IMAP
+
+For Google Workspace and Gmail, dmarcguard supports OAuth2 in addition to App
+Passwords. Setup uses the OAuth2 authorization code flow with PKCE and a
+loopback redirect (RFC 8252) — `--oauth-login` opens a local browser on the
+machine running the binary. (Google's device authorization grant does NOT
+permit the `https://mail.google.com/` scope, so the device flow is unusable
+for Gmail IMAP.)
+
+Required Google Cloud setup (UI button names change frequently — see
+https://support.google.com/cloud/answer/6158849 for the current flow):
+
+1. Create a Google Cloud project and **enable the Gmail API**.
+2. Configure **Google Auth Platform** (formerly "OAuth consent screen"):
+   - Audience = **Internal** for Workspace accounts (no verification, no
+     test-user cap), or **External** for personal Gmail (you must add your
+     own address as a test user).
+   - Add scope `https://mail.google.com/` — the only scope that grants
+     XOAUTH2 access to IMAP. Narrower Gmail API scopes (`gmail.readonly`,
+     `gmail.modify`) do not work over IMAP.
+3. Create an **OAuth client** of type **Desktop app**. Loopback redirect
+   URIs (`http://127.0.0.1:<port>/callback`) are accepted by default for
+   this client type — no need to register them. Copy the client ID and
+   secret.
+4. Set the IMAP auth block in `config.json`:
+   ```json
+   "imap": {
+     "host": "imap.gmail.com",
+     "port": 993,
+     "username": "you@yourdomain.com",
+     "mailbox": "DMARC",
+     "auth": {
+       "type": "xoauth2",
+       "provider": "google",
+       "client_id": "...apps.googleusercontent.com",
+       "client_secret": "..."
+     }
+   }
+   ```
+5. Run `./parse-dmarc --oauth-login` on a machine with a browser. It prints
+   the auth URL (and tries to auto-open it via `open`/`xdg-open`), spins up
+   a local HTTP server on a random loopback port, receives the callback,
+   and exchanges the code for tokens.
+6. The refresh token is written to `<dirname(database.path)>/secrets.json`
+   (mode 0600) when that path is host-writable. When it isn't (typical for
+   developer-laptop bootstrapping with a Docker daemon path like
+   `/data/parse-dmarc.db`), the binary instead prints the token and a
+   ready-to-paste `IMAP_OAUTH_REFRESH_TOKEN=...` line for the daemon's env.
+7. Start the daemon normally — it loads the refresh token at startup and
+   refreshes access tokens silently in memory.
+
+The `imap.username` in config must match the email shown by `--oauth-login`
+("✓ Authorized as ..."). XOAUTH2 binds the username to the token; a mismatch
+causes Gmail to reject the connection.
+
+When the refresh token is rejected (revoked, scopes changed, 6-month
+inactivity), the `parse_dmarc_imap_auth_required` gauge is set to 1 and the
+operator must re-run `--oauth-login`.
 
 ## Deployment Options
 

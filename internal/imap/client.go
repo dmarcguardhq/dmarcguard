@@ -11,19 +11,23 @@ import (
 	_ "github.com/emersion/go-message/charset"
 	"github.com/emersion/go-message/mail"
 	"github.com/meysam81/parse-dmarc/internal/config"
+	imapoauth "github.com/meysam81/parse-dmarc/internal/imap/oauth"
 	"github.com/rs/zerolog"
+	"golang.org/x/oauth2"
 )
 
 // Client represents an IMAP client
 type Client struct {
-	config *config.IMAPConfig
-	client *client.Client
-	log    *zerolog.Logger
+	config      *config.IMAPConfig
+	client      *client.Client
+	log         *zerolog.Logger
+	tokenSource oauth2.TokenSource
 }
 
-// NewClient creates a new IMAP client
-func NewClient(cfg *config.IMAPConfig, log *zerolog.Logger) *Client {
-	return &Client{config: cfg, log: log}
+// NewClient creates a new IMAP client. tokenSource is required only when the
+// auth block selects xoauth2; pass nil for password auth.
+func NewClient(cfg *config.IMAPConfig, log *zerolog.Logger, tokenSource oauth2.TokenSource) *Client {
+	return &Client{config: cfg, log: log, tokenSource: tokenSource}
 }
 
 // Connect establishes connection to IMAP server
@@ -49,13 +53,38 @@ func (c *Client) Connect() error {
 	c.client = imapClient
 	c.log.Info().Str("addr", addr).Msg("connected")
 
-	// Login
-	if err := c.client.Login(c.config.Username, c.config.Password); err != nil {
+	if err := c.authenticate(); err != nil {
 		_ = c.client.Logout()
-		return fmt.Errorf("login failed: %w", err)
+		return err
 	}
 
 	c.log.Info().Str("username", c.config.Username).Msg("logged in")
+	return nil
+}
+
+// authenticate logs in using either password or XOAUTH2 depending on the
+// auth block. The caller is responsible for closing the connection on error.
+func (c *Client) authenticate() error {
+	if !c.config.Auth.IsXOAUTH2() {
+		if err := c.client.Login(c.config.Username, c.config.Password); err != nil {
+			return fmt.Errorf("login failed: %w", err)
+		}
+		return nil
+	}
+
+	if c.tokenSource == nil {
+		return fmt.Errorf("xoauth2 selected but no token source configured (run --oauth-login first)")
+	}
+
+	tok, err := c.tokenSource.Token()
+	if err != nil {
+		return fmt.Errorf("obtain access token: %w", err)
+	}
+
+	saslClient := imapoauth.NewXOAUTH2Client(c.config.Username, tok.AccessToken)
+	if err := c.client.Authenticate(saslClient); err != nil {
+		return fmt.Errorf("xoauth2 authenticate failed: %w", err)
+	}
 	return nil
 }
 

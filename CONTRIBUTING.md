@@ -160,7 +160,8 @@ go test -v ./...
 ## Areas for Contribution
 
 - **Forensic Reports**: Add support for DMARC forensic reports (RUF)
-- **OAuth2**: Implement OAuth2 for IMAP authentication
+- **OAuth2 (Microsoft 365)**: Add Microsoft 365 / Entra ID provider to the
+  IMAP XOAUTH2 flow (Google is supported via `--oauth-login --provider google`)
 - **Export**: Add CSV/JSON export functionality
 - **Alerts**: Email alerts for compliance issues
 - **Analytics**: Historical trend analysis

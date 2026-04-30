@@ -13,6 +13,7 @@ import (
 	"github.com/meysam81/parse-dmarc/internal/api"
 	"github.com/meysam81/parse-dmarc/internal/config"
 	"github.com/meysam81/parse-dmarc/internal/imap"
+	imapoauth "github.com/meysam81/parse-dmarc/internal/imap/oauth"
 	"github.com/meysam81/parse-dmarc/internal/logger"
 	mcpserver "github.com/meysam81/parse-dmarc/internal/mcp"
 	"github.com/meysam81/parse-dmarc/internal/mcp/oauth"
@@ -21,6 +22,7 @@ import (
 	"github.com/meysam81/parse-dmarc/internal/storage"
 	"github.com/rs/zerolog"
 	"github.com/urfave/cli/v3"
+	"golang.org/x/oauth2"
 )
 
 var (
@@ -139,6 +141,11 @@ func main() {
 				Usage:   "Skip TLS certificate verification (development only)",
 				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH_INSECURE"),
 			},
+			&cli.BoolFlag{
+				Name:    "oauth-login",
+				Usage:   "Run the IMAP OAuth2 device flow, save the refresh token, and exit",
+				Sources: cli.EnvVars("PARSE_DMARC_OAUTH_LOGIN"),
+			},
 		},
 		Action: run,
 		Commands: []*cli.Command{
@@ -197,6 +204,10 @@ func run(ctx context.Context, cmd *cli.Command) error {
 
 	// Reinitialize logger with config-derived level
 	log = logger.NewLogger(cfg.LogLevel, !cfg.ColoredLogs)
+
+	if cmd.Bool("oauth-login") {
+		return runOAuthLogin(ctx, cfg)
+	}
 
 	// Validate required IMAP configuration when fetching is enabled
 	// (not serve-only and not MCP mode)
@@ -263,6 +274,16 @@ func run(ctx context.Context, cmd *cli.Command) error {
 		log.Info().Msg("prometheus metrics enabled at /metrics")
 	}
 
+	// Build IMAP token source if XOAUTH2 is configured. Done once so the
+	// underlying ReuseTokenSource caches access tokens across fetch cycles.
+	var tokenSource oauth2.TokenSource
+	if cfg.IMAP.Auth.IsXOAUTH2() && !serveOnly {
+		tokenSource, err = buildTokenSource(ctx, cfg)
+		if err != nil {
+			return fmt.Errorf("initialize oauth token source: %w", err)
+		}
+	}
+
 	ctx, stop := signal.NotifyContext(ctx, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM)
 	defer stop()
 
@@ -289,7 +310,7 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	}
 
 	if fetchOnce {
-		if err := fetchReports(cfg, store, m); err != nil {
+		if err := fetchReports(cfg, store, m, tokenSource); err != nil {
 			return fmt.Errorf("failed to fetch reports: %w", err)
 		}
 		server.RefreshMetrics()
@@ -299,8 +320,8 @@ func run(ctx context.Context, cmd *cli.Command) error {
 
 	log.Info().Int("interval_seconds", fetchInterval).Msg("starting continuous fetch mode")
 
-	if err := fetchReports(cfg, store, m); err != nil {
-		log.Error().Err(err).Msg("initial fetch failed")
+	if err := fetchReports(cfg, store, m, tokenSource); err != nil {
+		handleFetchError(err, m)
 	}
 	server.RefreshMetrics()
 
@@ -310,8 +331,8 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	for {
 		select {
 		case <-ticker.C:
-			if err := fetchReports(cfg, store, m); err != nil {
-				log.Error().Err(err).Msg("fetch failed")
+			if err := fetchReports(cfg, store, m, tokenSource); err != nil {
+				handleFetchError(err, m)
 			}
 			server.RefreshMetrics()
 		case <-ctx.Done():
@@ -325,7 +346,7 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	}
 }
 
-func fetchReports(cfg *config.Config, store *storage.Storage, m *metrics.Metrics) error {
+func fetchReports(cfg *config.Config, store *storage.Storage, m *metrics.Metrics, tokenSource oauth2.TokenSource) error {
 	log.Info().Msg("fetching DMARC reports")
 
 	fetchStart := time.Now()
@@ -335,7 +356,7 @@ func fetchReports(cfg *config.Config, store *storage.Storage, m *metrics.Metrics
 
 	// Create IMAP client
 	connectStart := time.Now()
-	client := imap.NewClient(&cfg.IMAP, log)
+	client := imap.NewClient(&cfg.IMAP, log, tokenSource)
 	if err := client.Connect(); err != nil {
 		if m != nil {
 			m.RecordIMAPConnection(false, time.Since(connectStart))
@@ -345,6 +366,7 @@ func fetchReports(cfg *config.Config, store *storage.Storage, m *metrics.Metrics
 	}
 	if m != nil {
 		m.RecordIMAPConnection(true, time.Since(connectStart))
+		m.IMAPAuthRequired.Set(0)
 	}
 	defer func() { _ = client.Disconnect() }()
 
@@ -438,6 +460,100 @@ func fetchReports(cfg *config.Config, store *storage.Storage, m *metrics.Metrics
 
 	log.Info().Int("count", processed).Msg("reports processed")
 	return nil
+}
+
+// buildTokenSource constructs an XOAUTH2 token source backed by the refresh
+// token in secrets.json (or the IMAP_OAUTH_REFRESH_TOKEN env override).
+func buildTokenSource(ctx context.Context, cfg *config.Config) (oauth2.TokenSource, error) {
+	provider, err := imapoauth.ProviderByName(cfg.IMAP.Auth.Provider)
+	if err != nil {
+		return nil, err
+	}
+	refreshToken, envOverride, err := imapoauth.LoadSecrets(cfg.SecretsPath())
+	if err != nil {
+		return nil, err
+	}
+	if envOverride {
+		log.Info().Msg("using oauth refresh token from IMAP_OAUTH_REFRESH_TOKEN env (read-only)")
+	} else {
+		log.Info().Str("path", cfg.SecretsPath()).Msg("loaded oauth refresh token from secrets file")
+	}
+	return imapoauth.NewTokenSource(ctx, provider, cfg.IMAP.Auth.ClientID, cfg.IMAP.Auth.ClientSecret, refreshToken), nil
+}
+
+// runOAuthLogin runs the OAuth2 device authorization grant and writes the
+// resulting refresh token to secrets.json. Exits the process on completion.
+func runOAuthLogin(ctx context.Context, cfg *config.Config) error {
+	if !cfg.IMAP.Auth.IsXOAUTH2() {
+		return fmt.Errorf("oauth-login requires imap.auth.type=xoauth2 in config (or IMAP_AUTH_TYPE=xoauth2)")
+	}
+	if cfg.IMAP.Auth.ClientID == "" || cfg.IMAP.Auth.ClientSecret == "" {
+		return fmt.Errorf("imap.auth.client_id and client_secret must be set before --oauth-login")
+	}
+
+	provider, err := imapoauth.ProviderByName(cfg.IMAP.Auth.Provider)
+	if err != nil {
+		return err
+	}
+
+	prompt := func(authURL, _ string) {
+		fmt.Println()
+		fmt.Println("Open this URL in a browser to authorize dmarcguard:")
+		fmt.Println("  " + authURL)
+		fmt.Println()
+		fmt.Println("(attempting to open it for you automatically)")
+		fmt.Println("Waiting for callback on http://127.0.0.1:<port>/callback ...")
+	}
+
+	result, err := imapoauth.LoopbackLogin(ctx, provider, cfg.IMAP.Auth.ClientID, cfg.IMAP.Auth.ClientSecret, prompt)
+	if err != nil {
+		return fmt.Errorf("loopback login: %w", err)
+	}
+
+	fmt.Println()
+	if result.Email != "" {
+		fmt.Println("✓ Authorized as " + result.Email)
+		if cfg.IMAP.Username != "" && cfg.IMAP.Username != result.Email {
+			fmt.Println()
+			fmt.Println("⚠ Your config sets imap.username=" + cfg.IMAP.Username)
+			fmt.Println("  but you authenticated as " + result.Email)
+			fmt.Println("  Gmail will reject the XOAUTH2 connection unless these match.")
+		}
+	}
+
+	// Try to write the secrets file at the configured path. This works when
+	// running on the same host as the daemon. When the path isn't writable
+	// (e.g. the binary is run on a developer Mac but config.json points at a
+	// Docker path like /data/secrets.json), fall back to printing the token
+	// so the user can paste it into IMAP_OAUTH_REFRESH_TOKEN.
+	if err := imapoauth.SaveSecrets(cfg.SecretsPath(), result.RefreshToken); err != nil {
+		fmt.Println()
+		fmt.Println("⚠ Could not write " + cfg.SecretsPath() + ": " + err.Error())
+		fmt.Println("  This is expected if you're running --oauth-login on a host but the daemon")
+		fmt.Println("  runs in Docker (the configured secrets path doesn't exist on the host).")
+		fmt.Println()
+		fmt.Println("Add this env var to your compose.yml or run command:")
+		fmt.Println()
+		fmt.Println("    IMAP_OAUTH_REFRESH_TOKEN=" + result.RefreshToken)
+		fmt.Println()
+		return nil
+	}
+
+	fmt.Println("✓ Refresh token saved to " + cfg.SecretsPath())
+	return nil
+}
+
+// handleFetchError logs a fetch error and, when it represents a permanent
+// OAuth failure, sets the auth-required gauge so operators see a clear signal.
+func handleFetchError(err error, m *metrics.Metrics) {
+	if imapoauth.IsTerminalAuthError(err) {
+		log.Error().Err(err).Msg("oauth refresh token rejected — re-run with --oauth-login")
+		if m != nil {
+			m.IMAPAuthRequired.Set(1)
+		}
+		return
+	}
+	log.Error().Err(err).Msg("fetch failed")
 }
 
 func runMCPServer(ctx context.Context, store *storage.Storage, httpAddr string, oauthCfg *oauth.Config) error {
