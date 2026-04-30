@@ -11,7 +11,7 @@ require (
 	github.com/mattn/go-sqlite3 v1.14.38
 	github.com/modelcontextprotocol/go-sdk v1.4.1
 	github.com/prometheus/client_golang v1.23.2
-	github.com/rs/zerolog v1.35.0
+	github.com/rs/zerolog v1.35.1
 	github.com/urfave/cli/v3 v3.8.0
 	modernc.org/sqlite v1.48.0
 )
