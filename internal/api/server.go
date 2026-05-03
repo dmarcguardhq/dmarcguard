@@ -64,6 +64,7 @@ func (s *Server) Start(ctx context.Context) error {
 	protectedMux.HandleFunc("/api/reports/", s.handleReportDetail)
 	protectedMux.HandleFunc("/api/statistics", s.handleStatistics)
 	protectedMux.HandleFunc("/api/top-sources", s.handleTopSources)
+	protectedMux.HandleFunc("/api/auth/me", s.handleAuthMe)
 
 	// Prometheus metrics endpoint (always unauthenticated for scrapers)
 	if s.metrics != nil {
@@ -261,6 +262,29 @@ func (s *Server) writeJSON(w http.ResponseWriter, data interface{}) {
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		s.log.Error().Err(err).Msg("failed to encode JSON")
 	}
+}
+
+// handleAuthMe returns the current authenticated user's information
+func (s *Server) handleAuthMe(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract user info from context (set by auth middleware)
+	user := auth.UserFromContext(r.Context())
+	if user == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte(`{"error":"unauthorized","login_url":"/auth/login"}`))
+		return
+	}
+
+	s.writeJSON(w, map[string]string{
+		"login":      user.Login,
+		"email":      user.Email,
+		"logout_url": "/auth/logout",
+	})
 }
 
 // RefreshMetrics updates all Prometheus metrics from current database state

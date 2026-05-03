@@ -84,3 +84,28 @@ func TestMiddleware_ValidSessionPassesThrough(t *testing.T) {
 		t.Fatal("next handler should have been invoked for valid session")
 	}
 }
+
+// Regression: UserFromContext must return a usable Identity for downstream
+// handlers (e.g. /api/auth/me). A previous bug stored *Session in the context
+// but UserFromContext type-asserted to *Identity, so it always returned nil
+// even on authenticated requests — which silently hid the logout button.
+func TestMiddleware_PopulatesUserContext(t *testing.T) {
+	signer := newSigner(t)
+	cookie, _ := signer.Sign("sebykrueger", "seb@example.com", time.Now())
+
+	var seen *Identity
+	mw := Middleware(signer, http.HandlerFunc(func(_ http.ResponseWriter, r *http.Request) {
+		seen = UserFromContext(r.Context())
+	}))
+
+	req := httptest.NewRequest(http.MethodGet, "/api/auth/me", nil)
+	req.AddCookie(&http.Cookie{Name: CookieName, Value: cookie})
+	mw.ServeHTTP(httptest.NewRecorder(), req)
+
+	if seen == nil {
+		t.Fatal("UserFromContext returned nil for an authenticated request")
+	}
+	if seen.Login != "sebykrueger" || seen.Email != "seb@example.com" {
+		t.Fatalf("identity mismatch: got %+v", seen)
+	}
+}

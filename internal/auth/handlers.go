@@ -31,11 +31,12 @@ func NewHandlers(github *GitHubClient, signer *SessionSigner, allowlist *Allowli
 	}
 }
 
-// Mount attaches /auth/login, /auth/callback, and /auth/logout to mux.
+// Mount attaches the /auth/* handlers to mux.
 func (h *Handlers) Mount(mux *http.ServeMux) {
 	mux.HandleFunc("/auth/login", h.Login)
 	mux.HandleFunc("/auth/callback", h.Callback)
 	mux.HandleFunc("/auth/logout", h.Logout)
+	mux.HandleFunc("/auth/logged-out", h.LoggedOut)
 }
 
 // Login generates a fresh state token, sets it as a short-lived cookie, and
@@ -129,10 +130,16 @@ func (h *Handlers) Callback(w http.ResponseWriter, r *http.Request) {
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 }
 
-// Logout clears the session cookie and redirects to /auth/login.
-// Accepts both POST (for forms) and GET (for "logout" links) — the latter
-// is fine because the cookie is HttpOnly and SameSite=Lax, so cross-site
-// triggering still requires user navigation.
+// Logout clears the session cookie and redirects to a dedicated "signed out"
+// page. We deliberately do NOT redirect to /auth/login here — that would
+// immediately bounce the user back through GitHub, and (because GitHub
+// remembers the prior consent) they'd be silently re-authenticated and end
+// up exactly where they started. The dedicated landing page makes the user
+// click an explicit "Sign in" link to come back.
+//
+// Accepts both POST (for forms) and GET (for plain "logout" links) — the
+// cookie is HttpOnly and SameSite=Lax, so cross-site triggering still
+// requires user navigation.
 func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
 	http.SetCookie(w, &http.Cookie{
 		Name:     CookieName,
@@ -143,5 +150,38 @@ func (h *Handlers) Logout(w http.ResponseWriter, r *http.Request) {
 		Secure:   h.Secure,
 		SameSite: http.SameSiteLaxMode,
 	})
-	http.Redirect(w, r, "/auth/login", http.StatusSeeOther)
+	http.Redirect(w, r, "/auth/logged-out", http.StatusSeeOther)
+}
+
+// LoggedOut is the post-logout landing page. Plain HTML (no Vue) so the
+// browser can render it without re-authenticating against the gated SPA.
+func (h *Handlers) LoggedOut(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Header().Set("Cache-Control", "no-store")
+	_, _ = w.Write([]byte(`<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Signed out — dmarcguard</title>
+<style>
+  :root { color-scheme: light dark; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif; max-width: 28rem; margin: 6rem auto; padding: 2rem; line-height: 1.6; }
+  h1 { font-size: 1.5rem; margin: 0 0 0.5rem; }
+  p { opacity: 0.75; margin: 0 0 1.5rem; }
+  a.btn { display: inline-block; padding: 0.625rem 1.25rem; background: #1f2937; color: #fff; text-decoration: none; border-radius: 0.375rem; font-weight: 500; }
+  a.btn:hover { background: #111827; }
+  @media (prefers-color-scheme: dark) {
+    body { background: #0f172a; color: #e2e8f0; }
+    a.btn { background: #e2e8f0; color: #0f172a; }
+    a.btn:hover { background: #fff; }
+  }
+</style>
+</head>
+<body>
+  <h1>Signed out</h1>
+  <p>You've been signed out of dmarcguard. Your session cookie has been cleared.</p>
+  <p><a class="btn" href="/auth/login">Sign in again</a></p>
+</body>
+</html>`))
 }

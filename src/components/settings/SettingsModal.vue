@@ -1,6 +1,7 @@
 <script setup>
-import { computed, ref, watch } from "vue";
+import { computed, ref, watch, onMounted } from "vue";
 import { useThemeStore, useSettingsStore } from "@/stores";
+import { getCurrentUser } from "@/lib/api.js";
 
 const props = defineProps({
   isOpen: {
@@ -18,13 +19,39 @@ const settingsStore = useSettingsStore();
 const editingEndpoint = ref(settingsStore.apiEndpoint);
 const validationError = ref("");
 
+// Auth state
+const currentUser = ref(null);
+const loadingUser = ref(false);
+
+// Fetch current user on mount
+onMounted(async () => {
+  loadingUser.value = true;
+  try {
+    currentUser.value = await getCurrentUser();
+  } catch (error) {
+    // Silently fail - auth might be disabled
+    currentUser.value = null;
+  } finally {
+    loadingUser.value = false;
+  }
+});
+
 // Sync editing endpoint when modal opens or store changes
 watch(
   () => props.isOpen,
-  (open) => {
+  async (open) => {
     if (open) {
       editingEndpoint.value = settingsStore.apiEndpoint;
       validationError.value = "";
+      // Fetch user info when modal opens (in case user logged in after component mounted)
+      try {
+        const user = await getCurrentUser();
+        console.log('[SettingsModal] Fetched user:', user);
+        currentUser.value = user;
+      } catch (error) {
+        console.error('[SettingsModal] Failed to fetch user:', error);
+        currentUser.value = null;
+      }
     }
   },
 );
@@ -75,6 +102,10 @@ function handleBackdropClick(event) {
   if (event.target === event.currentTarget) {
     closeModal();
   }
+}
+
+function handleLogout() {
+  window.location.href = currentUser.value.logout_url;
 }
 
 // Theme helpers
@@ -136,6 +167,55 @@ const themeOptions = [
           </div>
 
           <div class="modal-body">
+            <!-- User Info Section (only shown when authenticated) -->
+            <section v-if="currentUser" class="settings-section user-section">
+              <h3 class="section-label">Account</h3>
+              <div class="user-info">
+                <div class="user-details">
+                  <div class="user-login">
+                    <svg
+                      width="16"
+                      height="16"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      stroke-width="2"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                    >
+                      <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+                      <circle cx="12" cy="7" r="4" />
+                    </svg>
+                    <span class="user-name">@{{ currentUser.login }}</span>
+                  </div>
+                  <div v-if="currentUser.email" class="user-email">
+                    {{ currentUser.email }}
+                  </div>
+                </div>
+                <a
+                  :href="currentUser.logout_url"
+                  class="btn btn-logout"
+                  @click.prevent="handleLogout"
+                >
+                  <svg
+                    width="16"
+                    height="16"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                  >
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" y1="12" x2="9" y2="12" />
+                  </svg>
+                  Logout
+                </a>
+              </div>
+            </section>
+
             <!-- Theme Section -->
             <section class="settings-section">
               <h3 class="section-label">Theme</h3>
@@ -340,6 +420,77 @@ const themeOptions = [
   align-items: center;
   justify-content: center;
   z-index: 100;
+
+/* User Section */
+.user-section {
+  padding-bottom: 20px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px 16px;
+  background: var(--bg-app);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+}
+
+.user-details {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.user-login {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+  color: var(--text-main);
+  font-size: 0.875rem;
+}
+
+.user-login svg {
+  color: var(--text-muted);
+}
+
+.user-name {
+  font-family: var(--font-mono);
+}
+
+.user-email {
+  font-size: 0.8125rem;
+  color: var(--text-muted);
+  padding-left: 24px;
+}
+
+.btn-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.btn-logout:hover {
+  border-color: var(--c-danger);
+  color: var(--c-danger);
+  background: rgba(239, 68, 68, 0.05);
+}
+
+
   padding: 16px;
 }
 
