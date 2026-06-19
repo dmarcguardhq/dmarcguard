@@ -122,6 +122,9 @@ jobs:
             ghcr.io/${{ github.repository }}:latest
             ghcr.io/${{ github.repository }}:${{ github.run_id }}
             ghcr.io/${{ github.repository }}:${{ github.sha }}
+            dmarcguardhq/dmarcguard:latest
+            dmarcguardhq/dmarcguard:${{ github.run_id }}
+            dmarcguardhq/dmarcguard:${{ github.sha }}
           kubescape: true
 
   release-please:
