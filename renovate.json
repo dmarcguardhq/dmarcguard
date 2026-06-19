@@ -1,38 +1,4 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "customManagers": [
-    {
-      "customType": "regex",
-      "datasourceTemplate": "{{#if (equals datasource 'github')}}github-tags{{else}}{{{datasource}}}{{/if}}",
-      "managerFilePatterns": [
-        "/^.*$/"
-      ],
-      "matchStrings": [
-        "\\s*#\\s?renovate: (?<datasource>.*?)=(?<depName>.*?)(\\s+versioning=(?<versioning>.*?))?\\s+[\\w+\\.\\-]+(?:[:=]|\\s+\\S+)\\s*[\\\"']?(?<currentValue>[\\w+\\.\\-]*)(?:@(?<currentDigest>sha256:[a-f0-9]+))?[\\\"']?"
-      ],
-      "versioningTemplate": "{{#if (equals datasource 'docker')}}docker{{else if versioning}}{{{versioning}}}{{else}}semver{{/if}}"
-    }
-  ],
-  "extends": [
-    "config:recommended",
-    ":dependencyDashboard",
-    ":semanticPrefixFixDepsChoreOthers",
-    ":ignoreModulesAndTests",
-    "group:monorepos",
-    "group:recommended",
-    "replacements:all",
-    "workarounds:all"
-  ],
-  "packageRules": [
-    {
-      "automerge": true,
-      "automergeStrategy": "rebase",
-      "matchUpdateTypes": [
-        "patch",
-        "pin",
-        "lockFileMaintenance",
-        "digest"
-      ]
-    }
-  ]
+  "extends": ["github>meysam81/.github"]
 }
