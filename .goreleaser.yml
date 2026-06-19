@@ -19,26 +19,11 @@ before:
 
 builds:
   - binary: parse-dmarc
+    main: .
     env:
       - CGO_ENABLED=0
     flags:
       - "-trimpath"
-    goarch:
-      - amd64
-      - arm64
-      - arm
-    goarm:
-      - "6"
-      - "7"
-    goos:
-      - linux
-      - windows
-      - darwin
-    ignore:
-      - goarch: arm
-        goos: windows
-      - goarch: arm64
-        goos: windows
     ldflags:
       - "-s"
       - "-w"
@@ -47,16 +32,20 @@ builds:
       - "-X main.commit={{.Commit}}"
       - "-X main.date={{.Date}}"
       - "-X main.builtBy=goreleaser"
-    main: .
+    ignore:
+      - goarch: arm
+        goos: windows
+      - goarch: arm64
+        goos: windows
 
 archives:
-  - format_overrides:
+  - id: default
+    formats:
+      - tar.gz
+    format_overrides:
       - formats:
           - zip
         goos: windows
-    formats:
-      - tar.gz
-    id: default
     name_template: >-
       {{ .ProjectName }}_
       {{- tolower .Os }}_
@@ -87,60 +76,26 @@ dockers_v2:
       "org.opencontainers.image.source": "{{.GitURL}}"
       "org.opencontainers.image.version": "{{.Version}}"
       "io.modelcontextprotocol.server.name": "io.github.meysam81/parse-dmarc"
-    sbom: "{{ not .Env.DISABLE_SBOM }}"
 
 docker_signs:
   - id: default
+    cmd: cosign
     args:
       - "sign"
       - "--yes"
       - "${artifact}"
-    cmd: cosign
     output: true
 
 docker_digest:
   name_template: "digest.txt"
   disable: "{{ .Env.NO_DIGEST }}"
 
-# TODO: the server requires a config to run and I currently don't know how!
-# mcp:
-#   name: io.github.meysam81/parse-dmarc
-#   title: Parse-DMARC MCP Server
-#   description: "Lightweight DMARC parser: auto-fetch email reports, visualize compliance in a single all-in-one app"
-#   homepage: https://github.com/meysam81/parse-dmarc
-#   auth:
-#     type: github-oidc
-#   repository:
-#     url: "https://github.com/meysam81/parse-dmarc.git"
-#     source: github
-#     id: "1089959979"
-#   packages:
-#     - registry_type: oci
-#       identifier: "ghcr.io/meysam81/parse-dmarc-mcp:v{{ .Version }}"
-#       transport:
-#         type: stdio
-#   disable: true
-
-report_sizes: true
-
-milestones:
-  - close: true
-    fail_on_error: false
-    name_template: "{{ .Tag }}"
-
-announce:
-  skip: "{{gt .Patch 0}}"
-
-checksum:
-  algorithm: sha256
-  name_template: checksums.txt
-
 homebrew_casks:
-  - commit_msg_template: Brew formula update for {{ .ProjectName }} version {{ .Tag }}
+  - name: parse-dmarc
     description: Single-binary, zero-dependency DMARC parser with a modern web dashboard.
     homepage: https://github.com/meysam81/parse-dmarc
     license: Apache-2.0
-    name: parse-dmarc
+    commit_msg_template: Brew formula update for {{ .ProjectName }} version {{ .Tag }}
     repository:
       name: homebrew-tap
       owner: meysam81
@@ -160,3 +115,17 @@ homebrew_casks:
           puts ""
           puts "📚 For more information and usage instructions, visit:"
           puts "   https://github.com/meysam81/parse-dmarc"
+
+report_sizes: true
+
+milestones:
+  - close: true
+    fail_on_error: false
+    name_template: "{{ .Tag }}"
+
+announce:
+  skip: "{{gt .Patch 0}}"
+
+checksum:
+  algorithm: sha256
+  name_template: checksums.txt
