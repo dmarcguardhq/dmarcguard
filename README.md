@@ -1,15 +1,20 @@
 # Parse DMARC
 
+[![CI](https://img.shields.io/github/actions/workflow/status/meysam81/parse-dmarc/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=white&style=flat-square)](https://github.com/meysam81/parse-dmarc/actions/workflows/ci.yml)
 [![License](https://img.shields.io/github/license/meysam81/parse-dmarc?style=flat-square)](https://github.com/meysam81/parse-dmarc/blob/main/LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/meysam81/parse-dmarc?style=flat-square)](https://github.com/meysam81/parse-dmarc/releases)
+[![GitHub release](https://img.shields.io/github/v/release/meysam81/parse-dmarc?style=flat-square&logo=github)](https://github.com/meysam81/parse-dmarc/releases)
 [![GitHub Stars](https://img.shields.io/github/stars/meysam81/parse-dmarc?style=flat-square&logo=github)](https://github.com/meysam81/parse-dmarc/stargazers)
 [![GitHub Issues](https://img.shields.io/github/issues/meysam81/parse-dmarc?style=flat-square&logo=github)](https://github.com/meysam81/parse-dmarc/issues)
 [![Go Report Card](https://goreportcard.com/badge/github.com/meysam81/parse-dmarc?style=flat-square)](https://goreportcard.com/report/github.com/meysam81/parse-dmarc)
-[![Made with Go](https://img.shields.io/badge/Made%20with-Go-1f425f.svg?style=flat-square&logo=go)](https://go.dev)
-[![Made with Vue.js](https://img.shields.io/badge/Made%20with-Vue.js-4FC08D.svg?style=flat-square&logo=vue.js)](https://vuejs.org)
-[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-meysam81%2Fparse--dmarc-blue?style=flat-square&logo=docker)](https://hub.docker.com/r/meysam81/parse-dmarc)
-[![Docker Pulls](https://img.shields.io/docker/pulls/meysam81/parse-dmarc?style=flat-square&logo=docker)](https://hub.docker.com/r/meysam81/parse-dmarc)
-[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/meysam81/parse-dmarc/v1)](https://hub.docker.com/r/meysam81/parse-dmarc)
+
+[![Made with Go](https://img.shields.io/badge/Made%20with-Go-1f425f?style=flat-square&logo=go&logoColor=white)](https://go.dev)
+[![Made with Vue.js](https://img.shields.io/badge/Made%20with-Vue.js-4FC08D?style=flat-square&logo=vue.js&logoColor=white)](https://vuejs.org)
+[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-meysam81%2Fparse--dmarc-2496ED?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/meysam81/parse-dmarc)
+[![Docker Pulls](https://img.shields.io/docker/pulls/meysam81/parse-dmarc?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/meysam81/parse-dmarc)
+[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/meysam81/parse-dmarc/v1?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/meysam81/parse-dmarc)
+
+[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white&style=flat-square)](https://www.conventionalcommits.org)
+[![Renovate](https://img.shields.io/badge/renovate-enabled-1f8b4c?logo=renovatebot&logoColor=white&style=flat-square)](https://developer.mend.io/github/meysam81/parse-dmarc)
 
 **Monitor who's sending email on behalf of your domain. Catch spoofing. Stop phishing.**
 
