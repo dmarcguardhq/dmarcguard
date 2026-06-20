@@ -125,9 +125,6 @@ jobs:
             meysam81/parse-dmarc:latest
             meysam81/parse-dmarc:${{ github.run_id }}
             meysam81/parse-dmarc:${{ github.sha }}
-            ghcr.io/meysam81/parse-dmarc:latest
-            ghcr.io/meysam81/parse-dmarc:${{ github.run_id }}
-            ghcr.io/meysam81/parse-dmarc:${{ github.sha }}
           kubescape: true
 
   release-please:

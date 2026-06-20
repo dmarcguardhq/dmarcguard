@@ -58,8 +58,7 @@ dist: .goreleaser-dist
 dockers_v2:
   - id: parse-dmarc
     images:
-      - meysam81/{{ .ProjectName }}
-      - ghcr.io/meysam81/{{ .ProjectName }}
+      - meysam81/parse-dmarc
       - dmarcguard/dmarcguard
       - ghcr.io/dmarcguardhq/dmarcguard
     dockerfile: Dockerfile.goreleaser
