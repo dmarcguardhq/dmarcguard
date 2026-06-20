@@ -73,6 +73,7 @@ Deploy Parse DMARC to your favorite cloud provider with one click:
 - 📦 Single binary - no databases to install, no complex setup
 - 🚀 Tiny 14MB Docker image
 - 🔒 Secure TLS support
+- 🔐 Optional GitHub OAuth login for the dashboard ([details](#dashboard-authentication))
 - 🌙 Dark mode support
 
 ## Installation
@@ -158,6 +159,117 @@ This helps you:
 - Verify your legitimate email services are properly configured
 - Detect unauthorized use of your domain
 - Gradually move from monitoring (`p=none`) to enforcement (`p=quarantine` or `p=reject`)
+
+## Dashboard Authentication
+
+The dashboard runs unauthenticated by default — fine for `localhost`, but if
+you expose it to the internet you'll want login. Parse DMARC ships with
+**GitHub OAuth** out of the box.
+
+### Step 1 — Create a GitHub OAuth App
+
+Go to <https://github.com/settings/developers> → **OAuth Apps** → **New OAuth App**:
+
+| Field | Value |
+| --- | --- |
+| **Application name** | `dmarcguard` (anything — only you see it) |
+| **Homepage URL** | Your dashboard URL, e.g. `https://dmarc.example.com` (or `http://localhost:8080` for local testing) |
+| **Authorization callback URL** | Same as above with `/auth/callback` appended, e.g. `https://dmarc.example.com/auth/callback` |
+| **Enable Device Flow** | ❌ Leave unchecked |
+
+Click **Register application**. On the next screen:
+
+1. Copy the **Client ID** (visible immediately).
+2. Click **Generate a new client secret** → copy the secret (only shown once).
+
+> The callback URL above must match `auth.redirect_url` in your config **exactly** — including scheme (`http`/`https`), host, port, and path. A mismatch produces GitHub's `redirect_uri_mismatch` error.
+
+### Step 2 — Generate a session secret
+
+```bash
+./parse-dmarc --gen-session-secret
+# nX2Fc0PbLjYOvGPrO3MsZ6o+To2MHi3hJp48czUnH+U=
+```
+
+Or in Docker:
+
+```bash
+docker compose run --rm parse-dmarc --gen-session-secret
+```
+
+This is a 32-byte random key used to sign session cookies (HMAC-SHA256). Treat it like any other secret — anyone who has it can mint valid sessions for any allowlisted user.
+
+### Step 3 — Add the `auth` block to `config.json`
+
+```json
+"auth": {
+  "enabled": true,
+  "client_id": "Iv1.xxxxxxxxxxxxxxxx",
+  "client_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "redirect_url": "https://dmarc.example.com/auth/callback",
+  "session_secret": "nX2Fc0PbLjYOvGPrO3MsZ6o+To2MHi3hJp48czUnH+U=",
+  "allowed_users": ["sebykrueger"],
+  "allowed_emails": ["seb@example.com"],
+  "session_ttl_days": 7
+}
+```
+
+**Allowlist semantics:**
+
+- `allowed_users` matches the GitHub username (e.g. `sebykrueger`).
+- `allowed_emails` matches the verified primary email on the GitHub account.
+- A user is granted access if **either** list contains their identity (OR, not AND). Case-insensitive on both sides.
+- At least one entry across the two lists is required — the daemon refuses to start with `auth.enabled=true` and an empty allowlist (otherwise nobody could log in).
+
+**Optional fields:**
+
+- `session_ttl_days` — how long a login lasts. Default: 7 days.
+- The `Secure` cookie flag is set automatically when `redirect_url` starts with `https://`.
+
+### Step 4 — Restart the daemon
+
+```bash
+docker compose restart parse-dmarc
+```
+
+You should see this log line confirming auth is on:
+
+```
+INF dashboard authentication enabled (github) allowed_emails=1 allowed_users=1
+```
+
+### What changes after auth is enabled
+
+| Path | Behavior |
+| --- | --- |
+| `/` and the dashboard SPA | 303 redirect to `/auth/login` if no valid session cookie |
+| `/api/*` | `401 application/json` with `{"error":"unauthorized","login_url":"/auth/login"}` for programmatic callers |
+| `/auth/login` | Redirects to GitHub OAuth |
+| `/auth/callback` | Receives the code, validates state (CSRF), checks the allowlist, sets the session cookie |
+| `/auth/logout` | Clears the session cookie and redirects to login |
+| `/metrics` | **Still open** — Prometheus scrapers don't need to authenticate |
+
+### Environment variable equivalents
+
+Every field has an env var, useful for Docker secrets / Vault / k8s secrets:
+
+```bash
+AUTH_ENABLED=true
+AUTH_CLIENT_ID=Iv1.xxxxxxxxxxxxxxxx
+AUTH_CLIENT_SECRET=xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+AUTH_REDIRECT_URL=https://dmarc.example.com/auth/callback
+AUTH_SESSION_SECRET=nX2Fc0PbLjYOvGPrO3MsZ6o+To2MHi3hJp48czUnH+U=
+AUTH_ALLOWED_USERS=sebykrueger,alice
+AUTH_ALLOWED_EMAILS=seb@example.com
+AUTH_SESSION_TTL_DAYS=7
+```
+
+### Common gotchas
+
+- **`redirect_uri_mismatch` from GitHub** — the OAuth App's callback URL doesn't match `auth.redirect_url` to the byte. Trailing slash counts.
+- **403 "not authorized"** after a successful GitHub login — your username/email isn't in the allowlist. Either add it, or switch to a different GitHub account.
+- **Removing someone from the allowlist doesn't kick them out immediately** — sessions are cookie-based and last `session_ttl_days`. To force-evict, rotate `auth.session_secret` (invalidates all sessions).
+- **Cookies aren't `Secure` on `http://`** — fine for local, dangerous in production. Always use HTTPS for any internet-facing deployment (a reverse proxy with Caddy / Traefik / nginx-acme handles this in one line).
 
 ## Configuration Options
 

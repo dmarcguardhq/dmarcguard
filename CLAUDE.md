@@ -202,6 +202,49 @@ go test -v ./internal/parser/...
 | `--mcp-oauth-introspection-endpoint` | `PARSE_DMARC_MCP_OAUTH_INTROSPECTION_ENDPOINT` | Token introspection endpoint URL                      |
 | `--mcp-oauth-resource-name`          | `PARSE_DMARC_MCP_OAUTH_RESOURCE_NAME`          | Human-readable name for MCP server metadata           |
 | `--mcp-oauth-insecure`               | `PARSE_DMARC_MCP_OAUTH_INSECURE`               | Skip TLS certificate verification (dev only)          |
+| `--gen-session-secret`               | `PARSE_DMARC_GEN_SESSION_SECRET`               | Print a base64-encoded 32-byte session secret and exit |
+
+## Dashboard Authentication (GitHub OAuth)
+
+The dashboard runs unauthenticated by default. To require login, add an
+`auth` block to `config.json`:
+
+```json
+"auth": {
+  "enabled": true,
+  "client_id": "Iv1.xxxxxxxxxxxxxxxx",
+  "client_secret": "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+  "redirect_url": "https://dmarc.example.com/auth/callback",
+  "session_secret": "<output of --gen-session-secret>",
+  "allowed_emails": ["seb@example.com"],
+  "allowed_users":  ["sebykrueger"],
+  "session_ttl_days": 7
+}
+```
+
+Setup steps:
+
+1. Generate a session secret: `./parse-dmarc --gen-session-secret`. Paste
+   into `auth.session_secret`.
+2. Create a GitHub OAuth App at <https://github.com/settings/developers> →
+   **New OAuth App**:
+   - **Homepage URL**: your dashboard URL (e.g., `https://dmarc.example.com`)
+   - **Authorization callback URL**: must exactly match `auth.redirect_url`
+3. Copy the Client ID and Client secret into `config.json`.
+4. Configure `allowed_emails` and/or `allowed_users` — at least one entry is
+   required (otherwise no one can log in).
+5. Restart the daemon. Visiting any dashboard URL now redirects to GitHub.
+
+Behavior notes:
+
+- `/api/*` returns `401 application/json` with `{"login_url":"/auth/login"}`
+  for programmatic clients.
+- `/metrics` and `/healthz` are intentionally **not** auth-gated so
+  Prometheus scrapers and uptime checks still work.
+- Sessions are stateless: an HMAC-signed cookie carries `sub`, `email`,
+  `iat`, `exp`. No server-side session store.
+- Session TTL defaults to 7 days; configurable via `session_ttl_days`.
+- Cookies use `Secure` automatically when `redirect_url` is `https://`.
 
 ## Code Style
 

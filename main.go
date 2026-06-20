@@ -11,6 +11,7 @@ import (
 	"time"
 
 	"github.com/meysam81/parse-dmarc/internal/api"
+	"github.com/meysam81/parse-dmarc/internal/auth"
 	"github.com/meysam81/parse-dmarc/internal/config"
 	"github.com/meysam81/parse-dmarc/internal/imap"
 	"github.com/meysam81/parse-dmarc/internal/logger"
@@ -139,6 +140,11 @@ func main() {
 				Usage:   "Skip TLS certificate verification (development only)",
 				Sources: cli.EnvVars("PARSE_DMARC_MCP_OAUTH_INSECURE"),
 			},
+			&cli.BoolFlag{
+				Name:    "gen-session-secret",
+				Usage:   "Generate a base64-encoded 32-byte session secret for auth.session_secret and exit",
+				Sources: cli.EnvVars("PARSE_DMARC_GEN_SESSION_SECRET"),
+			},
 		},
 		Action: run,
 		Commands: []*cli.Command{
@@ -187,6 +193,15 @@ func run(ctx context.Context, cmd *cli.Command) error {
 			return fmt.Errorf("failed to generate config: %w", err)
 		}
 		log.Info().Str("path", configPath).Msg("sample configuration written")
+		return nil
+	}
+
+	if cmd.Bool("gen-session-secret") {
+		secret, err := auth.GenerateSessionSecret()
+		if err != nil {
+			return fmt.Errorf("generate session secret: %w", err)
+		}
+		fmt.Println(secret)
 		return nil
 	}
 
@@ -267,6 +282,25 @@ func run(ctx context.Context, cmd *cli.Command) error {
 	defer stop()
 
 	server := api.NewServer(store, cfg.Server.Host, cfg.Server.Port, m, log)
+
+	if cfg.Auth.Enabled {
+		if err := cfg.ValidateAuth(); err != nil {
+			return fmt.Errorf("auth configuration error: %w", err)
+		}
+		signer, err := auth.NewSessionSigner(cfg.Auth.SessionSecret, cfg.Auth.SessionTTLDays)
+		if err != nil {
+			return fmt.Errorf("auth signer: %w", err)
+		}
+		github := auth.NewGitHubClient(cfg.Auth.ClientID, cfg.Auth.ClientSecret, cfg.Auth.RedirectURL, nil)
+		allowlist := auth.NewAllowlist(cfg.Auth.AllowedEmails, cfg.Auth.AllowedUsers)
+		handlers := auth.NewHandlers(github, signer, allowlist, cfg.Auth.RedirectURL, log)
+		server.WithAuth(handlers, signer)
+		log.Info().
+			Int("allowed_emails", len(cfg.Auth.AllowedEmails)).
+			Int("allowed_users", len(cfg.Auth.AllowedUsers)).
+			Msg("dashboard authentication enabled (github)")
+	}
+
 	serverErrChan := make(chan error, 1)
 	go func() {
 		serverErrChan <- server.Start(ctx)

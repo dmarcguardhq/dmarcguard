@@ -17,6 +17,18 @@ var (
 	ErrMissingIMAPUsername = errors.New("IMAP_USERNAME is required: set via environment variable or config file")
 	// ErrMissingIMAPPassword is returned when IMAP password is not configured
 	ErrMissingIMAPPassword = errors.New("IMAP_PASSWORD is required: set via environment variable or config file")
+	// ErrAuthMissingClientID is returned when auth is enabled without a GitHub OAuth client ID
+	ErrAuthMissingClientID = errors.New("auth.client_id is required when auth.enabled (set AUTH_CLIENT_ID)")
+	// ErrAuthMissingClientSecret is returned when auth is enabled without a GitHub OAuth client secret
+	ErrAuthMissingClientSecret = errors.New("auth.client_secret is required when auth.enabled (set AUTH_CLIENT_SECRET)")
+	// ErrAuthMissingRedirectURL is returned when auth is enabled without a callback URL
+	ErrAuthMissingRedirectURL = errors.New("auth.redirect_url is required when auth.enabled (e.g., https://dmarc.example.com/auth/callback)")
+	// ErrAuthMissingSessionSecret is returned when auth is enabled without a session-signing secret
+	ErrAuthMissingSessionSecret = errors.New("auth.session_secret is required when auth.enabled (generate with --gen-session-secret)")
+	// ErrAuthSessionSecretTooShort is returned when the session secret is too short to safely sign cookies
+	ErrAuthSessionSecretTooShort = errors.New("auth.session_secret must decode to at least 32 bytes")
+	// ErrAuthAllowlistEmpty is returned when auth is enabled but no users/emails are allowed
+	ErrAuthAllowlistEmpty = errors.New("auth requires at least one entry in allowed_emails or allowed_users (otherwise no one can log in)")
 )
 
 // Config holds the application configuration
@@ -26,6 +38,22 @@ type Config struct {
 	IMAP        IMAPConfig     `json:"imap"`
 	Database    DatabaseConfig `json:"database"`
 	Server      ServerConfig   `json:"server"`
+	Auth        AuthConfig     `json:"auth" envPrefix:"AUTH_"`
+}
+
+// AuthConfig holds dashboard authentication configuration. When Enabled is
+// false (or the block is absent) the dashboard runs unauthenticated, matching
+// pre-auth behavior. When enabled, all /api/* and / routes require a valid
+// session cookie obtained via GitHub OAuth.
+type AuthConfig struct {
+	Enabled        bool     `json:"enabled" env:"ENABLED"`
+	ClientID       string   `json:"client_id" env:"CLIENT_ID"`
+	ClientSecret   string   `json:"client_secret" env:"CLIENT_SECRET"`
+	RedirectURL    string   `json:"redirect_url" env:"REDIRECT_URL"`
+	SessionSecret  string   `json:"session_secret" env:"SESSION_SECRET"`
+	AllowedEmails  []string `json:"allowed_emails" env:"ALLOWED_EMAILS" envSeparator:","`
+	AllowedUsers   []string `json:"allowed_users" env:"ALLOWED_USERS" envSeparator:","`
+	SessionTTLDays int      `json:"session_ttl_days" env:"SESSION_TTL_DAYS"`
 }
 
 // IMAPConfig holds IMAP server configuration
@@ -134,6 +162,35 @@ func (c *Config) Validate() error {
 	}
 	if c.IMAP.Password == "" {
 		return ErrMissingIMAPPassword
+	}
+	return nil
+}
+
+// ValidateAuth checks the auth configuration when it is enabled. Always called
+// before mounting auth handlers. Returns nil when auth is disabled.
+func (c *Config) ValidateAuth() error {
+	if !c.Auth.Enabled {
+		return nil
+	}
+	if c.Auth.ClientID == "" {
+		return ErrAuthMissingClientID
+	}
+	if c.Auth.ClientSecret == "" {
+		return ErrAuthMissingClientSecret
+	}
+	if c.Auth.RedirectURL == "" {
+		return ErrAuthMissingRedirectURL
+	}
+	if c.Auth.SessionSecret == "" {
+		return ErrAuthMissingSessionSecret
+	}
+	// Decoded length check happens when the secret is loaded by the auth
+	// package; here we just guard against obviously-short raw strings.
+	if len(c.Auth.SessionSecret) < 32 {
+		return ErrAuthSessionSecretTooShort
+	}
+	if len(c.Auth.AllowedEmails) == 0 && len(c.Auth.AllowedUsers) == 0 {
+		return ErrAuthAllowlistEmpty
 	}
 	return nil
 }

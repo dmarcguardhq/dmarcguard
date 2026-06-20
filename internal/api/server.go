@@ -12,6 +12,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/rs/zerolog"
 
+	"github.com/meysam81/parse-dmarc/internal/auth"
 	"github.com/meysam81/parse-dmarc/internal/metrics"
 	"github.com/meysam81/parse-dmarc/internal/storage"
 )
@@ -21,10 +22,12 @@ var distFS embed.FS
 
 // Server represents the API server
 type Server struct {
-	storage *storage.Storage
-	metrics *metrics.Metrics
-	log     *zerolog.Logger
-	addr    string
+	storage      *storage.Storage
+	metrics      *metrics.Metrics
+	log          *zerolog.Logger
+	addr         string
+	authHandlers *auth.Handlers
+	authSigner   *auth.SessionSigner
 }
 
 // NewServer creates a new API server
@@ -37,29 +40,50 @@ func NewServer(store *storage.Storage, host string, port int, m *metrics.Metrics
 	}
 }
 
+// WithAuth enables dashboard authentication. When called, /api/* and / are
+// gated behind a valid session cookie and /auth/* handlers are mounted.
+// Pass nil to disable auth (default).
+func (s *Server) WithAuth(handlers *auth.Handlers, signer *auth.SessionSigner) *Server {
+	s.authHandlers = handlers
+	s.authSigner = signer
+	return s
+}
+
 // Start starts the HTTP server
 func (s *Server) Start(ctx context.Context) error {
 	mux := http.NewServeMux()
 
-	// API routes
-	mux.HandleFunc("/api/reports", s.handleReports)
-	mux.HandleFunc("/api/reports/", s.handleReportDetail)
-	mux.HandleFunc("/api/statistics", s.handleStatistics)
-	mux.HandleFunc("/api/top-sources", s.handleTopSources)
+	// Build the protected portion of the router (API + frontend) on its own
+	// mux so the auth middleware can wrap it cleanly. /metrics and /auth/*
+	// stay on the outer mux — Prometheus needs unauthenticated scrapes, and
+	// /auth/* obviously can't sit behind the auth gate.
+	protectedMux := http.NewServeMux()
 
-	// Prometheus metrics endpoint
+	// API routes
+	protectedMux.HandleFunc("/api/reports", s.handleReports)
+	protectedMux.HandleFunc("/api/reports/", s.handleReportDetail)
+	protectedMux.HandleFunc("/api/statistics", s.handleStatistics)
+	protectedMux.HandleFunc("/api/top-sources", s.handleTopSources)
+	protectedMux.HandleFunc("/api/auth/me", s.handleAuthMe)
+
+	// Prometheus metrics endpoint (always unauthenticated for scrapers)
 	if s.metrics != nil {
 		mux.Handle("/metrics", s.metrics.Handler())
 	}
 
-	// Serve frontend
+	// Auth handlers
+	if s.authHandlers != nil {
+		s.authHandlers.Mount(mux)
+	}
+
+	// Serve frontend (mounted on protectedMux so the dashboard SPA is gated)
 	// Try to serve embedded files, fallback to nothing if not embedded
 	distFiles, err := fs.Sub(distFS, "dist")
 	if err == nil {
-		mux.Handle("/", http.FileServer(http.FS(distFiles)))
+		protectedMux.Handle("/", http.FileServer(http.FS(distFiles)))
 	} else {
 		// If dist folder is not embedded, serve a simple message
-		mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		protectedMux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 			if r.URL.Path == "/" {
 				w.Header().Set("Content-Type", "text/html")
 				_, _ = fmt.Fprintf(w, `
@@ -83,6 +107,13 @@ func (s *Server) Start(ctx context.Context) error {
 			}
 		})
 	}
+
+	// Mount protected routes (gated by auth middleware when enabled).
+	var protected http.Handler = protectedMux
+	if s.authSigner != nil {
+		protected = auth.Middleware(s.authSigner, protected)
+	}
+	mux.Handle("/", protected)
 
 	// Build handler chain: CORS -> Metrics -> Routes
 	var handler http.Handler = mux
@@ -231,6 +262,29 @@ func (s *Server) writeJSON(w http.ResponseWriter, data interface{}) {
 	if err := json.NewEncoder(w).Encode(data); err != nil {
 		s.log.Error().Err(err).Msg("failed to encode JSON")
 	}
+}
+
+// handleAuthMe returns the current authenticated user's information
+func (s *Server) handleAuthMe(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodGet {
+		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
+		return
+	}
+
+	// Extract user info from context (set by auth middleware)
+	user := auth.UserFromContext(r.Context())
+	if user == nil {
+		w.Header().Set("Content-Type", "application/json")
+		w.WriteHeader(http.StatusUnauthorized)
+		_, _ = w.Write([]byte(`{"error":"unauthorized","login_url":"/auth/login"}`))
+		return
+	}
+
+	s.writeJSON(w, map[string]string{
+		"login":      user.Login,
+		"email":      user.Email,
+		"logout_url": "/auth/logout",
+	})
 }
 
 // RefreshMetrics updates all Prometheus metrics from current database state

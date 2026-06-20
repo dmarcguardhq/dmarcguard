@@ -77,6 +77,22 @@ export const getReports = ({ limit = 20, offset = 0 } = {}) =>
   createApiClient().get("reports", { searchParams: { limit, offset } }).json();
 
 /**
+ * Get current authenticated user information
+ * Returns null if authentication is disabled or user is not logged in
+ */
+export const getCurrentUser = async () => {
+  try {
+    return await createApiClient().get("auth/me").json();
+  } catch (error) {
+    // Return null if auth is disabled (401) or any other error
+    if (error.response?.status === 401) {
+      return null;
+    }
+    throw error;
+  }
+};
+
+/**
  * Get a single report by ID
  * @param {string|number} id - Report ID
  */
