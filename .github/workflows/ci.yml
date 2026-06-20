@@ -116,18 +116,18 @@ jobs:
           dockerhub-password: ${{ secrets.DOCKERHUB_TOKEN }}
           image-name: ghcr.io/${{ github.repository }}
           image-extra-tags: |
-            ${{ github.repository }}:latest
-            ${{ github.repository }}:${{ github.run_id }}
-            ${{ github.repository }}:${{ github.sha }}
-            ghcr.io/${{ github.repository }}:latest
-            ghcr.io/${{ github.repository }}:${{ github.run_id }}
-            ghcr.io/${{ github.repository }}:${{ github.sha }}
-            dmarcguardhq/dmarcguard:latest
-            dmarcguardhq/dmarcguard:${{ github.run_id }}
-            dmarcguardhq/dmarcguard:${{ github.sha }}
+            dmarcguard/dmarcguard:latest
+            dmarcguard/dmarcguard:${{ github.run_id }}
+            dmarcguard/dmarcguard:${{ github.sha }}
             ghcr.io/dmarcguardhq/dmarcguard:latest
             ghcr.io/dmarcguardhq/dmarcguard:${{ github.run_id }}
             ghcr.io/dmarcguardhq/dmarcguard:${{ github.sha }}
+            meysam81/parse-dmarc:latest
+            meysam81/parse-dmarc:${{ github.run_id }}
+            meysam81/parse-dmarc:${{ github.sha }}
+            ghcr.io/meysam81/parse-dmarc:latest
+            ghcr.io/meysam81/parse-dmarc:${{ github.run_id }}
+            ghcr.io/meysam81/parse-dmarc:${{ github.sha }}
           kubescape: true
 
   release-please:

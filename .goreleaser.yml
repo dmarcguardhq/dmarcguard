@@ -60,7 +60,7 @@ dockers_v2:
     images:
       - meysam81/{{ .ProjectName }}
       - ghcr.io/meysam81/{{ .ProjectName }}
-      - dmarcguardhq/dmarcguard
+      - dmarcguard/dmarcguard
       - ghcr.io/dmarcguardhq/dmarcguard
     dockerfile: Dockerfile.goreleaser
     tags:
