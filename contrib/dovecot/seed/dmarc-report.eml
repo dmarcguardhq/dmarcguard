@@ -1,0 +1,86 @@
+From: noreply-dmarc-support@google.com
+To: dmarc@localhost
+Subject: Report Domain: example.com Submitter: google.com Report-ID: 12345678901234567890
+Date: Fri, 01 Jan 2021 00:00:00 +0000
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="dmarc-boundary"
+
+--dmarc-boundary
+Content-Type: text/plain; charset="UTF-8"
+
+This is a sample DMARC aggregate report for local parse-dmarc testing.
+
+--dmarc-boundary
+Content-Type: application/xml; name="google.com!example.com!1609459200!1609545600.xml"
+Content-Disposition: attachment; filename="google.com!example.com!1609459200!1609545600.xml"
+
+<?xml version="1.0" encoding="UTF-8"?>
+<feedback>
+  <version>1.0</version>
+  <report_metadata>
+    <org_name>google.com</org_name>
+    <email>noreply-dmarc-support@google.com</email>
+    <report_id>12345678901234567890</report_id>
+    <date_range>
+      <begin>1609459200</begin>
+      <end>1609545600</end>
+    </date_range>
+  </report_metadata>
+  <policy_published>
+    <domain>example.com</domain>
+    <adkim>r</adkim>
+    <aspf>r</aspf>
+    <p>none</p>
+    <sp>none</sp>
+    <pct>100</pct>
+  </policy_published>
+  <record>
+    <row>
+      <source_ip>192.0.2.1</source_ip>
+      <count>100</count>
+      <policy_evaluated>
+        <disposition>none</disposition>
+        <dkim>pass</dkim>
+        <spf>pass</spf>
+      </policy_evaluated>
+    </row>
+    <identifiers>
+      <header_from>example.com</header_from>
+    </identifiers>
+    <auth_results>
+      <spf>
+        <domain>example.com</domain>
+        <result>pass</result>
+      </spf>
+      <dkim>
+        <domain>example.com</domain>
+        <result>pass</result>
+      </dkim>
+    </auth_results>
+  </record>
+  <record>
+    <row>
+      <source_ip>198.51.100.7</source_ip>
+      <count>12</count>
+      <policy_evaluated>
+        <disposition>none</disposition>
+        <dkim>fail</dkim>
+        <spf>fail</spf>
+      </policy_evaluated>
+    </row>
+    <identifiers>
+      <header_from>example.com</header_from>
+    </identifiers>
+    <auth_results>
+      <spf>
+        <domain>mail.example.net</domain>
+        <result>fail</result>
+      </spf>
+      <dkim>
+        <domain>example.com</domain>
+        <result>fail</result>
+      </dkim>
+    </auth_results>
+  </record>
+</feedback>
+--dmarc-boundary--

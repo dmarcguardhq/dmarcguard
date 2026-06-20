@@ -1,15 +1,32 @@
 ---
 services:
-  parse-dmarc:
-    build: .
-    image: ${IMAGE_NAME:-meysam81/parse-dmarc}
-    environment:
-      DATABASE_PATH: /data/parse-dmarc.db
-    ports:
-      - "8080:8080"
+  # One-shot sidecar that prepares the Maildir skeleton on the shared
+  # `dovecot-mail` volume and seeds INBOX/new with the sample DMARC report(s)
+  # under ./contrib/dovecot/seed. Lives in its own service because the
+  # dovecot/dovecot image is too minimal to ship mkdir/cp/sed.
+  dovecot-init:
+    image: alpine:3.24
+    restart: on-failure
     volumes:
-      - ./config.json:/app/config.json:ro
-      - parse-dmarc:/data
+      - ./contrib/dovecot/init.sh:/init.sh:ro
+      - ./contrib/dovecot/seed:/import/seed:ro
+      - dovecot-mail:/srv/mail
+    entrypoint: ["/bin/sh", "/init.sh"]
+
+  # Local IMAP server (plain, cleartext — docker only) for exercising the
+  # fetch + parse pipeline. User dmarc:dev, INBOX served from the seeded
+  # volume. Reachable from the host on localhost:11143.
+  dovecot:
+    image: dovecot/dovecot:2.4.4
+    depends_on:
+      dovecot-init:
+        condition: service_completed_successfully
+    ports:
+      - "11143:143"
+    volumes:
+      - ./contrib/dovecot/dovecot.conf:/etc/dovecot/dovecot.conf:ro
+      - ./contrib/dovecot/users:/etc/dovecot/users:ro
+      - dovecot-mail:/srv/mail
 
 volumes:
-  parse-dmarc:
+  dovecot-mail:

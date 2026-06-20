@@ -4,7 +4,7 @@ tmp_dir = "tmp"
 
 [build]
   args_bin = [
-    "-config=config.json",
+    "-config=config.dev.json",
   ]
   delay = 1000
   exclude_dir = ["assets", "tmp", "vendor", "testdata", "frontend", ".git*", "bin"]

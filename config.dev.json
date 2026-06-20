@@ -1,0 +1,20 @@
+{
+  "colored_logs": true,
+  "database": {
+    "path": ".parse-dmarc/dev.sqlite"
+  },
+  "imap": {
+    "host": "127.0.0.1",
+    "mailbox": "INBOX",
+    "mark_as_seen": true,
+    "password": "dev",
+    "port": 11143,
+    "use_tls": false,
+    "username": "dmarc"
+  },
+  "log_level": "debug",
+  "server": {
+    "host": "127.0.0.1",
+    "port": 8080
+  }
+}

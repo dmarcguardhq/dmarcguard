@@ -64,3 +64,4 @@ ignore
 db.sqlite*
 *~
 .direnv
+/.parse-dmarc

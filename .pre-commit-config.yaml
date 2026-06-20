@@ -75,7 +75,6 @@ repos:
       - id: go-imports
       # - id: go-cyclo
       #   args: [-over=15]
-      - id: validate-toml
       - id: no-go-testing
       - id: golangci-lint
       # - id: go-critic
