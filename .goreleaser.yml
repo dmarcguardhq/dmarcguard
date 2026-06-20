@@ -61,6 +61,7 @@ dockers_v2:
       - meysam81/{{ .ProjectName }}
       - ghcr.io/meysam81/{{ .ProjectName }}
       - dmarcguardhq/dmarcguard
+      - ghcr.io/dmarcguardhq/dmarcguard
     dockerfile: Dockerfile.goreleaser
     tags:
       - "{{ if not .IsSnapshot }}v{{ .Version }}{{ end }}"
