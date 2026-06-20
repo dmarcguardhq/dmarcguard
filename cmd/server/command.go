@@ -79,7 +79,7 @@ func Command(version, commit, date, builtBy string) *cli.Command {
 				Name:        "fetch-interval",
 				Usage:       "Interval in seconds between fetch operations",
 				Value:       300,
-				Sources:     cli.EnvVars("PARSE_DMARC_FETCH_INTERVAL"),
+				Sources:     cli.EnvVars("PARSE_DMARC_FETCH_INTERVAL", "FETCH_INTERVAL"),
 				Destination: &fetchInterval,
 			},
 			&cli.BoolFlag{
