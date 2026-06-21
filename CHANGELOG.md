@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.5.4](https://github.com/dmarcguardhq/dmarcguard/compare/v1.5.3...v1.5.4) (2026-06-20)
+
+
+### Bug Fixes
+
+* accept fetch-interval without prefix ([06fd520](https://github.com/dmarcguardhq/dmarcguard/commit/06fd520d1a816795d8e35f6a7c9b1b5eed5c096c)), closes [#162](https://github.com/dmarcguardhq/dmarcguard/issues/162)
+* **CI:** name docker repo explicitly ([0ebbf87](https://github.com/dmarcguardhq/dmarcguard/commit/0ebbf87a6aad51ad735434982734105d79a97893))
+* **CI:** publish to ghcr.io as well ([9c0bf28](https://github.com/dmarcguardhq/dmarcguard/commit/9c0bf284a08c50487bb6e8fe475b0248a836cedc))
+* **CI:** publish to new and old docker hub repo ([e7eda52](https://github.com/dmarcguardhq/dmarcguard/commit/e7eda52d98e7d3d7d127f199f0f06376007e5cb4))
+* **CI:** remove docker repo from old ghcr.io ([d3f24c0](https://github.com/dmarcguardhq/dmarcguard/commit/d3f24c00961876ac7bd8a976a16ada168a59be28))
+* **deps:** update module github.com/caarlos0/env/v11 to v11.4.1 ([#155](https://github.com/dmarcguardhq/dmarcguard/issues/155)) ([31398d3](https://github.com/dmarcguardhq/dmarcguard/commit/31398d31413b2c204fb4fd0946bc3d087a490b77))
+* **deps:** update module github.com/mattn/go-sqlite3 to v1.14.38 ([#129](https://github.com/dmarcguardhq/dmarcguard/issues/129)) ([40fb4d4](https://github.com/dmarcguardhq/dmarcguard/commit/40fb4d4a9f2048af86f3cf77be12df5a16cf134b))
+* **deps:** update module github.com/modelcontextprotocol/go-sdk to v1.6.1 ([#151](https://github.com/dmarcguardhq/dmarcguard/issues/151)) ([eb1fb95](https://github.com/dmarcguardhq/dmarcguard/commit/eb1fb953b6e91199a7de4df959802a2dffdeb9ef))
+* move cli init to cmd/ and grab values using Destination syntax ([e04af1a](https://github.com/dmarcguardhq/dmarcguard/commit/e04af1aefd1c33c74780afd2b4e00805a951c1b0))
+
 ## [1.5.3](https://github.com/meysam81/parse-dmarc/compare/v1.5.2...v1.5.3) (2026-03-28)
 
 
