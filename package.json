@@ -1,7 +1,7 @@
 {
   "author": "Meysam Azad",
   "dependencies": {
-    "ky": "^1.14.3",
+    "ky": "^2.0.0",
     "pinia": "^3.0.4",
     "vue": "^3.5.31",
     "zod": "^4.3.6"
