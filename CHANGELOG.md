@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.5](https://github.com/dmarcguardhq/dmarcguard/compare/v1.5.4...v1.5.5) (2026-07-22)
+
+
+### Bug Fixes
+
+* **docker:** make /data writable under non-root runtimes ([#171](https://github.com/dmarcguardhq/dmarcguard/issues/171)) ([90a36d3](https://github.com/dmarcguardhq/dmarcguard/commit/90a36d3359edf9dd7e2529b412261c3ecbfe67f7))
+
 ## [1.5.4](https://github.com/dmarcguardhq/dmarcguard/compare/v1.5.3...v1.5.4) (2026-06-20)
 
 
