@@ -4,7 +4,7 @@ go 1.25.4
 
 require (
 	github.com/caarlos0/env/v11 v11.4.1
-	github.com/coreos/go-oidc/v3 v3.19.0
+	github.com/coreos/go-oidc/v3 v3.20.0
 	github.com/emersion/go-imap v1.2.1
 	github.com/emersion/go-message v0.18.2
 	github.com/goccy/go-json v0.10.6
