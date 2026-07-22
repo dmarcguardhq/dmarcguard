@@ -46,7 +46,7 @@ ENV PARSE_DMARC_CONFIG=/app/config.json \
 
 COPY --from=backend-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
 COPY --from=backend-builder /app/parse-dmarc /usr/local/bin/parse-dmarc
-COPY --from=backend-builder /data /data
+COPY --from=backend-builder --chmod=0777 /data /data
 COPY --from=backend-builder /tmp /tmp
 
 EXPOSE 8080
