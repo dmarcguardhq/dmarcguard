@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.6](https://github.com/dmarcguardhq/dmarcguard/compare/v1.5.5...v1.5.6) (2026-08-18)
+
+
+### Bug Fixes
+
+* **imap:** unwrap nested message/rfc822 report attachments ([c82f118](https://github.com/dmarcguardhq/dmarcguard/commit/c82f118c375481956cccd352ec00c3275aa01e0a))
+
 ## [1.5.5](https://github.com/dmarcguardhq/dmarcguard/compare/v1.5.4...v1.5.5) (2026-07-22)
 
 
