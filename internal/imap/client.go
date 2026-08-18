@@ -1,6 +1,7 @@
 package imap
 
 import (
+	"bytes"
 	"crypto/tls"
 	"fmt"
 	"io"
@@ -141,12 +142,6 @@ func (c *Client) FetchDMARCReports() (*FetchResult, error) {
 			continue
 		}
 
-		mr, err := mail.CreateReader(r)
-		if err != nil {
-			c.log.Warn().Err(err).Msg("failed to create mail reader")
-			continue
-		}
-
 		report := Report{
 			Subject: msg.Envelope.Subject,
 			Date:    msg.Envelope.Date.String(),
@@ -156,35 +151,7 @@ func (c *Client) FetchDMARCReports() (*FetchResult, error) {
 			report.From = msg.Envelope.From[0].Address()
 		}
 
-		// Process email parts
-		for {
-			part, err := mr.NextPart()
-			if err == io.EOF {
-				break
-			}
-			if err != nil {
-				c.log.Warn().Err(err).Msg("error reading part")
-				break
-			}
-
-			switch h := part.Header.(type) {
-			case *mail.AttachmentHeader:
-				filename, _ := h.Filename()
-				// Only process DMARC-related attachments
-				if isDMARCAttachment(filename) {
-					data, err := io.ReadAll(part.Body)
-					if err != nil {
-						c.log.Warn().Err(err).Msg("error reading attachment")
-						continue
-					}
-
-					report.Attachments = append(report.Attachments, Attachment{
-						Filename: filename,
-						Data:     data,
-					})
-				}
-			}
-		}
+		report.Attachments = c.collectAttachments(r, 0)
 
 		// Only add reports with attachments
 		if len(report.Attachments) > 0 {
@@ -248,11 +215,103 @@ func (c *Client) MoveMessages(messageIDs []uint32, destMailbox string) error {
 	return nil
 }
 
-// isDMARCAttachment checks if filename is likely a DMARC report
-func isDMARCAttachment(filename string) bool {
+// maxNestDepth bounds recursion into forwarded/embedded messages.
+const maxNestDepth = 4
+
+// collectAttachments walks a MIME message and returns DMARC report attachments,
+// descending into embedded messages (Google reports relayed through Exchange or
+// Outlook arrive as a message/rfc822 attachment wrapping the real .zip).
+func (c *Client) collectAttachments(r io.Reader, depth int) []Attachment {
+	if depth > maxNestDepth {
+		c.log.Warn().Msg("max nesting depth reached; skipping embedded message")
+		return nil
+	}
+
+	mr, err := mail.CreateReader(r)
+	if err != nil {
+		c.log.Warn().Err(err).Msg("failed to create mail reader")
+		return nil
+	}
+	defer func() { _ = mr.Close() }()
+
+	var attachments []Attachment
+	for {
+		part, err := mr.NextPart()
+		if err == io.EOF {
+			break
+		}
+		if err != nil {
+			c.log.Warn().Err(err).Msg("error reading part")
+			break
+		}
+
+		h, ok := part.Header.(*mail.AttachmentHeader)
+		if !ok {
+			continue
+		}
+
+		filename, _ := h.Filename()
+		contentType, _, _ := h.ContentType()
+
+		data, err := io.ReadAll(part.Body)
+		if err != nil {
+			c.log.Warn().Err(err).Msg("error reading attachment")
+			continue
+		}
+
+		if isEmbeddedMessage(contentType, filename, data) {
+			attachments = append(attachments, c.collectAttachments(bytes.NewReader(data), depth+1)...)
+			continue
+		}
+
+		// Outlook's binary .msg (OLE compound file) needs a CFB reader;
+		// log it instead of silently dropping. Add a parser if it shows up often.
+		if bytes.HasPrefix(data, []byte{0xd0, 0xcf, 0x11, 0xe0}) {
+			c.log.Warn().Str("filename", filename).Msg("unsupported Outlook .msg (OLE) attachment; ask the sender to forward as .eml")
+			continue
+		}
+
+		if isDMARCAttachment(filename, data) {
+			attachments = append(attachments, Attachment{Filename: filename, Data: data})
+		}
+	}
+
+	return attachments
+}
+
+// isEmbeddedMessage reports whether the attachment is itself an email message.
+func isEmbeddedMessage(contentType, filename string, data []byte) bool {
+	if strings.HasPrefix(strings.ToLower(contentType), "message/rfc822") {
+		return true
+	}
 	lower := strings.ToLower(filename)
-	return strings.HasSuffix(lower, ".xml") ||
-		strings.HasSuffix(lower, ".xml.gz") ||
+	if !strings.HasSuffix(lower, ".eml") && !strings.HasSuffix(lower, ".msg") {
+		return false
+	}
+	// .msg is ambiguous: rfc822 text from most relays, OLE binary from Outlook.
+	return bytes.Contains(headOf(data), []byte(":"))
+}
+
+func headOf(data []byte) []byte {
+	if len(data) > 512 {
+		return data[:512]
+	}
+	return data
+}
+
+// isDMARCAttachment checks if an attachment is likely a DMARC report, by
+// filename or — for senders using opaque names — by sniffing the content.
+func isDMARCAttachment(filename string, data []byte) bool {
+	lower := strings.ToLower(filename)
+	if strings.HasSuffix(lower, ".xml") ||
+		strings.HasSuffix(lower, ".gz") ||
 		strings.HasSuffix(lower, ".zip") ||
-		strings.Contains(lower, "dmarc")
+		strings.Contains(lower, "dmarc") {
+		return true
+	}
+
+	// Content sniff: gzip/zip magic, or a raw <feedback> document.
+	return bytes.HasPrefix(data, []byte{0x1f, 0x8b}) ||
+		bytes.HasPrefix(data, []byte("PK\x03\x04")) ||
+		bytes.Contains(headOf(data), []byte("<feedback"))
 }

@@ -7,6 +7,7 @@ import (
 	"encoding/xml"
 	"fmt"
 	"io"
+	"strings"
 	"time"
 )
 
@@ -152,19 +153,21 @@ func decompressZip(data []byte) ([]byte, error) {
 		return nil, err
 	}
 
-	if len(zipReader.File) == 0 {
-		return nil, fmt.Errorf("zip archive is empty")
+	// Pick the first XML member; archives may carry directories or __MACOSX noise.
+	for _, file := range zipReader.File {
+		if file.FileInfo().IsDir() || !strings.HasSuffix(strings.ToLower(file.Name), ".xml") {
+			continue
+		}
+		rc, err := file.Open()
+		if err != nil {
+			return nil, err
+		}
+		defer func() { _ = rc.Close() }()
+
+		return io.ReadAll(rc)
 	}
 
-	// Read first file in archive
-	file := zipReader.File[0]
-	rc, err := file.Open()
-	if err != nil {
-		return nil, err
-	}
-	defer func() { _ = rc.Close() }()
-
-	return io.ReadAll(rc)
+	return nil, fmt.Errorf("no XML file in zip archive")
 }
 
 // GetDateRange returns the date range as time.Time objects
