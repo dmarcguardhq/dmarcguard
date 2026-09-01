@@ -37,7 +37,11 @@ const formatDate = (timestamp) => {
 };
 
 // Helper for status badge styling
+// A report with zero messages is an RFC 7489 "null report" — some reporters
+// send one every day the domain sees no traffic. 0/0 is not a 0% pass rate,
+// so it gets a neutral badge instead of FAIL.
 const getStatusClass = (report) => {
+  if ((report.total_messages ?? 0) === 0) return "status-empty";
   const rate = report.compliance_rate ?? 0;
   if (rate >= 100) return "status-pass";
   if (rate >= 80) return "status-warn";
@@ -45,6 +49,7 @@ const getStatusClass = (report) => {
 };
 
 const getStatusLabel = (report) => {
+  if ((report.total_messages ?? 0) === 0) return "EMPTY";
   const rate = report.compliance_rate ?? 0;
   if (rate >= 100) return "PASS";
   if (rate >= 80) return "WARN";
@@ -137,7 +142,10 @@ const getPolicyClass = (policy) => {
             </td>
 
             <td class="col-rate text-right font-mono">
-              {{ (report.compliance_rate ?? 0).toFixed(1) }}%
+              <template v-if="(report.total_messages ?? 0) === 0">—</template>
+              <template v-else
+                >{{ (report.compliance_rate ?? 0).toFixed(1) }}%</template
+              >
             </td>
 
             <td class="col-policy">
@@ -411,6 +419,12 @@ td {
 .status-fail {
   background-color: var(--c-danger-soft);
   color: var(--c-danger);
+}
+
+/* Empty null report (Neutral) */
+.status-empty {
+  background-color: var(--border-subtle);
+  color: var(--text-muted);
 }
 
 /* --- Empty State --- */
