@@ -31,10 +31,14 @@ type Statistics struct {
 	TotalReports      int     `json:"total_reports"`
 	TotalMessages     int     `json:"total_messages"`
 	CompliantMessages int     `json:"compliant_messages"`
-	ComplianceRate    float64 `json:"compliance_rate"`
-	UniqueSourceIPs   int     `json:"unique_source_ips"`
-	UniqueDomains     int     `json:"unique_domains"`
-	HasData           bool    `json:"has_data"`
+	// EnforcedMessages counts non-compliant messages the receiver already
+	// blocked (disposition reject or quarantine) — the published policy
+	// working, not an authentication gap.
+	EnforcedMessages int     `json:"enforced_messages"`
+	ComplianceRate   float64 `json:"compliance_rate"`
+	UniqueSourceIPs  int     `json:"unique_source_ips"`
+	UniqueDomains    int     `json:"unique_domains"`
+	HasData          bool    `json:"has_data"`
 }
 
 type TopSourceIP struct {
@@ -203,6 +207,17 @@ func (s *Storage) GetStatistics() (*Statistics, error) {
 
 	if stats.TotalMessages > 0 {
 		stats.ComplianceRate = float64(stats.CompliantMessages) / float64(stats.TotalMessages) * 100
+	}
+
+	err = s.db.QueryRow(`
+		SELECT COALESCE(SUM(count), 0)
+		FROM records
+		WHERE disposition IN ('reject', 'quarantine')
+		  AND dkim_result != 'pass'
+		  AND spf_result != 'pass'
+	`).Scan(&stats.EnforcedMessages)
+	if err != nil {
+		return nil, fmt.Errorf("query enforced messages: %w", err)
 	}
 
 	err = s.db.QueryRow("SELECT COUNT(DISTINCT source_ip) FROM records").Scan(&stats.UniqueSourceIPs)

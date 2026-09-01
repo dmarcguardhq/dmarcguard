@@ -88,8 +88,20 @@ const closeDrawer = () => {
 };
 
 // Computed values for hero component
+// Pass rate over delivered mail only. Messages the receiver already blocked
+// (disposition reject/quarantine) are the policy working, not an
+// authentication gap — counting them against the score means more blocked
+// spoofing makes a fully-enforcing domain look less healthy.
 const complianceScore = computed(() => {
-  return statistics.value?.compliance_rate ?? 0;
+  const s = statistics.value;
+  if (!s) return 0;
+  const delivered = (s.total_messages ?? 0) - (s.enforced_messages ?? 0);
+  if (delivered <= 0) return 100;
+  return Math.min(100, ((s.compliant_messages ?? 0) / delivered) * 100);
+});
+
+const enforcedCount = computed(() => {
+  return statistics.value?.enforced_messages ?? 0;
 });
 
 const totalVolume = computed(() => {
@@ -284,6 +296,7 @@ onUnmounted(() => {
             :compliance-score="complianceScore"
             :volume="totalVolume"
             :source-count="sourceCount"
+            :enforced="enforcedCount"
             :has-data="hasData"
             :loading="loading"
             @refresh="refreshData"

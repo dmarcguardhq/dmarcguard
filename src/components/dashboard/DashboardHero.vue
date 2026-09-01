@@ -5,6 +5,7 @@ const props = defineProps({
   complianceScore: { type: Number, required: true },
   volume: { type: Number, default: 0 },
   sourceCount: { type: Number, default: 0 },
+  enforced: { type: Number, default: 0 },
   hasData: { type: Boolean, default: false },
   dateRange: { type: String, default: "Last 30 Days" },
   loading: { type: Boolean, default: false },
@@ -34,7 +35,11 @@ const statusMessage = computed(() => {
 const statusSubtext = computed(() => {
   if (healthState.value === "nodata")
     return "No DMARC reports received yet. Check IMAP connection.";
-  if (healthState.value === "secure") return "Traffic is fully authenticated.";
+  if (healthState.value === "secure") {
+    return props.enforced > 0
+      ? `Delivered traffic is authenticated. ${fmt(props.enforced)} spoofed messages blocked by your policy.`
+      : "Traffic is fully authenticated.";
+  }
   if (healthState.value === "warning")
     return "Some legitimate email may be failing.";
   return "High risk of spoofing. Immediate action required.";
