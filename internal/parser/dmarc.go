@@ -121,18 +121,44 @@ func ParseReport(data []byte) (*Feedback, error) {
 
 // tryDecompress attempts to decompress data (gzip or zip)
 func tryDecompress(data []byte) ([]byte, error) {
-	// Try gzip first
-	if gzipData, err := decompressGzip(data); err == nil {
-		return gzipData, nil
+	// Try gzip first. Detect the format by magic bytes so that a valid-but-
+	// oversized member is reported as an error instead of silently falling
+	// through to "return the raw bytes" (which would hand a bomb to the XML
+	// parser and re-buffer it).
+	if len(data) >= 2 && data[0] == 0x1f && data[1] == 0x8b {
+		return decompressGzip(data)
 	}
 
-	// Try zip
-	if zipData, err := decompressZip(data); err == nil {
-		return zipData, nil
+	// Zip local-file-header magic "PK\x03\x04".
+	if len(data) >= 4 && data[0] == 'P' && data[1] == 'K' && data[2] == 0x03 && data[3] == 0x04 {
+		return decompressZip(data)
 	}
 
-	// Return original data if not compressed
+	// Not compressed.
 	return data, nil
+}
+
+// maxDecompressedSize bounds how much data we will decompress from a single
+// report member. DMARC aggregate reports are small (usually well under a
+// megabyte); a generous 16 MB ceiling stops a malicious sender from turning a
+// tiny gzip/zip member into a multi-gigabyte allocation (a decompression bomb).
+const maxDecompressedSize = 16 * 1024 * 1024
+
+// readAllLimited reads from r but rejects streams that exceed
+// maxDecompressedSize instead of allocating without bound. The buffer is
+// pre-sized to the cap so a bomb cannot drive repeated doubling allocations.
+func readAllLimited(r io.Reader) ([]byte, error) {
+	// Read one byte past the cap so we can tell "exactly at the cap" from
+	// "over the cap".
+	buf := bytes.NewBuffer(make([]byte, 0, 64*1024))
+	n, err := io.Copy(buf, io.LimitReader(r, maxDecompressedSize+1))
+	if err != nil {
+		return nil, err
+	}
+	if n > maxDecompressedSize {
+		return nil, fmt.Errorf("decompressed report exceeds %d bytes", maxDecompressedSize)
+	}
+	return buf.Bytes(), nil
 }
 
 // decompressGzip decompresses gzip data
@@ -143,7 +169,7 @@ func decompressGzip(data []byte) ([]byte, error) {
 	}
 	defer func() { _ = reader.Close() }()
 
-	return io.ReadAll(reader)
+	return readAllLimited(reader)
 }
 
 // decompressZip decompresses zip data (returns first file)
@@ -158,13 +184,18 @@ func decompressZip(data []byte) ([]byte, error) {
 		if file.FileInfo().IsDir() || !strings.HasSuffix(strings.ToLower(file.Name), ".xml") {
 			continue
 		}
+		// Reject a member whose declared uncompressed size is already over the
+		// cap before opening it (a zip bomb can advertise a huge size cheaply).
+		if file.UncompressedSize64 > maxDecompressedSize {
+			return nil, fmt.Errorf("zip member exceeds %d bytes", maxDecompressedSize)
+		}
 		rc, err := file.Open()
 		if err != nil {
 			return nil, err
 		}
 		defer func() { _ = rc.Close() }()
 
-		return io.ReadAll(rc)
+		return readAllLimited(rc)
 	}
 
 	return nil, fmt.Errorf("no XML file in zip archive")
