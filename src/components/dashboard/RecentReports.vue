@@ -36,31 +36,12 @@ const formatDate = (timestamp) => {
   }).format(date);
 };
 
-// Helper for status badge styling
-// A report with zero messages is an RFC 7489 "null report" — some reporters
-// send one every day the domain sees no traffic. 0/0 is not a 0% pass rate,
-// so it gets a neutral badge instead of FAIL.
-const getStatusClass = (report) => {
-  if ((report.total_messages ?? 0) === 0) return "status-empty";
-  const rate = report.compliance_rate ?? 0;
-  if (rate >= 100) return "status-pass";
-  if (rate >= 80) return "status-warn";
-  return "status-fail";
-};
-
-const getStatusLabel = (report) => {
-  if ((report.total_messages ?? 0) === 0) return "EMPTY";
-  const rate = report.compliance_rate ?? 0;
-  if (rate >= 100) return "PASS";
-  if (rate >= 80) return "WARN";
-  return "FAIL";
-};
-
-// Get policy badge class
-const getPolicyClass = (policy) => {
-  if (policy === "reject") return "policy-reject";
-  if (policy === "quarantine") return "policy-quarantine";
-  return "policy-none";
+// The backend classifies each report (report.status); this only labels it.
+const STATUS_LABEL = {
+  empty: "EMPTY",
+  pass: "PASS",
+  warn: "WARN",
+  fail: "FAIL",
 };
 </script>
 
@@ -142,16 +123,17 @@ const getPolicyClass = (policy) => {
             </td>
 
             <td class="col-rate text-right font-mono">
-              <template v-if="(report.total_messages ?? 0) === 0">—</template>
-              <template v-else
-                >{{ (report.compliance_rate ?? 0).toFixed(1) }}%</template
-              >
+              {{
+                report.compliance_rate == null
+                  ? "—"
+                  : report.compliance_rate.toFixed(1) + "%"
+              }}
             </td>
 
             <td class="col-policy">
               <span
                 class="policy-badge"
-                :class="getPolicyClass(report.policy_p)"
+                :class="'policy-' + (report.policy_p || 'none')"
               >
                 {{ report.policy_p || "none" }}
               </span>
@@ -162,9 +144,9 @@ const getPolicyClass = (policy) => {
             </td>
 
             <td class="col-status">
-              <span class="badge" :class="getStatusClass(report)">
+              <span class="badge" :class="'status-' + report.status">
                 <span class="dot"></span>
-                {{ getStatusLabel(report) }}
+                {{ STATUS_LABEL[report.status] }}
               </span>
             </td>
 
