@@ -15,16 +15,44 @@ type Storage struct {
 }
 
 type ReportSummary struct {
-	ID                int64   `json:"id"`
-	ReportID          string  `json:"report_id"`
-	OrgName           string  `json:"org_name"`
-	Domain            string  `json:"domain"`
-	DateBegin         int64   `json:"date_begin"`
-	DateEnd           int64   `json:"date_end"`
-	TotalMessages     int     `json:"total_messages"`
-	CompliantMessages int     `json:"compliant_messages"`
-	ComplianceRate    float64 `json:"compliance_rate"`
-	PolicyP           string  `json:"policy_p"`
+	ID                int64  `json:"id"`
+	ReportID          string `json:"report_id"`
+	OrgName           string `json:"org_name"`
+	Domain            string `json:"domain"`
+	DateBegin         int64  `json:"date_begin"`
+	DateEnd           int64  `json:"date_end"`
+	TotalMessages     int    `json:"total_messages"`
+	CompliantMessages int    `json:"compliant_messages"`
+	// ComplianceRate is null for an RFC 7489 null report (no messages):
+	// 0 of 0 is not a 0% pass rate.
+	ComplianceRate *float64 `json:"compliance_rate"`
+	PolicyP        string   `json:"policy_p"`
+	// Status is the backend's verdict for display: empty, pass, warn or fail.
+	Status string `json:"status"`
+}
+
+// Compliance-rate thresholds (percent) behind Status.
+const (
+	passRate = 100
+	warnRate = 80
+)
+
+// classify derives ComplianceRate and Status from the message counts.
+func (r *ReportSummary) classify() {
+	if r.TotalMessages == 0 {
+		r.Status = "empty"
+		return
+	}
+	rate := float64(r.CompliantMessages) / float64(r.TotalMessages) * 100
+	r.ComplianceRate = &rate
+	switch {
+	case rate >= passRate:
+		r.Status = "pass"
+	case rate >= warnRate:
+		r.Status = "warn"
+	default:
+		r.Status = "fail"
+	}
 }
 
 type Statistics struct {
@@ -159,10 +187,7 @@ func (s *Storage) GetReports(limit, offset int) ([]ReportSummary, error) {
 			return nil, fmt.Errorf("scan report row: %w", err)
 		}
 
-		if r.TotalMessages > 0 {
-			r.ComplianceRate = float64(r.CompliantMessages) / float64(r.TotalMessages) * 100
-		}
-
+		r.classify()
 		reports = append(reports, r)
 	}
 

@@ -36,26 +36,12 @@ const formatDate = (timestamp) => {
   }).format(date);
 };
 
-// Helper for status badge styling
-const getStatusClass = (report) => {
-  const rate = report.compliance_rate ?? 0;
-  if (rate >= 100) return "status-pass";
-  if (rate >= 80) return "status-warn";
-  return "status-fail";
-};
-
-const getStatusLabel = (report) => {
-  const rate = report.compliance_rate ?? 0;
-  if (rate >= 100) return "PASS";
-  if (rate >= 80) return "WARN";
-  return "FAIL";
-};
-
-// Get policy badge class
-const getPolicyClass = (policy) => {
-  if (policy === "reject") return "policy-reject";
-  if (policy === "quarantine") return "policy-quarantine";
-  return "policy-none";
+// The backend classifies each report (report.status); this only labels it.
+const STATUS_LABEL = {
+  empty: "EMPTY",
+  pass: "PASS",
+  warn: "WARN",
+  fail: "FAIL",
 };
 </script>
 
@@ -137,13 +123,17 @@ const getPolicyClass = (policy) => {
             </td>
 
             <td class="col-rate text-right font-mono">
-              {{ (report.compliance_rate ?? 0).toFixed(1) }}%
+              {{
+                report.compliance_rate == null
+                  ? "—"
+                  : report.compliance_rate.toFixed(1) + "%"
+              }}
             </td>
 
             <td class="col-policy">
               <span
                 class="policy-badge"
-                :class="getPolicyClass(report.policy_p)"
+                :class="'policy-' + (report.policy_p || 'none')"
               >
                 {{ report.policy_p || "none" }}
               </span>
@@ -154,9 +144,9 @@ const getPolicyClass = (policy) => {
             </td>
 
             <td class="col-status">
-              <span class="badge" :class="getStatusClass(report)">
+              <span class="badge" :class="'status-' + report.status">
                 <span class="dot"></span>
-                {{ getStatusLabel(report) }}
+                {{ STATUS_LABEL[report.status] }}
               </span>
             </td>
 
@@ -411,6 +401,12 @@ td {
 .status-fail {
   background-color: var(--c-danger-soft);
   color: var(--c-danger);
+}
+
+/* Empty null report (Neutral) */
+.status-empty {
+  background-color: var(--border-subtle);
+  color: var(--text-muted);
 }
 
 /* --- Empty State --- */
