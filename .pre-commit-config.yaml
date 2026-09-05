@@ -96,5 +96,5 @@ repos:
       - id: prettier
         name: prettier
         language: system
-        pass_filenames: false
-        entry: bunx prettier --write .
+        pass_filenames: true
+        entry: bunx prettier -u --write
