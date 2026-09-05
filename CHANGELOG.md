@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.5.7](https://github.com/dmarcguardhq/dmarcguard/compare/v1.5.6...v1.5.7) (2026-09-05)
+
+
+### Bug Fixes
+
+* **dashboard:** judge health over delivered mail, in the backend ([#191](https://github.com/dmarcguardhq/dmarcguard/issues/191)) ([53d8944](https://github.com/dmarcguardhq/dmarcguard/commit/53d8944fdc95ed4199e3ad47505e461e74851d5a))
+* **dashboard:** show null reports as EMPTY instead of FAIL ([#187](https://github.com/dmarcguardhq/dmarcguard/issues/187)) ([dcf9d98](https://github.com/dmarcguardhq/dmarcguard/commit/dcf9d98cff2ebda51c6157bcb603f0d9550941e2))
+* **ingest:** bound report decompression to stop a gzip/zip bomb ([#189](https://github.com/dmarcguardhq/dmarcguard/issues/189)) ([f50ee41](https://github.com/dmarcguardhq/dmarcguard/commit/f50ee4129f8f56fd8a1647f9859978f73e778d41))
+* **precommit:** run prettier on changed files only ([729f64d](https://github.com/dmarcguardhq/dmarcguard/commit/729f64db6044da83bd7bfc356b926a8e05d062cf))
+
+
+### Build & Dependencies
+
+* **deps:** update actions/setup-go action to v7 ([#175](https://github.com/dmarcguardhq/dmarcguard/issues/175)) ([99e4a48](https://github.com/dmarcguardhq/dmarcguard/commit/99e4a48f9e04e854c09b2ecd906ed543131c6432))
+* **deps:** update golang docker tag to v1.27 ([#184](https://github.com/dmarcguardhq/dmarcguard/issues/184)) ([afdb202](https://github.com/dmarcguardhq/dmarcguard/commit/afdb202e842fcddaf88d6f54dcbeb779dd4ac9d8))
+* **deps:** update module github.com/coreos/go-oidc/v3 to v3.21.0 ([#188](https://github.com/dmarcguardhq/dmarcguard/issues/188)) ([675492d](https://github.com/dmarcguardhq/dmarcguard/commit/675492dfb372adcb03b5b5b56db9c367e85ddcaa))
+* **deps:** update module github.com/modelcontextprotocol/go-sdk to v1.7.0 ([#178](https://github.com/dmarcguardhq/dmarcguard/issues/178)) ([f10b023](https://github.com/dmarcguardhq/dmarcguard/commit/f10b0233751ebdaa1e9d94a28906fb69ac417672))
+* **deps:** update module github.com/urfave/cli/v3 to v3.11.0 ([#181](https://github.com/dmarcguardhq/dmarcguard/issues/181)) ([e5d3fef](https://github.com/dmarcguardhq/dmarcguard/commit/e5d3fefa373a85687bae2e13421e04308e0a7f44))
+* **deps:** update module modernc.org/sqlite to v1.58.0 ([#179](https://github.com/dmarcguardhq/dmarcguard/issues/179)) ([21daa5b](https://github.com/dmarcguardhq/dmarcguard/commit/21daa5b8c797968a5d3c9d51533cc41138082843))
+* **deps:** update non-major dependencies ([#174](https://github.com/dmarcguardhq/dmarcguard/issues/174)) ([4bae98f](https://github.com/dmarcguardhq/dmarcguard/commit/4bae98f85398c2d160401c64c4f37a0bdab5f349))
+* **deps:** upgrade JS dependencies (ky v2, pinia v4, sharp 0.35, vite 8.2.2) ([#192](https://github.com/dmarcguardhq/dmarcguard/issues/192)) ([d80f128](https://github.com/dmarcguardhq/dmarcguard/commit/d80f1289638e230e2193ab8e1f3b349341679411))
+
+
+### Chores
+
+* **CI:** enrich release changelog ([5f9f9e8](https://github.com/dmarcguardhq/dmarcguard/commit/5f9f9e85e69a0816176df62f2619e6291168d12b))
+* **deps:** lock file maintenance ([#177](https://github.com/dmarcguardhq/dmarcguard/issues/177)) ([b3da7f2](https://github.com/dmarcguardhq/dmarcguard/commit/b3da7f2d067e413323580ef20f6eb4b17b99a64e))
+
 ## [1.5.6](https://github.com/dmarcguardhq/dmarcguard/compare/v1.5.5...v1.5.6) (2026-08-18)
 
 
