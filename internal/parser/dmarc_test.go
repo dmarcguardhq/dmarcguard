@@ -108,15 +108,3 @@ func TestParseReport(t *testing.T) {
 		t.Errorf("Expected compliant count 100, got %d", compliantCount)
 	}
 }
-
-func TestParseGzipReport(t *testing.T) {
-	// This test would require creating a gzip-compressed XML
-	// For now, we just test the decompression logic exists
-	t.Skip("TODO: Test gzip decompression")
-}
-
-func TestParseZipReport(t *testing.T) {
-	// This test would require creating a zip-compressed XML
-	// For now, we just test the decompression logic exists
-	t.Skip("TODO: Test zip decompression")
-}
