@@ -60,9 +60,49 @@ type Statistics struct {
 	TotalMessages     int     `json:"total_messages"`
 	CompliantMessages int     `json:"compliant_messages"`
 	ComplianceRate    float64 `json:"compliance_rate"`
-	UniqueSourceIPs   int     `json:"unique_source_ips"`
-	UniqueDomains     int     `json:"unique_domains"`
-	HasData           bool    `json:"has_data"`
+	// EnforcedMessages counts non-compliant mail the receiver already blocked
+	// (disposition reject or quarantine): the published policy working, not
+	// an authentication gap.
+	EnforcedMessages int `json:"enforced_messages"`
+	// DeliveredComplianceRate is the pass rate over mail that was actually
+	// delivered (total minus enforced). Null when nothing was delivered.
+	DeliveredComplianceRate *float64 `json:"delivered_compliance_rate"`
+	// Health is the backend's verdict for the dashboard: nodata, secure,
+	// warning or critical.
+	Health          string `json:"health"`
+	UniqueSourceIPs int    `json:"unique_source_ips"`
+	UniqueDomains   int    `json:"unique_domains"`
+	HasData         bool   `json:"has_data"`
+}
+
+// Delivered-compliance thresholds (percent) behind Health.
+const (
+	secureRate  = 95
+	warningRate = 80
+)
+
+// classify derives DeliveredComplianceRate and Health from the counts.
+func (st *Statistics) classify() {
+	if !st.HasData {
+		st.Health = "nodata"
+		return
+	}
+	delivered := st.TotalMessages - st.EnforcedMessages
+	if delivered <= 0 {
+		// Everything seen was blocked spoofing: nothing unauthenticated got through.
+		st.Health = "secure"
+		return
+	}
+	rate := float64(st.CompliantMessages) / float64(delivered) * 100
+	st.DeliveredComplianceRate = &rate
+	switch {
+	case rate >= secureRate:
+		st.Health = "secure"
+	case rate >= warningRate:
+		st.Health = "warning"
+	default:
+		st.Health = "critical"
+	}
 }
 
 type TopSourceIP struct {
@@ -230,6 +270,17 @@ func (s *Storage) GetStatistics() (*Statistics, error) {
 		stats.ComplianceRate = float64(stats.CompliantMessages) / float64(stats.TotalMessages) * 100
 	}
 
+	err = s.db.QueryRow(`
+		SELECT COALESCE(SUM(count), 0)
+		FROM records
+		WHERE disposition IN ('reject', 'quarantine')
+		  AND dkim_result != 'pass'
+		  AND spf_result != 'pass'
+	`).Scan(&stats.EnforcedMessages)
+	if err != nil {
+		return nil, fmt.Errorf("query enforced messages: %w", err)
+	}
+
 	err = s.db.QueryRow("SELECT COUNT(DISTINCT source_ip) FROM records").Scan(&stats.UniqueSourceIPs)
 	if err != nil {
 		return nil, fmt.Errorf("query unique source IPs: %w", err)
@@ -240,6 +291,7 @@ func (s *Storage) GetStatistics() (*Statistics, error) {
 		return nil, fmt.Errorf("query unique domains: %w", err)
 	}
 
+	stats.classify()
 	return &stats, nil
 }
 
