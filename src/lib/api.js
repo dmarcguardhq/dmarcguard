@@ -18,20 +18,20 @@ function createApiClient() {
   const settingsStore = useSettingsStore();
 
   return ky.create({
-    prefixUrl: settingsStore.apiEndpoint,
+    prefix: settingsStore.apiEndpoint,
     timeout: 30000,
     retry: {
       limit: 3,
     },
     hooks: {
       beforeRequest: [
-        function logBeforeRequest(request) {
+        function logBeforeRequest({ request }) {
           requestTimings.set(request, Date.now());
           log.debug(`API Request: ${request.method} ${request.url}`);
         },
       ],
       afterResponse: [
-        function logAfterResponse(request, options, response) {
+        function logAfterResponse({ request, response }) {
           var startTime = requestTimings.get(request);
           var duration = startTime ? Date.now() - startTime : 0;
           log.debug(
@@ -40,7 +40,7 @@ function createApiClient() {
         },
       ],
       beforeError: [
-        function logBeforeError(error) {
+        function logBeforeError({ error }) {
           var { response } = error;
           log.error(
             `API Error: ${response?.status} ${response?.statusText} - ${error.message}`,

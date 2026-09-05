@@ -50,7 +50,7 @@ function validateUrl(url) {
     return { valid: true };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { valid: false, error: error.errors[0].message };
+      return { valid: false, error: error.issues[0].message };
     }
     return { valid: false, error: "Invalid URL format" };
   }
