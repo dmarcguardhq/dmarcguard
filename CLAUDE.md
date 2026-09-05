@@ -377,6 +377,7 @@ See `parse-dmarc.service` for systemd service configuration.
 - Kubescape security scanning
 - Release automation via release-please and goreleaser
 - Multi-platform Docker images (amd64, arm64)
+- Lockfile: bun.lock only (Docker + CI use `bun install --frozen-lockfile`). package-lock.json was removed so Renovate updates bun.lock; do not reintroduce it.
 
 ## Roadmap
 
