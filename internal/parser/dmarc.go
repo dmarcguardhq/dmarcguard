@@ -105,6 +105,11 @@ type SPFResult struct {
 
 // ParseReport parses a DMARC aggregate report from raw data
 func ParseReport(data []byte) (*Feedback, error) {
+	// A raw (uncompressed) report gets the same ceiling as a decompressed one.
+	if len(data) > maxDecompressedSize {
+		return nil, errReportTooLarge
+	}
+
 	// Try to decompress if needed
 	decompressed, err := tryDecompress(data)
 	if err != nil {
@@ -119,20 +124,51 @@ func ParseReport(data []byte) (*Feedback, error) {
 	return &feedback, nil
 }
 
-// tryDecompress attempts to decompress data (gzip or zip)
+// tryDecompress attempts to decompress data (gzip or zip). Detection is
+// decisive so that a valid-but-oversized member is reported as an error
+// instead of silently falling through to "return the raw bytes" (which would
+// hand a bomb to the XML parser and re-buffer it).
 func tryDecompress(data []byte) ([]byte, error) {
-	// Try gzip first
-	if gzipData, err := decompressGzip(data); err == nil {
-		return gzipData, nil
+	// gzip mandates its magic bytes, so this check is exact.
+	if bytes.HasPrefix(data, []byte{0x1f, 0x8b}) {
+		return decompressGzip(data)
 	}
 
-	// Try zip
-	if zipData, err := decompressZip(data); err == nil {
-		return zipData, nil
+	// Let archive/zip decide: it locates the central directory from the end,
+	// so archives with a leading stub (self-extracting) are recognised too,
+	// which a fixed "PK\x03\x04" prefix check would miss.
+	if zipReader, err := zip.NewReader(bytes.NewReader(data), int64(len(data))); err == nil {
+		return decompressZip(zipReader)
 	}
 
-	// Return original data if not compressed
+	// Not compressed.
 	return data, nil
+}
+
+// maxDecompressedSize bounds a single report, raw or decompressed. DMARC
+// aggregate reports are small (usually well under a megabyte); a generous
+// 16 MB ceiling stops a malicious sender from turning a tiny gzip/zip member
+// into a multi-gigabyte allocation (a decompression bomb).
+const maxDecompressedSize = 16 * 1024 * 1024
+
+var errReportTooLarge = fmt.Errorf("report exceeds %d bytes", maxDecompressedSize)
+
+// readAllLimited reads from r but rejects streams that exceed
+// maxDecompressedSize instead of allocating without bound. The buffer starts
+// small so normal reports don't pay for the cap; growth stops at the cap, so a
+// bomb costs at most a few times maxDecompressedSize in transient allocation.
+func readAllLimited(r io.Reader) ([]byte, error) {
+	// Read one byte past the cap so we can tell "exactly at the cap" from
+	// "over the cap".
+	buf := bytes.NewBuffer(make([]byte, 0, 64*1024))
+	n, err := io.Copy(buf, io.LimitReader(r, maxDecompressedSize+1))
+	if err != nil {
+		return nil, err
+	}
+	if n > maxDecompressedSize {
+		return nil, errReportTooLarge
+	}
+	return buf.Bytes(), nil
 }
 
 // decompressGzip decompresses gzip data
@@ -143,20 +179,21 @@ func decompressGzip(data []byte) ([]byte, error) {
 	}
 	defer func() { _ = reader.Close() }()
 
-	return io.ReadAll(reader)
+	return readAllLimited(reader)
 }
 
-// decompressZip decompresses zip data (returns first file)
-func decompressZip(data []byte) ([]byte, error) {
-	zipReader, err := zip.NewReader(bytes.NewReader(data), int64(len(data)))
-	if err != nil {
-		return nil, err
-	}
-
+// decompressZip returns the first XML member of the archive.
+func decompressZip(zipReader *zip.Reader) ([]byte, error) {
 	// Pick the first XML member; archives may carry directories or __MACOSX noise.
 	for _, file := range zipReader.File {
 		if file.FileInfo().IsDir() || !strings.HasSuffix(strings.ToLower(file.Name), ".xml") {
 			continue
+		}
+		// Reject a member whose declared uncompressed size is already over the
+		// cap before opening it. archive/zip stops a read that exceeds the
+		// declared size with ErrFormat, so an understated header can't bypass this.
+		if file.UncompressedSize64 > maxDecompressedSize {
+			return nil, errReportTooLarge
 		}
 		rc, err := file.Open()
 		if err != nil {
@@ -164,7 +201,7 @@ func decompressZip(data []byte) ([]byte, error) {
 		}
 		defer func() { _ = rc.Close() }()
 
-		return io.ReadAll(rc)
+		return readAllLimited(rc)
 	}
 
 	return nil, fmt.Errorf("no XML file in zip archive")
