@@ -17,7 +17,7 @@ services:
   # fetch + parse pipeline. User dmarc:dev, INBOX served from the seeded
   # volume. Reachable from the host on localhost:11143.
   dovecot:
-    image: dovecot/dovecot:2.4.4
+    image: dovecot/dovecot:2.4.5
     depends_on:
       dovecot-init:
         condition: service_completed_successfully
