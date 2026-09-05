@@ -1,43 +1,49 @@
 <script setup>
 import { computed } from "vue";
 
+// The backend classifies health (nodata, secure, warning, critical) and the
+// pass rate over delivered mail; this component only renders them.
 const props = defineProps({
-  complianceScore: { type: Number, required: true },
+  health: { type: String, default: "nodata" },
+  passRate: { type: Number, default: null },
+  enforced: { type: Number, default: 0 },
   volume: { type: Number, default: 0 },
   sourceCount: { type: Number, default: 0 },
-  hasData: { type: Boolean, default: false },
   dateRange: { type: String, default: "Last 30 Days" },
   loading: { type: Boolean, default: false },
 });
 
 const emit = defineEmits(["refresh"]);
 
-// Determine health state based on score and data availability
-const healthState = computed(() => {
-  if (!props.hasData) return "nodata";
-  if (props.complianceScore >= 95) return "secure";
-  if (props.complianceScore >= 80) return "warning";
-  return "critical";
-});
-
 // Format numbers (e.g. 12,450)
 const fmt = (n) => new Intl.NumberFormat("en-US").format(n);
 
-// Dynamic status text
-const statusMessage = computed(() => {
-  if (healthState.value === "nodata") return "Awaiting Data";
-  if (healthState.value === "secure") return "Domain Protected";
-  if (healthState.value === "warning") return "Compliance Issues Detected";
-  return "Critical Authentication Gaps";
-});
+const STATUS_TEXT = {
+  nodata: {
+    message: "Awaiting Data",
+    subtext: "No DMARC reports received yet. Check IMAP connection.",
+  },
+  secure: {
+    message: "Domain Protected",
+    subtext: "Traffic is fully authenticated.",
+  },
+  warning: {
+    message: "Compliance Issues Detected",
+    subtext: "Some legitimate email may be failing.",
+  },
+  critical: {
+    message: "Critical Authentication Gaps",
+    subtext: "High risk of spoofing. Immediate action required.",
+  },
+};
+
+const statusMessage = computed(() => STATUS_TEXT[props.health].message);
 
 const statusSubtext = computed(() => {
-  if (healthState.value === "nodata")
-    return "No DMARC reports received yet. Check IMAP connection.";
-  if (healthState.value === "secure") return "Traffic is fully authenticated.";
-  if (healthState.value === "warning")
-    return "Some legitimate email may be failing.";
-  return "High risk of spoofing. Immediate action required.";
+  if (props.health === "secure" && props.enforced > 0) {
+    return `Delivered traffic is authenticated. ${fmt(props.enforced)} spoofed messages blocked by your policy.`;
+  }
+  return STATUS_TEXT[props.health].subtext;
 });
 </script>
 
@@ -72,11 +78,11 @@ const statusSubtext = computed(() => {
     </header>
 
     <div class="stat-grid">
-      <div class="card health-card" :class="healthState">
+      <div class="card health-card" :class="health">
         <div class="health-content">
           <div class="icon-wrapper">
             <svg
-              v-if="healthState === 'secure'"
+              v-if="health === 'secure'"
               width="24"
               height="24"
               viewBox="0 0 24 24"
@@ -90,7 +96,7 @@ const statusSubtext = computed(() => {
               <path d="m9 12 2 2 4-4" />
             </svg>
             <svg
-              v-else-if="healthState === 'nodata'"
+              v-else-if="health === 'nodata'"
               width="24"
               height="24"
               viewBox="0 0 24 24"
@@ -127,8 +133,8 @@ const statusSubtext = computed(() => {
           </div>
         </div>
 
-        <div class="health-score" v-if="hasData">
-          <span class="score-val">{{ complianceScore.toFixed(1) }}%</span>
+        <div class="health-score" v-if="passRate != null">
+          <span class="score-val">{{ passRate.toFixed(1) }}%</span>
           <span class="score-label">Pass Rate</span>
         </div>
       </div>

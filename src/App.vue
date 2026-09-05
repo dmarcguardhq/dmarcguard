@@ -87,10 +87,15 @@ const closeDrawer = () => {
   }, 300);
 };
 
-// Computed values for hero component
-const complianceScore = computed(() => {
-  return statistics.value?.compliance_rate ?? 0;
-});
+// Computed values for hero component. Health and the pass rate arrive
+// classified from the backend; the hero only renders them.
+const health = computed(() => statistics.value?.health ?? "nodata");
+
+const passRate = computed(
+  () => statistics.value?.delivered_compliance_rate ?? null,
+);
+
+const enforcedCount = computed(() => statistics.value?.enforced_messages ?? 0);
 
 const totalVolume = computed(() => {
   return statistics.value?.total_messages ?? 0;
@@ -98,10 +103,6 @@ const totalVolume = computed(() => {
 
 const sourceCount = computed(() => {
   return statistics.value?.unique_source_ips ?? 0;
-});
-
-const hasData = computed(() => {
-  return statistics.value?.has_data ?? false;
 });
 
 // Helpers
@@ -281,10 +282,11 @@ onUnmounted(() => {
         <!-- Dashboard View -->
         <template v-if="currentView === 'dashboard'">
           <DashboardHero
-            :compliance-score="complianceScore"
+            :health="health"
+            :pass-rate="passRate"
+            :enforced="enforcedCount"
             :volume="totalVolume"
             :source-count="sourceCount"
-            :has-data="hasData"
             :loading="loading"
             @refresh="refreshData"
           />

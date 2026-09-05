@@ -233,3 +233,114 @@ func TestGetReports_NullReport(t *testing.T) {
 		}
 	}
 }
+
+// Health is judged over delivered mail only: spoofing the receiver already
+// blocked under the published policy is the policy working, not a gap.
+func TestStatisticsClassify(t *testing.T) {
+	cases := map[string]struct {
+		reports, total, compliant, enforced int
+		wantHealth                          string
+		wantRate                            string // "nil" or the formatted rate
+	}{
+		"no reports":            {0, 0, 0, 0, "nodata", "nil"},
+		"all delivered pass":    {1, 100, 100, 0, "secure", "100.0"},
+		"blocked spoofing only": {1, 90, 0, 90, "secure", "nil"},
+		"3 pass, 90 blocked":    {1, 93, 3, 90, "secure", "100.0"},
+		"warning":               {1, 100, 85, 0, "warning", "85.0"},
+		"critical":              {1, 100, 50, 0, "critical", "50.0"},
+	}
+	for name, tc := range cases {
+		t.Run(name, func(t *testing.T) {
+			st := Statistics{
+				TotalReports: tc.reports, TotalMessages: tc.total,
+				CompliantMessages: tc.compliant, EnforcedMessages: tc.enforced,
+				HasData: tc.reports > 0,
+			}
+			st.classify()
+
+			gotRate := "nil"
+			if st.DeliveredComplianceRate != nil {
+				gotRate = fmt.Sprintf("%.1f", *st.DeliveredComplianceRate)
+			}
+			if st.Health != tc.wantHealth || gotRate != tc.wantRate {
+				t.Fatalf("got health=%q rate=%s, want health=%q rate=%s", st.Health, gotRate, tc.wantHealth, tc.wantRate)
+			}
+		})
+	}
+}
+
+// reportXML builds a one-domain aggregate report from (count, disposition,
+// dkim, spf) rows so tests can synthesise traffic mixes compactly.
+func reportXML(id, policy string, rows ...[4]string) string {
+	var b strings.Builder
+	fmt.Fprintf(&b, `<?xml version="1.0"?><feedback><version>1.0</version>
+<report_metadata><org_name>google.com</org_name><report_id>%s</report_id>
+<date_range><begin>1609459200</begin><end>1609545600</end></date_range></report_metadata>
+<policy_published><domain>example.com</domain><p>%s</p><pct>100</pct></policy_published>`, id, policy)
+	for i, r := range rows {
+		fmt.Fprintf(&b, `<record><row><source_ip>192.0.2.%d</source_ip><count>%s</count>
+<policy_evaluated><disposition>%s</disposition><dkim>%s</dkim><spf>%s</spf></policy_evaluated></row>
+<identifiers><header_from>example.com</header_from></identifiers></record>`, i+1, r[0], r[1], r[2], r[3])
+	}
+	b.WriteString("</feedback>")
+	return b.String()
+}
+
+// A p=reject domain that blocks a botnet must read as healthy, and an
+// unenforced domain letting failures through must still drag health down.
+func TestGetStatistics_Health(t *testing.T) {
+	storage, err := NewStorage(":memory:")
+	if err != nil {
+		t.Fatalf("Failed to create storage: %v", err)
+	}
+	defer func() { _ = storage.Close() }()
+
+	save := func(xml string) {
+		t.Helper()
+		fb, err := parser.ParseReport([]byte(xml))
+		if err != nil {
+			t.Fatal(err)
+		}
+		if err := storage.SaveReport(fb); err != nil {
+			t.Fatal(err)
+		}
+	}
+	check := func(wantEnforced int, wantRate float64, wantHealth string) {
+		t.Helper()
+		stats, err := storage.GetStatistics()
+		if err != nil {
+			t.Fatal(err)
+		}
+		if stats.EnforcedMessages != wantEnforced || stats.Health != wantHealth ||
+			stats.DeliveredComplianceRate == nil || fmt.Sprintf("%.1f", *stats.DeliveredComplianceRate) != fmt.Sprintf("%.1f", wantRate) {
+			t.Fatalf("got enforced=%d rate=%v health=%q, want enforced=%d rate=%.1f health=%q",
+				stats.EnforcedMessages, stats.DeliveredComplianceRate, stats.Health, wantEnforced, wantRate, wantHealth)
+		}
+	}
+
+	// p=reject: 10 legitimate messages pass, 40 spoofed ones are rejected.
+	save(reportXML("r1", "reject",
+		[4]string{"40", "reject", "fail", "fail"},
+		[4]string{"10", "none", "pass", "pass"},
+	))
+	check(40, 100, "secure")
+
+	// p=none: 50 of 100 fail and are delivered anyway.
+	save(reportXML("r2", "none",
+		[4]string{"50", "none", "fail", "fail"},
+		[4]string{"50", "none", "pass", "pass"},
+	))
+	// delivered = 150 - 40 = 110, compliant = 60
+	check(40, 60.0/110*100, "critical")
+
+	stats, _ := storage.GetStatistics()
+	if stats.ComplianceRate != 40 { // raw rate over all mail is unchanged for metrics
+		t.Errorf("ComplianceRate = %v, want 40", stats.ComplianceRate)
+	}
+	out, _ := json.Marshal(stats)
+	for _, want := range []string{`"enforced_messages":40`, `"health":"critical"`} {
+		if !strings.Contains(string(out), want) {
+			t.Errorf("JSON %s\nmissing %s", out, want)
+		}
+	}
+}
