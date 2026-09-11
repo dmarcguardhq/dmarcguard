@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/dmarcguardhq/dmarcguard/compare/v1.5.7...v1.6.0) (2026-09-11)
+
+
+### Features
+
+* **imap:** support internal CA, skip-verify and STARTTLS ([#194](https://github.com/dmarcguardhq/dmarcguard/issues/194)) ([98abb52](https://github.com/dmarcguardhq/dmarcguard/commit/98abb526d856a2c560fabc090a383a206fcec2cc)), closes [#193](https://github.com/dmarcguardhq/dmarcguard/issues/193)
+
 ## [1.5.7](https://github.com/dmarcguardhq/dmarcguard/compare/v1.5.6...v1.5.7) (2026-09-05)
 
 
