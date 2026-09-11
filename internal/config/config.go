@@ -37,6 +37,16 @@ type IMAPConfig struct {
 	Mailbox  string `json:"mailbox" env:"IMAP_MAILBOX" envDefault:"INBOX"`
 	UseTLS   bool   `json:"use_tls" env:"IMAP_USE_TLS" envDefault:"true"`
 
+	// StartTLS dials plaintext (typically port 143) and upgrades the
+	// connection with the STARTTLS command. It takes precedence over UseTLS.
+	StartTLS bool `json:"starttls" env:"IMAP_STARTTLS"`
+	// TLSCAFile is a PEM bundle used to verify the IMAP server certificate,
+	// for servers whose certificate is issued by an internal CA.
+	TLSCAFile string `json:"tls_ca_file" env:"IMAP_TLS_CA_FILE"`
+	// TLSSkipVerify disables IMAP server certificate verification. Prefer
+	// TLSCAFile; this leaves the connection open to interception.
+	TLSSkipVerify bool `json:"tls_skip_verify" env:"IMAP_TLS_SKIP_VERIFY"`
+
 	MarkAsSeen       bool   `json:"mark_as_seen" env:"IMAP_MARK_AS_SEEN" envDefault:"true"`
 	ProcessedMailbox string `json:"processed_mailbox" env:"IMAP_PROCESSED_MAILBOX"`
 }

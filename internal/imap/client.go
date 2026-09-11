@@ -3,8 +3,10 @@ package imap
 import (
 	"bytes"
 	"crypto/tls"
+	"crypto/x509"
 	"fmt"
 	"io"
+	"os"
 	"strings"
 
 	"github.com/emersion/go-imap"
@@ -27,22 +29,63 @@ func NewClient(cfg *config.IMAPConfig, log *zerolog.Logger) *Client {
 	return &Client{config: cfg, log: log}
 }
 
+// tlsConfig builds the TLS settings used for both implicit TLS and STARTTLS.
+func (c *Client) tlsConfig() (*tls.Config, error) {
+	cfg := &tls.Config{
+		ServerName:         c.config.Host,
+		InsecureSkipVerify: c.config.TLSSkipVerify, // #nosec G402 -- opt-in, for internal IMAP servers
+		MinVersion:         tls.VersionTLS12,
+	}
+
+	if c.config.TLSCAFile == "" {
+		return cfg, nil
+	}
+
+	pem, err := os.ReadFile(c.config.TLSCAFile)
+	if err != nil {
+		return nil, fmt.Errorf("read IMAP CA file %s: %w", c.config.TLSCAFile, err)
+	}
+
+	pool := x509.NewCertPool()
+	if !pool.AppendCertsFromPEM(pem) {
+		return nil, fmt.Errorf("no certificates found in IMAP CA file %s", c.config.TLSCAFile)
+	}
+	cfg.RootCAs = pool
+
+	return cfg, nil
+}
+
+// dial opens the connection: implicit TLS, plaintext upgraded via STARTTLS, or
+// plaintext. StartTLS wins over UseTLS since UseTLS defaults to true.
+func (c *Client) dial(addr string, tlsCfg *tls.Config) (*client.Client, error) {
+	if c.config.UseTLS && !c.config.StartTLS {
+		return client.DialTLS(addr, tlsCfg)
+	}
+
+	imapClient, err := client.Dial(addr)
+	if err != nil || !c.config.StartTLS {
+		return imapClient, err
+	}
+
+	if err := imapClient.StartTLS(tlsCfg); err != nil {
+		_ = imapClient.Logout()
+		return nil, fmt.Errorf("starttls: %w", err)
+	}
+
+	return imapClient, nil
+}
+
 // Connect establishes connection to IMAP server
 func (c *Client) Connect() error {
-	var imapClient *client.Client
-	var err error
-
 	addr := fmt.Sprintf("%s:%d", c.config.Host, c.config.Port)
 	c.log.Debug().Str("addr", addr).Msg("connecting")
 
-	if c.config.UseTLS {
-		imapClient, err = client.DialTLS(addr, &tls.Config{
-			ServerName: c.config.Host,
-		})
-	} else {
-		imapClient, err = client.Dial(addr)
+	tlsCfg, err := c.tlsConfig()
+	if err != nil {
+		return err
 	}
 
+	imapClient, err := c.dial(addr, tlsCfg)
 	if err != nil {
 		return fmt.Errorf("failed to connect: %w", err)
 	}

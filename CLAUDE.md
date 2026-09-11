@@ -311,6 +311,9 @@ Config via JSON file or environment variables (using caarlos0/env):
     "password": "your-password",
     "mailbox": "INBOX",
     "use_tls": true,
+    "starttls": false,
+    "tls_ca_file": "",
+    "tls_skip_verify": false,
     "mark_as_seen": true,
     "processed_mailbox": ""
   },
@@ -333,6 +336,9 @@ Environment variables:
 - `IMAP_PASSWORD`
 - `IMAP_PORT`
 - `IMAP_PROCESSED_MAILBOX`
+- `IMAP_STARTTLS` - dial plaintext (port 143) and upgrade via STARTTLS; wins over `IMAP_USE_TLS`
+- `IMAP_TLS_CA_FILE` - PEM bundle for an internal CA
+- `IMAP_TLS_SKIP_VERIFY` - disable IMAP certificate verification (last resort)
 - `IMAP_USE_TLS`
 - `IMAP_USERNAME`
 - `SERVER_HOST`

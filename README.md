@@ -192,6 +192,60 @@ Requires [App Password](https://support.google.com/accounts/answer/185833)
 **Generic IMAP:**
 Most providers use port `993` with TLS. Check your provider's documentation.
 
+### Self-Signed or Internal CA Certificates
+
+An internal IMAP server whose certificate is issued by your own CA fails to connect with:
+
+```
+connect to IMAP server: failed to connect: tls: failed to verify certificate: x509: certificate signed by unknown authority
+```
+
+Three settings cover this case:
+
+| Setting           | Environment variable   | Description                                                                                            |
+| ----------------- | ---------------------- | ------------------------------------------------------------------------------------------------------ |
+| `tls_ca_file`     | `IMAP_TLS_CA_FILE`     | Path to a PEM bundle containing your internal CA. **Recommended** - certificate verification stays on. |
+| `tls_skip_verify` | `IMAP_TLS_SKIP_VERIFY` | Disables certificate verification. Last resort, the connection can be intercepted.                     |
+| `starttls`        | `IMAP_STARTTLS`        | Dials plaintext (usually port `143`) and upgrades with `STARTTLS`. Takes precedence over `use_tls`.    |
+
+Internal CA on the usual implicit-TLS port:
+
+```json
+{
+  "host": "imap.internal",
+  "port": 993,
+  "use_tls": true,
+  "tls_ca_file": "/etc/ssl/certs/internal-ca.pem"
+}
+```
+
+Internal CA over STARTTLS on port 143:
+
+```json
+{
+  "host": "imap.internal",
+  "port": 143,
+  "starttls": true,
+  "tls_ca_file": "/etc/ssl/certs/internal-ca.pem"
+}
+```
+
+Same thing with Docker:
+
+```bash
+docker run -d -p 8080:8080 \
+  -v /etc/ssl/certs/internal-ca.pem:/ca.pem:ro \
+  -e IMAP_HOST=imap.internal \
+  -e IMAP_PORT=143 \
+  -e IMAP_STARTTLS=true \
+  -e IMAP_TLS_CA_FILE=/ca.pem \
+  -e IMAP_USERNAME=dmarc@example.com \
+  -e IMAP_PASSWORD=secret \
+  ghcr.io/meysam81/parse-dmarc:latest
+```
+
+Note that `use_tls: false` is plaintext IMAP with no upgrade at all - most servers reject `LOGIN` on an unencrypted connection, so use `starttls` instead of turning TLS off.
+
 ### Command Line Options
 
 ```bash
