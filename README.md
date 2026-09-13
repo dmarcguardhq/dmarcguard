@@ -1,28 +1,79 @@
 # Parse DMARC
 
-[![CI](https://img.shields.io/github/actions/workflow/status/meysam81/parse-dmarc/ci.yml?branch=main&label=CI&logo=githubactions&logoColor=white&style=flat-square)](https://github.com/meysam81/parse-dmarc/actions/workflows/ci.yml)
-[![License](https://img.shields.io/github/license/meysam81/parse-dmarc?style=flat-square)](https://github.com/meysam81/parse-dmarc/blob/main/LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/meysam81/parse-dmarc?style=flat-square&logo=github)](https://github.com/meysam81/parse-dmarc/releases)
-[![GitHub Stars](https://img.shields.io/github/stars/meysam81/parse-dmarc?style=flat-square&logo=github)](https://github.com/meysam81/parse-dmarc/stargazers)
-[![GitHub Issues](https://img.shields.io/github/issues/meysam81/parse-dmarc?style=flat-square&logo=github)](https://github.com/meysam81/parse-dmarc/issues)
+[![CI](https://img.shields.io/github/actions/workflow/status/dmarcguardhq/parse-dmarc/ci.yml?branch=main&label=CI&style=flat-square)](https://github.com/dmarcguardhq/parse-dmarc/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/dmarcguardhq/parse-dmarc?style=flat-square)](https://github.com/dmarcguardhq/parse-dmarc/releases)
+[![License](https://img.shields.io/github/license/dmarcguardhq/parse-dmarc?style=flat-square)](LICENSE)
+[![Stars](https://img.shields.io/github/stars/dmarcguardhq/parse-dmarc?style=flat-square)](https://github.com/dmarcguardhq/parse-dmarc)
+[![Docker pulls](https://img.shields.io/docker/pulls/meysam81/parse-dmarc?style=flat-square)](https://hub.docker.com/r/meysam81/parse-dmarc)
+[![Image size](https://img.shields.io/docker/image-size/meysam81/parse-dmarc/latest?style=flat-square&label=image)](https://hub.docker.com/r/meysam81/parse-dmarc/tags)
 [![Go Report Card](https://goreportcard.com/badge/github.com/meysam81/parse-dmarc?style=flat-square)](https://goreportcard.com/report/github.com/meysam81/parse-dmarc)
+[![Scope](https://img.shields.io/badge/scope-whole%20repo%20Apache--2.0%2C%20nothing%20gated-1f8b4c?style=flat-square)](#license)
 
-[![Made with Go](https://img.shields.io/badge/Made%20with-Go-1f425f?style=flat-square&logo=go&logoColor=white)](https://go.dev)
-[![Made with Vue.js](https://img.shields.io/badge/Made%20with-Vue.js-4FC08D?style=flat-square&logo=vue.js&logoColor=white)](https://vuejs.org)
-[![Docker Hub](https://img.shields.io/badge/Docker%20Hub-meysam81%2Fparse--dmarc-2496ED?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/meysam81/parse-dmarc)
-[![Docker Pulls](https://img.shields.io/docker/pulls/meysam81/parse-dmarc?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/meysam81/parse-dmarc)
-[![Docker Image Size (tag)](https://img.shields.io/docker/image-size/meysam81/parse-dmarc/v1?style=flat-square&logo=docker&logoColor=white)](https://hub.docker.com/r/meysam81/parse-dmarc)
+**Read your DMARC aggregate reports in one dashboard. One Go binary, SQLite, no Elasticsearch.**
 
-[![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-FE5196?logo=conventionalcommits&logoColor=white&style=flat-square)](https://www.conventionalcommits.org)
-[![Renovate](https://img.shields.io/badge/renovate-enabled-1f8b4c?logo=renovatebot&logoColor=white&style=flat-square)](https://developer.mend.io/github/meysam81/parse-dmarc)
+Parse DMARC is built and maintained by the team behind [DMARCguard](https://dmarcguard.io/?utm_source=github&utm_medium=referral&utm_campaign=parse-dmarc-readme&utm_content=header), a hosted DMARC monitoring service. The two do not share code, and this repository stays Apache-2.0 in full.
 
-**Monitor who's sending email on behalf of your domain. Catch spoofing. Stop phishing.**
+![Parse DMARC dashboard showing pass rate, message volume and top sending sources](./assets/screenshots/hero.png)
 
-[![Parse DMARC](./assets/social-preview.png)](https://github.com/meysam81/parse-dmarc)
+## What it does
 
-## Deploy Your Own Instance
+When your DMARC record carries a `rua=` address, mail receivers such as Google, Microsoft and Yahoo send you aggregate reports: gzip or zip XML attachments, at the interval your record asks for and daily by default, listing every IP that sent mail as your domain and whether SPF and DKIM passed ([RFC 7489 section 7.2](https://www.rfc-editor.org/rfc/rfc7489#section-7.2), carried forward by [RFC 9990](https://www.rfc-editor.org/rfc/rfc9990)). Nobody reads those by hand. Parse DMARC does:
 
-Deploy Parse DMARC to your favorite cloud provider with one click:
+- Fetches reports over IMAP from any mailbox. Reports that Exchange or Outlook forward as `message/rfc822` attachments are unwrapped too.
+- Parses gzip, zip and raw XML, with a 16 MB decompression cap per report.
+- Stores everything in one SQLite file. No database server, no JVM.
+- Shows pass rate, message volume and top sending sources, and opens any report down to its raw records.
+- Generates your `_dmarc` TXT record from a form.
+- Exposes 28 Prometheus metrics and ships a Grafana dashboard.
+- Serves an MCP server, so an AI assistant can query your reports.
+- Dark mode. One static binary. The Docker image is built `FROM scratch`.
+
+It reads aggregate (RUA) reports only. Failure reports (RUF), TLS-RPT, alerting, login and multi-mailbox intake are not built; see [Roadmap and contributing](#roadmap-and-contributing).
+
+## Run it
+
+Docker, with a named volume for the database:
+
+```bash
+docker run -d --name parse-dmarc -p 8080:8080 \
+  -e IMAP_HOST=imap.gmail.com \
+  -e IMAP_PORT=993 \
+  -e IMAP_USERNAME=dmarc@example.com \
+  -e IMAP_PASSWORD='your-app-password' \
+  -v parse-dmarc:/data \
+  ghcr.io/dmarcguardhq/parse-dmarc:latest
+```
+
+Homebrew on macOS or Linux:
+
+```bash
+brew tap meysam81/tap
+brew install parse-dmarc
+parse-dmarc --gen-config          # writes a config.json template
+parse-dmarc --config config.json
+```
+
+Or download a release archive, `parse-dmarc_<os>_<arch>.tar.gz`, from the [releases page](https://github.com/dmarcguardhq/parse-dmarc/releases).
+
+Open http://localhost:8080. Gmail needs an [App Password](https://support.google.com/accounts/answer/185833), not the account password. The same image is on Docker Hub as `meysam81/parse-dmarc`; both names track the same builds, and tags such as `v1` or `v1.6.0` pin a release.
+
+## Get reports flowing
+
+Receivers only send reports if your DMARC record asks for them. Publish this TXT record at `_dmarc.example.com`, with your own domain and mailbox:
+
+```
+v=DMARC1; p=none; rua=mailto:dmarc@example.com
+```
+
+- `p=none` asks receivers to deliver as usual and only report. Move to `p=quarantine`, then `p=reject`, once every legitimate sender in the reports passes ([RFC 9989 section 5.1](https://www.rfc-editor.org/rfc/rfc9989#section-5.1)).
+- `rua=` is the mailbox Parse DMARC reads. It has to exist and accept mail before the first report arrives.
+- Check the record with `dig +short TXT _dmarc.example.com`. Reports typically start within 24 to 48 hours.
+
+Cloudflare, Route 53 and every other DNS host take the same three fields: name `_dmarc`, type `TXT`, value as above. SPF and DKIM do not have to be set up first; the reports are how you find out what they are doing.
+
+## Deploy anywhere
+
+One click on a platform, or a template for the self-hosted PaaS you already run. Every option needs the IMAP settings from [Configuration](#configuration).
 
 ### Platform as a Service (PaaS)
 
@@ -34,7 +85,7 @@ Deploy Parse DMARC to your favorite cloud provider with one click:
 | **Zeabur**     | [![Deploy on Zeabur](https://zeabur.com/button.svg)](https://zeabur.com/templates/YB3TS7?referralCode=meysam)                                                                      | Asia-Pacific optimized                                    |
 | **Northflank** | [![Deploy to Northflank](https://assets.northflank.com/deploy_to_northflank_smm_36700fb050.svg)](https://app.northflank.com/s/account/templates/new?data=693e394eb41e1e64db65187e) | Developer-focused                                         |
 
-### Self-Hosted
+### Self-hosted PaaS
 
 | Provider     | Deploy                                                                                                                                              | Notes                           |
 | ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
@@ -49,612 +100,80 @@ Deploy Parse DMARC to your favorite cloud provider with one click:
 | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------- |
 | **DigitalOcean Droplet** | [![Deploy to DigitalOcean](https://img.shields.io/badge/Deploy-DigitalOcean-0080FF?style=for-the-badge&logo=digitalocean)](./deploy/digitalocean/) | VM with Packer image |
 
-> **Note**: All deployments require IMAP credentials. See [Configuration](#configuration-options) for details on setting up Gmail, Outlook, or other email providers.
+## Configuration
 
-## Why Do I Need This?
+Every setting is an environment variable or a key in `config.json`. Environment is read first and the file overrides it.
 
-**DMARC** (Domain-based Message Authentication, Reporting & Conformance) helps protect your domain from email spoofing and phishing. When you enable DMARC on your domain, email providers like Gmail, Outlook, and Yahoo send you **aggregate reports** showing:
+| Setting                       | Environment variable             | Default                                                      |
+| ----------------------------- | -------------------------------- | ------------------------------------------------------------ |
+| IMAP host and port            | `IMAP_HOST`, `IMAP_PORT`         | required, `993`                                              |
+| IMAP username and password    | `IMAP_USERNAME`, `IMAP_PASSWORD` | required                                                     |
+| Mailbox to read               | `IMAP_MAILBOX`                   | `INBOX`                                                      |
+| Implicit TLS                  | `IMAP_USE_TLS`                   | `true`                                                       |
+| STARTTLS on a plaintext port  | `IMAP_STARTTLS`                  | `false`                                                      |
+| Internal CA bundle, PEM       | `IMAP_TLS_CA_FILE`               | unset                                                        |
+| Skip certificate verification | `IMAP_TLS_SKIP_VERIFY`           | `false`                                                      |
+| Mark fetched mail as seen     | `IMAP_MARK_AS_SEEN`              | `true`                                                       |
+| Move processed mail to        | `IMAP_PROCESSED_MAILBOX`         | unset                                                        |
+| Database file                 | `DATABASE_PATH`                  | `~/.parse-dmarc/db.sqlite`, `/data/parse-dmarc.db` in Docker |
+| HTTP listen                   | `SERVER_HOST`, `SERVER_PORT`     | all interfaces, `8080`                                       |
+| Seconds between fetches       | `FETCH_INTERVAL`                 | `300`                                                        |
+| Log level                     | `LOG_LEVEL`                      | `info`                                                       |
 
-- Who's sending email claiming to be from your domain
-- Which emails passed or failed authentication (SPF/DKIM)
-- How many emails were sent, and from which IP addresses
-- Whether malicious actors are trying to impersonate your domain
+Providers: Gmail is `imap.gmail.com` on 993 with an App Password. Microsoft 365 is `outlook.office365.com` on 993. Anything else is port 993 with TLS unless its documentation says otherwise.
 
-**The Problem:** These reports arrive as compressed XML attachments in your inbox - nearly impossible to read or analyze manually.
+An IMAP server whose certificate comes from your own CA fails with `x509: certificate signed by unknown authority`. Mount the CA bundle and point `IMAP_TLS_CA_FILE` at it; verification stays on. `IMAP_TLS_SKIP_VERIFY=true` also connects and is the last resort, because the session can then be intercepted. `IMAP_STARTTLS=true` dials plaintext, usually port 143, and upgrades; it takes precedence over `IMAP_USE_TLS`. Turning TLS off entirely is plaintext IMAP, and most servers refuse `LOGIN` on it.
 
-**The Solution:** Parse DMARC automatically fetches these reports from your inbox, parses them, and displays everything in a beautiful dashboard. All in a single 14MB Docker image.
+| Flag                        | What it does                                                                                  |
+| --------------------------- | --------------------------------------------------------------------------------------------- |
+| `--fetch-once`              | Fetch, parse, store, exit. For cron.                                                          |
+| `--serve-only`              | Serve the dashboard without fetching.                                                         |
+| `--fetch-interval 600`      | Seconds between fetch cycles.                                                                 |
+| `--metrics=false`           | Turn off `/metrics`.                                                                          |
+| `--gen-config`              | Write a `config.json` template and exit.                                                      |
+| `--mcp`, `--mcp-http :8081` | Run the MCP server over stdio or HTTP instead of the fetcher. See [docs/MCP.md](docs/MCP.md). |
 
-## Features
+## Metrics, Grafana and MCP
 
-- 📧 Auto-fetches reports from any IMAP inbox (Gmail, Outlook, etc.)
-- 📊 Beautiful dashboard with real-time statistics
-- 🔍 See exactly who's sending email as your domain
-- 🔧 Built-in DNS record generator for easy DMARC setup
-- 📦 Single binary - no databases to install, no complex setup
-- 🚀 Tiny 14MB Docker image
-- 🔒 Secure TLS support
-- 🌙 Dark mode support
+`/metrics` is on by default: 28 metrics covering fetch cycles, IMAP connections, parse and store errors, compliance rate overall and per domain, SPF and DKIM result counts, and HTTP latency. `grafana/dashboard.json` is a ready dashboard for them. The full list, a Prometheus Operator `ServiceMonitor`, alert rules and a compose stack with Prometheus and Grafana are in [docs/METRICS.md](docs/METRICS.md).
 
-## Installation
+`parse-dmarc --mcp` exposes the same data to an AI assistant over the Model Context Protocol: nine tools, from `get_statistics` to `parse_dmarc_report`, over stdio or HTTP with optional OAuth2. Setup and the tool list are in [docs/MCP.md](docs/MCP.md).
 
-### Homebrew (macOS/Linux)
+The HTTP API behind the dashboard is four `GET` routes: `/api/statistics`, `/api/reports`, `/api/reports/{id}` and `/api/top-sources`. None of them has authentication, so keep the port behind your reverse proxy or VPN.
 
-```bash
-brew tap meysam81/tap
-brew install parse-dmarc
-```
+## Parse DMARC or DMARCguard?
 
-### Docker
+Two products, one maker, separate codebases. Parse DMARC is the whole of this repository: no enterprise directory, nothing to unlock. DMARCguard is a hosted, proprietary service that reads the reports for you and tells you what to change.
 
-```bash
-docker pull meysam81/parse-dmarc
-```
+|                 | Parse DMARC                                     | DMARCguard                                                                                                                                                             |
+| --------------- | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Who runs it     | You: a binary or container, a mailbox, a volume | We do                                                                                                                                                                  |
+| What it reads   | DMARC aggregate reports                         | DMARC aggregate reports, TLS-RPT reports, failure reports on Pro, and DNS checks for 9 protocols: DMARC, SPF, DKIM, BIMI, MTA-STS, TLS-RPT, ARC, DANE, ARF (7 on Free) |
+| Sending sources | IP addresses                                    | 170 named senders, Mailchimp or SendGrid rather than an IP, each with the DNS change that fixes it                                                                     |
+| Alerts          | Prometheus rules you write                      | Email on Free; Slack, Teams, Discord and webhooks on Pro                                                                                                               |
+| Retention       | Whatever your disk holds                        | 30 days on Free, 1 year on Pro                                                                                                                                         |
+| Access control  | None; keep it behind your proxy                 | Accounts and 2FA; SAML SSO on Pro                                                                                                                                      |
+| Support         | GitHub issues                                   | Email                                                                                                                                                                  |
+| Price           | $0, Apache-2.0                                  | Free for 2 domains, no credit card. Pro is $29/month including 2 domains                                                                                               |
 
-### Binary Downloads
+Run Parse DMARC when you want the data on your own disk and one mailbox to watch. Use DMARCguard when you want the reports read for you, or you have more domains than evenings.
 
-Download pre-built binaries from the [Releases page](https://github.com/meysam81/parse-dmarc/releases).
+> I built Parse DMARC first, in late 2025. DMARCguard came out of what people asked for next: a sender's name instead of its IP, and the exact record to change on every alert. Paying for DMARCguard is what funds the hours that go into this repository, and it stays Apache-2.0.
+>
+> Meysam
 
-## Quick Start
+[Start free on 2 domains, no credit card](https://dmarcguard.io/pricing/?utm_source=github&utm_medium=referral&utm_campaign=parse-dmarc-readme&utm_content=which-one)
 
-### Step 1: Set Up DNS to Receive DMARC Reports
+## Roadmap and contributing
 
-**This is the most important step!** Without this, you won't receive any reports to analyze.
-
-Add a DMARC TXT record to your domain's DNS:
-
-```
-Name: _dmarc.yourdomain.com
-Type: TXT
-Value: v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com
-```
-
-**What this means:**
-
-- `p=none` - Monitor only (don't block emails yet)
-- `rua=mailto:dmarc@yourdomain.com` - Send aggregate reports to this email address
-
-**Important:** Replace `dmarc@yourdomain.com` with an actual email inbox you control. This is where Gmail, Outlook, Yahoo, etc. will send your DMARC reports.
-
-**DNS Examples:**
-
-- **Cloudflare:** DNS > Add record > Type: TXT, Name: `_dmarc`, Content: `v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com`
-- **Google Domains:** DNS > Custom records > TXT, Name: `_dmarc`, Data: `v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com`
-- **AWS Route53:** Create record > Type: TXT, Name: `_dmarc.yourdomain.com`, Value: `"v=DMARC1; p=none; rua=mailto:dmarc@yourdomain.com"`
-
-Reports typically start arriving within 24-48 hours.
-
-### Step 2: Run Parse DMARC with Docker
-
-**Run the container:**
-
-```bash
-docker run -d \
-  --name parse-dmarc \
-  -p 8080:8080 \
-  -e IMAP_HOST=imap.gmail.com \
-  -e IMAP_PORT=993 \
-  -e IMAP_USERNAME=your-email@gmail.com \
-  -e IMAP_PASSWORD=your-app-password \
-  -v parse-dmarc:/data \
-  meysam81/parse-dmarc
-```
-
-**For Gmail users:** You'll need an [App Password](https://support.google.com/accounts/answer/185833), not your regular Gmail password.
-
-**Access the dashboard:** Open `http://localhost:8080` in your browser.
-
-## What You'll See
-
-Once DMARC reports start arriving and Parse DMARC processes them, your dashboard will show:
-
-- **Total messages** analyzed across all reports
-- **DMARC compliance rate** (SPF/DKIM pass rates)
-- **Top sending sources** (IP addresses and organizations sending as your domain)
-- **Authentication results** (which emails passed/failed SPF and DKIM)
-- **Policy actions** (how receiving servers handled your email)
-
-This helps you:
-
-- Verify your legitimate email services are properly configured
-- Detect unauthorized use of your domain
-- Gradually move from monitoring (`p=none`) to enforcement (`p=quarantine` or `p=reject`)
-
-## Configuration Options
-
-### IMAP Settings for Common Providers
-
-**Gmail:**
-
-```json
-{
-  "host": "imap.gmail.com",
-  "port": 993,
-  "username": "your-email@gmail.com",
-  "password": "your-app-password",
-  "use_tls": true
-}
-```
-
-Requires [App Password](https://support.google.com/accounts/answer/185833)
-
-**Outlook/Office 365:**
-
-```json
-{
-  "host": "outlook.office365.com",
-  "port": 993,
-  "username": "your-email@outlook.com",
-  "password": "your-password",
-  "use_tls": true
-}
-```
-
-**Generic IMAP:**
-Most providers use port `993` with TLS. Check your provider's documentation.
-
-### Self-Signed or Internal CA Certificates
-
-An internal IMAP server whose certificate is issued by your own CA fails to connect with:
-
-```
-connect to IMAP server: failed to connect: tls: failed to verify certificate: x509: certificate signed by unknown authority
-```
-
-Three settings cover this case:
-
-| Setting           | Environment variable   | Description                                                                                            |
-| ----------------- | ---------------------- | ------------------------------------------------------------------------------------------------------ |
-| `tls_ca_file`     | `IMAP_TLS_CA_FILE`     | Path to a PEM bundle containing your internal CA. **Recommended** - certificate verification stays on. |
-| `tls_skip_verify` | `IMAP_TLS_SKIP_VERIFY` | Disables certificate verification. Last resort, the connection can be intercepted.                     |
-| `starttls`        | `IMAP_STARTTLS`        | Dials plaintext (usually port `143`) and upgrades with `STARTTLS`. Takes precedence over `use_tls`.    |
-
-Internal CA on the usual implicit-TLS port:
-
-```json
-{
-  "host": "imap.internal",
-  "port": 993,
-  "use_tls": true,
-  "tls_ca_file": "/etc/ssl/certs/internal-ca.pem"
-}
-```
-
-Internal CA over STARTTLS on port 143:
-
-```json
-{
-  "host": "imap.internal",
-  "port": 143,
-  "starttls": true,
-  "tls_ca_file": "/etc/ssl/certs/internal-ca.pem"
-}
-```
-
-Same thing with Docker:
-
-```bash
-docker run -d -p 8080:8080 \
-  -v /etc/ssl/certs/internal-ca.pem:/ca.pem:ro \
-  -e IMAP_HOST=imap.internal \
-  -e IMAP_PORT=143 \
-  -e IMAP_STARTTLS=true \
-  -e IMAP_TLS_CA_FILE=/ca.pem \
-  -e IMAP_USERNAME=dmarc@example.com \
-  -e IMAP_PASSWORD=secret \
-  ghcr.io/meysam81/parse-dmarc:latest
-```
-
-Note that `use_tls: false` is plaintext IMAP with no upgrade at all - most servers reject `LOGIN` on an unencrypted connection, so use `starttls` instead of turning TLS off.
-
-### Command Line Options
-
-```bash
-# Fetch once and exit (useful for cron jobs)
-docker exec parse-dmarc ./parse-dmarc -fetch-once
-
-# Serve dashboard only (no fetching)
-docker exec parse-dmarc ./parse-dmarc -serve-only
-
-# Custom fetch interval (in seconds, default 300)
-docker exec parse-dmarc ./parse-dmarc -fetch-interval=600
-```
-
-## Frequently Asked Questions
-
-**Q: I'm not receiving any reports. What's wrong?**
-
-A: Check these things in order:
-
-1. Did you add the `_dmarc` TXT record to your DNS? (Use a DNS checker like `dig _dmarc.yourdomain.com TXT`)
-2. Wait 24-48 hours - reports aren't instant
-3. Is your domain sending/receiving email? No email = no reports
-4. Check your IMAP credentials are correct in `config.json`
-
-**Q: Do I need SPF and DKIM set up first?**
-
-A: No! DMARC reports will show you whether SPF and DKIM are passing or failing, which helps you configure them correctly.
-
-**Q: What should my DMARC policy be?**
-
-A: Start with `p=none` (monitoring only). After reviewing reports and fixing any issues, gradually move to `p=quarantine` and then `p=reject`.
-
-**Q: How much email traffic do I need?**
-
-A: Any amount works. Even small domains with a few emails per day will receive useful reports.
-
-**Q: Can I use a Gmail account to receive reports?**
-
-A: Yes! Create a dedicated Gmail like `dmarc@yourdomain.com`, forward it to your personal Gmail if needed, and use Gmail's IMAP settings.
-
-## Advanced
-
-### Building from Source
-
-```bash
-git clone https://github.com/meysam81/parse-dmarc.git
-cd parse-dmarc
-just install-deps
-just build
-./bin/parse-dmarc -config=config.json
-```
-
-### Docker Compose
-
-See [`compose.yml`](./compose.yml) for Docker Compose configuration.
-
-### API Endpoints
-
-- `GET /api/statistics` - Dashboard statistics
-- `GET /api/reports` - List of reports (paginated)
-- `GET /api/reports/:id` - Detailed report view
-- `GET /api/top-sources` - Top sending source IPs
-- `GET /metrics` - Prometheus metrics endpoint
-
-## Prometheus Metrics & Grafana Integration
-
-Parse DMARC includes production-ready Prometheus metrics for monitoring and alerting. Metrics are enabled by default and exposed at `/metrics`.
-
-### Available Metrics
-
-#### Build Information
-
-| Metric                   | Type  | Description                                     |
-| ------------------------ | ----- | ----------------------------------------------- |
-| `parse_dmarc_build_info` | Gauge | Build information (version, commit, build_date) |
-
-#### Report Processing
-
-| Metric                                             | Type      | Description                                 |
-| -------------------------------------------------- | --------- | ------------------------------------------- |
-| `parse_dmarc_reports_fetched_total`                | Counter   | Total DMARC report emails fetched from IMAP |
-| `parse_dmarc_reports_parsed_total`                 | Counter   | Total DMARC reports successfully parsed     |
-| `parse_dmarc_reports_stored_total`                 | Counter   | Total DMARC reports stored in database      |
-| `parse_dmarc_reports_parse_errors_total`           | Counter   | Total parse errors                          |
-| `parse_dmarc_reports_store_errors_total`           | Counter   | Total storage errors                        |
-| `parse_dmarc_reports_attachments_total`            | Counter   | Total attachments processed                 |
-| `parse_dmarc_reports_fetch_duration_seconds`       | Histogram | Duration of fetch operations                |
-| `parse_dmarc_reports_last_fetch_timestamp_seconds` | Gauge     | Unix timestamp of last successful fetch     |
-| `parse_dmarc_reports_fetch_cycles_total`           | Counter   | Total fetch cycles executed                 |
-| `parse_dmarc_reports_fetch_errors_total`           | Counter   | Total fetch cycle errors                    |
-
-#### IMAP Connection
-
-| Metric                                         | Type      | Labels | Description                              |
-| ---------------------------------------------- | --------- | ------ | ---------------------------------------- |
-| `parse_dmarc_imap_connections_total`           | Counter   | status | IMAP connection attempts (success/error) |
-| `parse_dmarc_imap_connection_duration_seconds` | Histogram |        | IMAP connection establishment duration   |
-
-#### DMARC Statistics
-
-| Metric                                       | Type  | Description                       |
-| -------------------------------------------- | ----- | --------------------------------- |
-| `parse_dmarc_dmarc_reports_total`            | Gauge | Total reports in database         |
-| `parse_dmarc_dmarc_messages_total`           | Gauge | Total messages across all reports |
-| `parse_dmarc_dmarc_compliant_messages_total` | Gauge | Total DMARC-compliant messages    |
-| `parse_dmarc_dmarc_compliance_rate`          | Gauge | Overall compliance rate (0-100)   |
-| `parse_dmarc_dmarc_unique_source_ips`        | Gauge | Number of unique source IPs       |
-| `parse_dmarc_dmarc_unique_domains`           | Gauge | Number of unique domains          |
-
-#### Per-Domain/Org Metrics
-
-| Metric                                        | Type  | Labels      | Description                  |
-| --------------------------------------------- | ----- | ----------- | ---------------------------- |
-| `parse_dmarc_dmarc_messages_by_domain`        | Gauge | domain      | Messages per domain          |
-| `parse_dmarc_dmarc_compliance_rate_by_domain` | Gauge | domain      | Compliance rate per domain   |
-| `parse_dmarc_dmarc_reports_by_org`            | Gauge | org_name    | Reports per organization     |
-| `parse_dmarc_dmarc_messages_by_disposition`   | Gauge | disposition | Messages by disposition type |
-
-#### Authentication Results
-
-| Metric                           | Type  | Labels | Description                       |
-| -------------------------------- | ----- | ------ | --------------------------------- |
-| `parse_dmarc_dmarc_spf_results`  | Gauge | result | SPF authentication result counts  |
-| `parse_dmarc_dmarc_dkim_results` | Gauge | result | DKIM authentication result counts |
-
-#### HTTP Server
-
-| Metric                                      | Type      | Labels               | Description                |
-| ------------------------------------------- | --------- | -------------------- | -------------------------- |
-| `parse_dmarc_http_requests_total`           | Counter   | method, path, status | Total HTTP requests        |
-| `parse_dmarc_http_request_duration_seconds` | Histogram | method, path         | HTTP request duration      |
-| `parse_dmarc_http_requests_in_flight`       | Gauge     |                      | Current in-flight requests |
-
-#### Go Runtime (Built-in)
-
-Standard Go runtime metrics are also exposed:
-
-- `go_goroutines` - Number of goroutines
-- `go_memstats_*` - Memory statistics
-- `go_gc_*` - Garbage collection metrics
-- `process_*` - Process metrics (CPU, memory, file descriptors)
-
-### Disabling Metrics
-
-To disable the metrics endpoint:
-
-```bash
-# Command line
-./parse-dmarc --metrics=false
-
-# Environment variable
-export PARSE_DMARC_METRICS=false
-
-# Docker
-docker run -e PARSE_DMARC_METRICS=false meysam81/parse-dmarc
-```
-
-### Prometheus Configuration
-
-Add Parse DMARC to your `prometheus.yml`:
-
-```yaml
-scrape_configs:
-  - job_name: "parse-dmarc"
-    static_configs:
-      - targets: ["parse-dmarc:8080"]
-    scrape_interval: 30s
-    metrics_path: /metrics
-```
-
-For Kubernetes with ServiceMonitor (Prometheus Operator):
-
-```yaml
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: parse-dmarc
-  labels:
-    app: parse-dmarc
-spec:
-  selector:
-    matchLabels:
-      app: parse-dmarc
-  endpoints:
-    - port: http
-      path: /metrics
-      interval: 30s
-```
-
-### Grafana Dashboard
-
-A production-ready Grafana dashboard is included in `grafana/dashboard.json`.
-
-#### Import Manually
-
-1. In Grafana, go to **Dashboards** > **Import**
-2. Upload `grafana/dashboard.json` or paste its contents
-3. Select your Prometheus datasource
-4. Click **Import**
-
-#### Provision Automatically (Recommended for Production)
-
-```bash
-# Copy dashboard to Grafana dashboards directory
-cp grafana/dashboard.json /var/lib/grafana/dashboards/parse-dmarc/
-
-# Copy provisioning config
-cp grafana/provisioning.yaml /etc/grafana/provisioning/dashboards/parse-dmarc.yaml
-
-# Restart Grafana or wait for it to pick up changes
-systemctl restart grafana-server
-```
-
-#### Dashboard Variables
-
-| Variable     | Purpose                        |
-| ------------ | ------------------------------ |
-| `datasource` | Prometheus datasource to query |
-| `job`        | Filter by Prometheus job label |
-| `instance`   | Filter by instance(s)          |
-| `domain`     | Filter by monitored domain(s)  |
-
-#### Dashboard Sections
-
-| Section                            | What It Shows                                                             |
-| ---------------------------------- | ------------------------------------------------------------------------- |
-| **Overview - Golden Signals**      | Compliance rate, total messages, reports count, time since last fetch     |
-| **DMARC Authentication Results**   | SPF/DKIM pass rates, disposition breakdown, per-domain compliance         |
-| **Report Sources & Organizations** | Top reporting organizations (Google, Microsoft, etc.), messages by domain |
-| **IMAP & Fetch Operations**        | Connection health, fetch cycle monitoring, latency heatmaps               |
-| **Error Tracking**                 | Parse errors, storage errors, fetch failures                              |
-| **HTTP Server**                    | Request rates, latency percentiles, error rates                           |
-| **Go Runtime**                     | Goroutines, memory usage, GC stats, CPU usage                             |
-
-#### Example Grafana Panels
-
-**Compliance Rate Gauge:**
-
-```promql
-parse_dmarc_dmarc_compliance_rate
-```
-
-**Messages Over Time:**
-
-```promql
-rate(parse_dmarc_dmarc_messages_total[5m])
-```
-
-**Compliance Rate by Domain:**
-
-```promql
-parse_dmarc_dmarc_compliance_rate_by_domain
-```
-
-**SPF/DKIM Pass Rate:**
-
-```promql
-# SPF Pass Rate
-parse_dmarc_dmarc_spf_results{result="pass"} / ignoring(result) sum(parse_dmarc_dmarc_spf_results) * 100
-
-# DKIM Pass Rate
-parse_dmarc_dmarc_dkim_results{result="pass"} / ignoring(result) sum(parse_dmarc_dmarc_dkim_results) * 100
-```
-
-**Fetch Success Rate:**
-
-```promql
-1 - (rate(parse_dmarc_reports_fetch_errors_total[1h]) / rate(parse_dmarc_reports_fetch_cycles_total[1h]))
-```
-
-**IMAP Connection Health:**
-
-```promql
-rate(parse_dmarc_imap_connections_total{status="success"}[5m]) /
-(rate(parse_dmarc_imap_connections_total{status="success"}[5m]) + rate(parse_dmarc_imap_connections_total{status="error"}[5m]))
-```
-
-**HTTP Request Latency (p95):**
-
-```promql
-histogram_quantile(0.95, rate(parse_dmarc_http_request_duration_seconds_bucket[5m]))
-```
-
-**Reports by Organization:**
-
-```promql
-topk(10, parse_dmarc_dmarc_reports_by_org)
-```
-
-#### Alerting Rules
-
-Example Prometheus alerting rules:
-
-```yaml
-groups:
-  - name: parse-dmarc
-    rules:
-      - alert: DMARCComplianceLow
-        expr: parse_dmarc_dmarc_compliance_rate < 90
-        for: 1h
-        labels:
-          severity: warning
-        annotations:
-          summary: "DMARC compliance rate is below 90%"
-          description: "Current compliance rate: {{ $value }}%"
-
-      - alert: DMARCFetchFailures
-        expr: rate(parse_dmarc_reports_fetch_errors_total[15m]) > 0
-        for: 30m
-        labels:
-          severity: critical
-        annotations:
-          summary: "Parse DMARC fetch failures detected"
-          description: "IMAP fetch operations are failing"
-
-      - alert: IMAPConnectionErrors
-        expr: rate(parse_dmarc_imap_connections_total{status="error"}[5m]) > 0
-        for: 10m
-        labels:
-          severity: warning
-        annotations:
-          summary: "IMAP connection errors detected"
-          description: "Check IMAP credentials and server connectivity"
-
-      - alert: NoRecentFetch
-        expr: time() - parse_dmarc_reports_last_fetch_timestamp_seconds > 600
-        for: 5m
-        labels:
-          severity: warning
-        annotations:
-          summary: "No recent DMARC report fetch"
-          description: "Last fetch was {{ humanizeDuration $value }} ago"
-```
-
-### Docker Compose with Prometheus & Grafana
-
-Complete monitoring stack:
-
-```yaml
-version: "3.8"
-
-services:
-  parse-dmarc:
-    image: meysam81/parse-dmarc
-    ports:
-      - "8080:8080"
-    volumes:
-      - ./config.json:/app/config.json
-      - ./data:/data
-
-  prometheus:
-    image: prom/prometheus
-    ports:
-      - "9090:9090"
-    volumes:
-      - ./prometheus.yml:/etc/prometheus/prometheus.yml
-    command:
-      - "--config.file=/etc/prometheus/prometheus.yml"
-
-  grafana:
-    image: grafana/grafana
-    ports:
-      - "3000:3000"
-    environment:
-      - GF_SECURITY_ADMIN_PASSWORD=admin
-    volumes:
-      - grafana-data:/var/lib/grafana
-
-volumes:
-  grafana-data:
-```
-
-With `prometheus.yml`:
-
-```yaml
-global:
-  scrape_interval: 15s
-
-scrape_configs:
-  - job_name: "parse-dmarc"
-    static_configs:
-      - targets: ["parse-dmarc:8080"]
-```
-
-Access:
-
-- Parse DMARC Dashboard: http://localhost:8080
-- Prometheus: http://localhost:9090
-- Grafana: http://localhost:3000 (admin/admin)
-
-### Why Parse DMARC vs ParseDMARC?
-
-This project is inspired by [ParseDMARC](https://github.com/domainaware/parsedmarc) but built for simplicity:
-
-- **Single 14MB binary** vs Python + Elasticsearch + Kibana stack
-- **Built-in dashboard** vs external visualization tools
-- **SQLite** vs Elasticsearch (no JVM required)
-- **Zero dependencies** vs complex setup
-
-## Contributing
-
-Issues and pull requests are welcome! Please check the [issues page](https://github.com/meysam81/parse-dmarc/issues).
+The three most-asked additions, in the order people ask: TLS-RPT reports ([#154](https://github.com/dmarcguardhq/parse-dmarc/issues/154)), a Maildir or directory intake for people without IMAP ([#169](https://github.com/dmarcguardhq/parse-dmarc/issues/169)), and whois on sending sources ([#143](https://github.com/dmarcguardhq/parse-dmarc/issues/143)). [ROADMAP.md](ROADMAP.md) has the rest. [CONTRIBUTING.md](CONTRIBUTING.md) covers the toolchain: `just build`, `just dev`, and `docker compose up` for a local Dovecot seeded with a sample report.
 
 ## License
 
-Apache-2.0 - see [LICENSE](LICENSE) for details.
+Apache-2.0, for everything in this repository. There is no `ee/` directory and no feature that needs a key.
 
 ---
 
-**Found this useful? Star the repo!** ⭐
+If Parse DMARC did the job, a star helps the next person find it. If you would rather have the reports read for you, [DMARCguard](https://dmarcguard.io/?utm_source=github&utm_medium=referral&utm_campaign=parse-dmarc-readme&utm_content=footer) is the hosted product from the same team.
 
 [koyeb-1click]: https://app.koyeb.com/deploy?name=parse-dmarc&type=docker&image=docker.io%2Fmeysam81%2Fparse-dmarc%3Alatest&regions=fra&env%5BDATABASE_PATH%5D=%2Fdata%2Fdb.sqlite&env%5BIMAP_HOST%5D=&env%5BIMAP_MAILBOX%5D=INBOX&env%5BIMAP_PASSWORD%5D=&env%5BIMAP_PORT%5D=993&env%5BIMAP_USERNAME%5D=&env%5BIMAP_USE_TLS%5D=true&env%5BSERVER_PORT%5D=8080&ports=8080%3Bhttp%3B%2F&hc_protocol%5B8080%5D=http&hc_grace_period%5B8080%5D=5&hc_interval%5B8080%5D=30&hc_restart_limit%5B8080%5D=3&hc_timeout%5B8080%5D=5&hc_path%5B8080%5D=%2Fapi%2Fstatistics&hc_method%5B8080%5D=get

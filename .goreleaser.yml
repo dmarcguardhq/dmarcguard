@@ -3,6 +3,8 @@
 
 version: 2
 
+project_name: parse-dmarc
+
 env:
   - GITHUB_TOKEN
   - HOMEBREW_TAP_GITHUB_TOKEN
@@ -58,6 +60,7 @@ dist: .goreleaser-dist
 dockers_v2:
   - id: parse-dmarc
     images:
+      - ghcr.io/dmarcguardhq/parse-dmarc
       - meysam81/parse-dmarc
       - dmarcguard/dmarcguard
       - ghcr.io/dmarcguardhq/dmarcguard
@@ -71,7 +74,7 @@ dockers_v2:
       - "{{ if .IsNightly }}latest{{ end }}"
     labels:
       "org.opencontainers.image.created": "{{.Date}}"
-      "org.opencontainers.image.description": "🛡️ A lightweight, self-hosted DMARC report parser with a beautiful Vue.js dashboard. Single-binary deployment with IMAP integration, SQLite storage, and RFC 7489 compliance. Built with Go and Vue 3 - no external dependencies required."
+      "org.opencontainers.image.description": "DMARC aggregate report parser with a built-in dashboard. One Go binary, IMAP in, SQLite, Prometheus metrics, MCP server. Apache-2.0."
       "org.opencontainers.image.name": "{{.ProjectName}}"
       "org.opencontainers.image.revision": "{{.FullCommit}}"
       "org.opencontainers.image.source": "{{.GitURL}}"
@@ -94,7 +97,7 @@ docker_digest:
 homebrew_casks:
   - name: parse-dmarc
     description: Single-binary, zero-dependency DMARC parser with a modern web dashboard.
-    homepage: https://github.com/meysam81/parse-dmarc
+    homepage: https://github.com/dmarcguardhq/parse-dmarc
     license: Apache-2.0
     commit_msg_template: Brew formula update for {{ .ProjectName }} version {{ .Tag }}
     repository:
@@ -115,7 +118,7 @@ homebrew_casks:
           puts "   parse-dmarc completion fish  # for fish"
           puts ""
           puts "📚 For more information and usage instructions, visit:"
-          puts "   https://github.com/meysam81/parse-dmarc"
+          puts "   https://github.com/dmarcguardhq/parse-dmarc"
 
 report_sizes: true
 

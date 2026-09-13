@@ -1,176 +1,66 @@
 # Contributing to Parse DMARC
 
-Thank you for your interest in contributing to Parse DMARC! This document provides guidelines and instructions for contributing.
+Issues and pull requests are welcome. This page is the local setup and the house rules.
 
-## Development Setup
+## Prerequisites
 
-### Prerequisites
+- Go 1.25 or newer (`go.mod` pins the exact version)
+- Bun 1.x for the Vue frontend
+- `just` for the build recipes
+- Docker with Compose, only for the local IMAP fixture
 
-- Go 1.21 or higher
-- Node.js 18+ and npm
-- Git
+`flake.nix` provides all of them: `nix develop`.
 
-### Getting Started
-
-1. Fork and clone the repository:
+## Setup
 
 ```bash
-git clone https://github.com/meysam81/parse-dmarc.git
+git clone https://github.com/dmarcguardhq/parse-dmarc.git
 cd parse-dmarc
+just install-deps      # go mod tidy + bun install
+just build             # frontend into internal/api/dist, then the Go binary at bin/parse-dmarc
 ```
 
-2. Install dependencies:
+## Layout
+
+```
+cmd/server/          CLI flags and the run loop
+internal/api/        HTTP server, embeds the built frontend from internal/api/dist
+internal/config/     config.json and environment parsing
+internal/imap/       IMAP client, attachment unwrapping
+internal/mcp/        MCP server and tools
+internal/metrics/    Prometheus metrics
+internal/parser/     aggregate report XML parser
+internal/storage/    SQLite, pure-Go by default, cgo behind the `cgo` build tag
+src/                 Vue 3 dashboard
+contrib/dovecot/     local IMAP fixture with a seeded sample report
+deploy/              CapRover, Coolify, Dokploy, DigitalOcean templates
+grafana/             dashboard and provisioning
+docs/                METRICS.md, MCP.md
+```
+
+## Day to day
 
 ```bash
-make install-deps
+just dev               # backend with live reload (air)
+just frontend-dev      # Vite dev server for the dashboard
+just test              # go test -v ./...
+docker compose up      # Dovecot on localhost:11143, user dmarc / dev, one report in INBOX
+go run . --config config.dev.json   # fetch from that fixture
 ```
 
-3. Build the project:
+`config.dev.json` is already pointed at the fixture. `parse-dmarc --gen-config` writes a fresh `config.json` template.
 
-```bash
-make build
-```
+## Pull requests
 
-## Project Structure
+- One change per PR, with a test when the change has logic in it.
+- Conventional Commits in the title (`feat:`, `fix:`, `docs:`); release-please builds the changelog from them.
+- `bunx prettier -w .` before pushing; CI runs it and commits the diff otherwise.
+- Update the README or `docs/` when you change a flag, an env var, a metric or a tool.
 
-```
-parse-dmarc/
-├── cmd/parse-dmarc/       # Main application entry point
-├── internal/
-│   ├── api/               # REST API and web server
-│   ├── config/            # Configuration management
-│   ├── imap/              # IMAP client for fetching emails
-│   ├── parser/            # DMARC XML parser
-│   └── storage/           # SQLite database layer
-├── frontend/              # Vue.js 3 dashboard
-│   ├── src/
-│   │   ├── components/
-│   │   ├── views/
-│   │   └── App.vue
-│   └── package.json
-├── Makefile
-├── Dockerfile
-└── README.md
-```
+## Open asks
 
-## Development Workflow
-
-### Backend Development
-
-Run the application in development mode:
-
-```bash
-make dev
-```
-
-Run tests:
-
-```bash
-go test ./...
-```
-
-Add tests for new features in `*_test.go` files.
-
-### Frontend Development
-
-Start the frontend dev server with hot reload:
-
-```bash
-cd frontend
-npm run dev
-```
-
-Build the frontend:
-
-```bash
-cd frontend
-npm run build
-```
-
-### Making Changes
-
-1. Create a new branch:
-
-```bash
-git checkout -b feature/your-feature-name
-```
-
-2. Make your changes and commit:
-
-```bash
-git add .
-git commit -m "Description of changes"
-```
-
-3. Push and create a pull request:
-
-```bash
-git push origin feature/your-feature-name
-```
-
-## Code Style
-
-### Go Code
-
-- Follow standard Go formatting (`gofmt`)
-- Add comments for exported functions and types
-- Keep functions small and focused
-- Use meaningful variable names
-
-### Vue.js Code
-
-- Use Vue 3 Composition API
-- Follow Vue style guide
-- Keep components modular and reusable
-
-## Testing
-
-### Go Tests
-
-Add tests for all new functionality:
-
-```bash
-go test -v ./...
-```
-
-### Manual Testing
-
-1. Generate a config file:
-
-```bash
-./bin/parse-dmarc -gen-config
-```
-
-2. Edit config.json with test credentials
-
-3. Run in serve-only mode for UI testing:
-
-```bash
-./bin/parse-dmarc -serve-only
-```
-
-## Pull Request Guidelines
-
-- Ensure all tests pass
-- Update documentation if needed
-- Keep PRs focused on a single feature/fix
-- Write clear commit messages
-- Reference any related issues
-
-## Areas for Contribution
-
-- **Forensic Reports**: Add support for DMARC forensic reports (RUF)
-- **OAuth2**: Implement OAuth2 for IMAP authentication
-- **Export**: Add CSV/JSON export functionality
-- **Alerts**: Email alerts for compliance issues
-- **Analytics**: Historical trend analysis
-- **Documentation**: Improve docs and examples
-- **Tests**: Increase test coverage
-
-## Questions?
-
-Open an issue for questions or discussions.
+In the order people ask: TLS-RPT reports (#154), Maildir or directory intake (#169), whois on sending sources (#143). Then, from ROADMAP.md: failure reports (RUF), CSV and JSON export, alerting.
 
 ## License
 
-By contributing, you agree that your contributions will be licensed under the MIT License.
+Apache-2.0. By contributing you agree your contribution is licensed the same way.
