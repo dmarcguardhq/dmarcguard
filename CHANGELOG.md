@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.2](https://github.com/dmarcguardhq/parse-dmarc/compare/v1.6.1...v1.6.2) (2026-09-15)
+
+
+### Chores
+
+* **docs:** publish brew to the new org-wide repository ([432f010](https://github.com/dmarcguardhq/parse-dmarc/commit/432f010856838969b99a078339d72830421a9678))
+
 ## [1.6.1](https://github.com/dmarcguardhq/parse-dmarc/compare/v1.6.0...v1.6.1) (2026-09-15)
 
 
