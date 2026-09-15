@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.6.1](https://github.com/dmarcguardhq/parse-dmarc/compare/v1.6.0...v1.6.1) (2026-09-15)
+
+
+### Bug Fixes
+
+* **CI:** publish the image to the new repo on main ([f89a9ec](https://github.com/dmarcguardhq/parse-dmarc/commit/f89a9ece752e3de0bf5c42f3583f41209cf46d55))
+* **docker:** publish to the new repository ([c29118f](https://github.com/dmarcguardhq/parse-dmarc/commit/c29118feff7ce3b2cb4c045b6dabb2e621b7c050)), closes [#201](https://github.com/dmarcguardhq/parse-dmarc/issues/201)
+* **docs:** remove report card ([6fc3871](https://github.com/dmarcguardhq/parse-dmarc/commit/6fc3871905dfb970558dfe28e30830aa72548c13))
+* **docs:** update docker-run snippet to the new image repo ([38d8e59](https://github.com/dmarcguardhq/parse-dmarc/commit/38d8e59914b3cdef25165b667e8414cd5a71fa5d))
+
+
+### Chores
+
+* **deps:** lock file maintenance ([#198](https://github.com/dmarcguardhq/parse-dmarc/issues/198)) ([a4d5d96](https://github.com/dmarcguardhq/parse-dmarc/commit/a4d5d96a7b4e69392babefbe0541a25e4001a640))
+* **docs:** rewrite README around Parse DMARC, split metrics and MCP docs, credit DMARCguard ([#196](https://github.com/dmarcguardhq/parse-dmarc/issues/196)) ([aed41c1](https://github.com/dmarcguardhq/parse-dmarc/commit/aed41c1f1a7bd37e13d1276bbc8b3db5d0a2299d))
+
 ## [1.6.0](https://github.com/dmarcguardhq/dmarcguard/compare/v1.5.7...v1.6.0) (2026-09-11)
 
 
